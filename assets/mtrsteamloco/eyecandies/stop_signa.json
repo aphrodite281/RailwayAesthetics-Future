@@ -1,0 +1,6 @@
+{
+    "stop_signa": {
+        "name": "站牌A 跟随站台名称",
+        "scriptFiles": ["mtrsteamloco:eyecandies/stop_signa/main.js"]
+    }
+}
