@@ -6,33 +6,47 @@ const fontSize = 256;
 const font = font0.deriveFont(Font.PLAIN, fontSize);
 
 function create(ctx, state, entity) {
-    try{
+    //try{
     
-        if(!entity.data.containsKey("scale")) {
+        if(entity.data.get("scale") == null) {
             entity.data.put("scale", 1 + "");
         }
-        if(!entity.data.containsKey("color")) {
+        if(entity.data.get("color") == null) {
             entity.data.put("color", "0x000000");
         }
-        if(!entity.data.containsKey("text")) {
+        if(entity.data.get("text") == null) {
             entity.data.put("text", "default");
         }
 
-        state.scale = isNaN(parseFloat(entity.data.get("scale")))? 1 : parseFloat(entity.data.get("scale"));
-        state.color = isNaN(parseInt(entity.data.get("color")))? 0x000000 : parseInt(entity.data.get("color"));
+        if(isNaN(parseFloat(entity.data.get("scale")))){
+            state.scale = 1;
+            entity.data.put("scale", 1 + "");
+        }else {
+            state.scale = parseFloat(entity.data.get("scale"));
+        }
+        if(isNaN(parseInt(entity.data.get("color")))){
+            state.color = 0x000000;
+            entity.data.put("color", "0x000000");
+        }else {
+            state.color = parseInt(entity.data.get("color"));
+        }
         state.text = entity.data.get("text");
 
         newFace(ctx, state, state.text);
         changeScale(state.scale, state);
         changeString(state.text, state);
-        
-    }catch(e) {
 
-    }
+        entity.sendUpdateC2S();
+        
+    //}catch(e) {
+
+    //}
 }
 
 function render(ctx, state, entity) {
-    try{
+    ctx.setDebugInfo("scale",entity.data.get("scale"))
+    ctx.setDebugInfo(entity.data.containsKey("scale"),1)
+    //try{
         state.face.tick();
 
         let newScale = parseFloat(entity.data.get("scale"));
@@ -50,7 +64,7 @@ function render(ctx, state, entity) {
         }
 
         let newText = entity.data.get("text");
-        if(state.text!= newText) {
+        if(newText!= null && state.text!= newText) {
             ctx.setDebugInfo("NH","text: " + state.text + " -> " + newText);
             state.text = newText;
             try {
@@ -62,9 +76,9 @@ function render(ctx, state, entity) {
             changeString(state.text, state);
             changeScale(state.scale, state);
         }
-    }catch(e) {
+    //}catch(e) {
 
-    }
+    //}
 }
 
 function dispose(ctx, state, entity) {

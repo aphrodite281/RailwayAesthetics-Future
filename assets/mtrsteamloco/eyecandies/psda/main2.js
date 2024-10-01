@@ -12,17 +12,29 @@ const interval = 0.28;
 const minInt = 0.08;
 const lineNum = 5;
 const vMax = 1;
+const timeInt = 1;
 
 function create(ctx, state, entity) {
+    state.time = 0;
     state.v = 0;
 }
 
 function render(ctx, state, entity) {
     let target = entity.doorTarget;
-    state.v += (target? 1: -1) * Timing.delta() * 0.3;
+    state.v += (target? 1: -1) * Timing.delta() * 0.6;
 
     if (state.v > vMax) state.v = vMax;
     if (state.v < 0) state.v = 0;
+
+    if (state.v != 0 && state.v != vMax) {
+        if (Timing.elapsed() > state.time + timeInt) {
+            let k = new TickableSound(target? Resources.id("mtrsteamloco:psda.open") : Resources.id("mtrsteamloco:psda.close"));
+            k.setData(1, 1, entity.getWorldPosVector3f());
+            SoundHelper.play(k);
+            state.time = Timing.elapsed();
+            ctx.setDebugInfo("p",1)
+        }
+    }
     
     let v = state.v;
     let mat = new Matrices();

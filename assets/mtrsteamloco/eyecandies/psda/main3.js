@@ -19,7 +19,7 @@ function create(ctx, state, entity) {
 
 function render(ctx, state, entity) {
     let target = entity.doorTarget;
-    state.v += (target? 1: -1) * Timing.delta() * 0.3;
+    state.v += (target? 1: -1) * Timing.delta() * 0.6;
 
     if (state.v > vMax) state.v = vMax;
     if (state.v < 0) state.v = 0;

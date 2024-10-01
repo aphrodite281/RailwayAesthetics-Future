@@ -88,15 +88,12 @@ Face.prototype.tick = function(matrices) {
         return;
     }
 
-    try{
         if(this.model instanceof DynamicModelHolder) {
             this.model.getUploadedModel().replaceAllTexture(this.path);
         }else{
             this.model.replaceAllTexture(this.path);
         }
-    }catch(e) {
-        throw new Error("无法更新贴图"+ this);
-    }
+
 
     let temp = matrices == undefined ? new Matrices() : matrices;
     temp.pushPose();

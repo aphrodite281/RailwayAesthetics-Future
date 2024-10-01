@@ -6,35 +6,50 @@ const fontSize = 256;
 const font = font0.deriveFont(Font.PLAIN, fontSize);
 
 function create(ctx, state, entity) {
-    try{
-        let name;
-        try{
-            let station = MinecraftClient.getStationAt(entity.getWorldPosVector3f()).name + "";
+    //try{
+        let text = "";
+        try {
+            text = MinecraftClient.getStationAt(entity.getWorldPosVector3f()).name + ""
         }catch(e) {
-            name = "";
+            text = "无车站";
         }
-    
-        if(!entity.data.containsKey("scale")) {
+
+        if(entity.data.get("scale") == null) {
             entity.data.put("scale", 1 + "");
         }
-        if(!entity.data.containsKey("color")) {
+        if(entity.data.get("color") == null) {
             entity.data.put("color", "0x000000");
         }
+        entity.data.put("text", text);
 
-        state.scale = isNaN(parseFloat(entity.data.get("scale")))? 1 : parseFloat(entity.data.get("scale"));
-        state.color = isNaN(parseInt(entity.data.get("color")))? 0x000000 : parseInt(entity.data.get("color"));
+        if(isNaN(parseFloat(entity.data.get("scale")))){
+            state.scale = 1;
+            entity.data.put("scale", 1 + "");
+        }else {
+            state.scale = parseFloat(entity.data.get("scale"));
+        }
+        if(isNaN(parseInt(entity.data.get("color")))){
+            state.color = 0x000000;
+            entity.data.put("color", "0x000000");
+        }else {
+            state.color = parseInt(entity.data.get("color"));
+        }
 
-        newFace(ctx, state, name);
+        newFace(ctx, state, state.text);
         changeScale(state.scale, state);
-        changeString(name, state);
-        
-    }catch(e) {
+        changeString(state.text, state);
 
-    }
+        entity.sendUpdateC2S();
+        
+    //}catch(e) {
+
+    //}
 }
 
 function render(ctx, state, entity) {
-    try{
+    ctx.setDebugInfo("scale",entity.data.get("scale"))
+    ctx.setDebugInfo(entity.data.containsKey("scale"),1)
+    //try{
         state.face.tick();
 
         let newScale = parseFloat(entity.data.get("scale"));
@@ -48,30 +63,30 @@ function render(ctx, state, entity) {
         if(state.color!= newColor && isNaN(newColor) == false) {
             ctx.setDebugInfo("CH","color: " + state.color + " -> " + newColor);
             state.color = newColor;
-            changeString(state.name, state);
+            changeString(state.text, state);
         }
 
-        let newName;
-        try{
-            newName = MinecraftClient.getStationAt(entity.getWorldPosVector3f()).name + "";
+        let newText = "";
+        try {
+            newText = MinecraftClient.getStationAt(entity.getWorldPosVector3f()).name + ""
         }catch(e) {
-            newName = "";
+            newText = "无车站";
         }
-        if(state.name!= newName) {
-            ctx.setDebugInfo("NH","name: " + state.name + " -> " + newName);
-            state.name = newName;
+        if(newText!= null && state.text!= newText) {
+            ctx.setDebugInfo("NH","text: " + state.text + " -> " + newText);
+            state.text = newText;
             try {
                 state.face.close();
             }catch(e) {
-                
+
             }
-            newFace(ctx, state, state.name);
-            changeString(state.name, state);
+            newFace(ctx, state, state.text);
+            changeString(state.text, state);
             changeScale(state.scale, state);
         }
-    }catch(e) {
+    //}catch(e) {
 
-    }
+    //}
 }
 
 function dispose(ctx, state, entity) {
@@ -101,7 +116,7 @@ function newFace(ctx, state, str) {
         }
     });
     state.face = face;
-    state.name = str;
+    state.text = str;
     state.size = size;
     state.rmA = state.face.rawModel.copy();
     state.rmA.sourceLocation = null;
@@ -118,19 +133,19 @@ function changeScale(scale, state) {
     state.scale = scale;
 }
 
-function changeString(name, state) {
+function changeString(text, state) {
     let face = state.face;
     try {
-        face.close();
+        face.texture.close();
     }catch(e) {
-
+        
     }
     face.texture = new GraphicsTexture(state.size[0], state.size[1]);
     let g = face.texture.graphics;
     g.setColor(new Color(state.color));
     g.setFont(font);
-    g.drawString(name, 0, state.size[1]);
+    g.drawString(text, 0, state.size[1]);
     face.texture.upload();
     face.path = face.texture.identifier;
-    state.name = name;
+    state.text = text;
 }

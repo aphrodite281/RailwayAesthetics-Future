@@ -1,0 +1,18 @@
+{
+    "psda.open": {
+        "sounds": [
+            {
+                "name": "mtrsteamloco:psda/t"
+            }
+        ],
+        "subtitle":"屏蔽门: 开启"
+    },
+    "psda.close": {
+        "sounds": [
+            {
+                "name": "mtrsteamloco:psda/t"
+            }
+        ],
+        "subtitle":"屏蔽门: 关闭"
+    }
+}
