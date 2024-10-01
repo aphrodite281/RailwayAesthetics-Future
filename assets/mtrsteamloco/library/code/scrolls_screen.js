@@ -9,7 +9,7 @@
 
 importPackage (java.awt);
 
-function ScrollsScreen(data){
+function ScrollsScreen(data) {
     if(data.uvSpeed != undefined && data.running != undefined && data.ctx != undefined && data.isTrain != undefined && data.matrices != undefined) {
         this.uvSpeed = data.uvSpeed;
         this.running = data.running;
@@ -35,11 +35,11 @@ function ScrollsScreen(data){
     }
 
 
-    if(data.texture instanceof GraphicsTexture){
+    if(data.texture instanceof GraphicsTexture) {
         this.texture = data.texture;
-    }else if(data.texture.path != undefined && data.texture.size != undefined){
+    }else if(data.texture.path != undefined && data.texture.size != undefined) {
         this.texture = new GraphicsTexture(data.texture.size[0], data.texture.size[1], data.texture.path);
-    }else if(data.texture instanceof Array){
+    }else if(data.texture instanceof Array) {
         this.texture = new GraphicsTexture(data.texture[0], data.texture[1]);
     }else{
         throw new Error("无效的贴图数据" + data.texture + this);
@@ -95,14 +95,14 @@ function ScrollsScreen(data){
 }
 
 ScrollsScreen.prototype.tick = function(matrices) {
-    if(!this.display){
+    if(!this.display) {
         return;
     }
 
     if(this.running) {
         let meshList = this.rawModel.meshList;
         for(let rawMesh of meshList.values()) {
-            for(let i = 0 ; i < rawMesh.vertices.length ; i++){
+            for(let i = 0 ; i < rawMesh.vertices.length ; i++) {
                 rawMesh.vertices.get(i).u += this.uvSpeed[0];
                 rawMesh.vertices.get(i).v += this.uvSpeed[1];
             }

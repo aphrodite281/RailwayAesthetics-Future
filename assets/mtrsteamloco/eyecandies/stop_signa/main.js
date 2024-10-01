@@ -1,7 +1,7 @@
 include(Resources.id("mtrsteamloco:library/code/face.js"));
 
 //const font0 = Resources.getSystemFont("Noto Serif");
-const font0 = Resources.readFont(Resources.id("mtrsteamloco:library/font/huangkaihuaLawyerfont_2.ttf"));
+const font0 = Resources.readFont(Resources.id("mtrsteamloco:library/font/hkh_sxt.ttf"));
 const fontSize = 256;
 const font = font0.deriveFont(Font.PLAIN, fontSize);
 
@@ -10,7 +10,7 @@ function create(ctx, state, entity) {
         let name;
         try{
             let station = MinecraftClient.getStationAt(entity.getWorldPosVector3f()).name + "";
-        }catch(e){
+        }catch(e) {
             name = "";
         }
     
@@ -28,7 +28,7 @@ function create(ctx, state, entity) {
         changeScale(state.scale, state);
         changeString(name, state);
         
-    }catch(e){
+    }catch(e) {
 
     }
 }
@@ -54,24 +54,32 @@ function render(ctx, state, entity) {
         let newName;
         try{
             newName = MinecraftClient.getStationAt(entity.getWorldPosVector3f()).name + "";
-        }catch(e){
+        }catch(e) {
             newName = "";
         }
         if(state.name!= newName) {
             ctx.setDebugInfo("NH","name: " + state.name + " -> " + newName);
             state.name = newName;
-            state.face.close();
+            try {
+                state.face.close();
+            }catch(e) {
+                
+            }
             newFace(ctx, state, state.name);
             changeString(state.name, state);
             changeScale(state.scale, state);
         }
-    }catch(e){
+    }catch(e) {
 
     }
 }
 
 function dispose(ctx, state, entity) {
-    state.face.close();
+    try {
+        state.face.close();
+    }catch(e) {
+
+    }
 }
 
 function getSize(str, font) {
@@ -99,7 +107,7 @@ function newFace(ctx, state, str) {
     state.rmA.sourceLocation = null;
 }
 
-function changeScale(scale, state){
+function changeScale(scale, state) {
     let face = state.face;
     let rmB = state.rmA.copy();
     rmB.sourceLocation = null;
@@ -110,9 +118,13 @@ function changeScale(scale, state){
     state.scale = scale;
 }
 
-function changeString(name, state){
+function changeString(name, state) {
     let face = state.face;
-    face.texture.close();
+    try {
+        face.close();
+    }catch(e) {
+
+    }
     face.texture = new GraphicsTexture(state.size[0], state.size[1]);
     let g = face.texture.graphics;
     g.setColor(new Color(state.color));

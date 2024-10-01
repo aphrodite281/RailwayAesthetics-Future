@@ -1,0 +1,14 @@
+{
+    "psda1": {
+        "name": "屏蔽门A-中部",
+        "scriptFiles": ["mtrsteamloco:eyecandies/psda/main1.js"]
+    },
+    "psda2": {
+        "name": "屏蔽门A-端部(单侧)",
+        "scriptFiles": ["mtrsteamloco:eyecandies/psda/main2.js"]
+    },
+    "psda3": {
+        "name": "屏蔽门A-端部(两侧)",
+        "scriptFiles": ["mtrsteamloco:eyecandies/psda/main3.js"]
+    }
+}

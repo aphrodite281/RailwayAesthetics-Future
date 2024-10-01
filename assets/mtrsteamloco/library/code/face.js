@@ -1,6 +1,6 @@
 importPackage (java.awt);
 
-function Face(data){
+function Face(data) {
     if(data.ctx != undefined && data.isTrain != undefined && data.matrices != undefined && data.texture != undefined && data.model != undefined) {
         this.ctx = data.ctx;
         this.cars = data.cars != undefined ? data.cars : [];
@@ -24,11 +24,11 @@ function Face(data){
     }
 
 
-    if(data.texture instanceof GraphicsTexture){
+    if(data.texture instanceof GraphicsTexture) {
         this.texture = data.texture;
-    }else if(data.texture.path != undefined && data.texture.size != undefined){
+    }else if(data.texture.path != undefined && data.texture.size != undefined) {
         this.texture = new GraphicsTexture(data.texture.size[0], data.texture.size[1], data.texture.path);
-    }else if(data.texture instanceof Array){
+    }else if(data.texture instanceof Array) {
         this.texture = new GraphicsTexture(data.texture[0], data.texture[1]);
     }else{
         throw new Error("无效的贴图数据" + data.texture + this);
@@ -83,18 +83,18 @@ function Face(data){
     }
 }
 
-Face.prototype.tick = function(matrices){
-    if(!this.display){
+Face.prototype.tick = function(matrices) {
+    if(!this.display) {
         return;
     }
 
     try{
-        if(this.model instanceof DynamicModelHolder){
+        if(this.model instanceof DynamicModelHolder) {
             this.model.getUploadedModel().replaceAllTexture(this.path);
         }else{
             this.model.replaceAllTexture(this.path);
         }
-    }catch(e){
+    }catch(e) {
         throw new Error("无法更新贴图"+ this);
     }
 
@@ -116,8 +116,8 @@ Face.prototype.tick = function(matrices){
     temp.popPose();
 }
 
-Face.prototype.close = function(){
-    if(this.model instanceof DynamicModelHolder){
+Face.prototype.close = function() {
+    if(this.model instanceof DynamicModelHolder) {
         this.model.close();
     }
     this.texture.close();

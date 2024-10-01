@@ -123,7 +123,7 @@ function Video(data) {
 
 Video.prototype.tick = function(matrices) {
     
-    if(!this.display){
+    if(!this.display) {
         return;
     }
 
@@ -171,7 +171,7 @@ Video.prototype.tick = function(matrices) {
     if(this.isTrain) {
         if(this.sound != undefined) {
             for(let sounds of this.sound) {
-                for(let i = 0; i < sounds.length; i++){
+                for(let i = 0; i < sounds.length; i++) {
                     let position = this.ctx.trainExtra.lastCarPosition.copy();
                     position.add(this.soundInfo.position[i][0], this.soundInfo.position[i][1], this.soundInfo.position[i][2])
                     sounds[i].setData(this.videoInfo.soundInfo.volume, this.videoInfo.soundInfo.pitch, position);
@@ -180,7 +180,7 @@ Video.prototype.tick = function(matrices) {
         }
     }else {
         if(this.sound != undefined) {
-            for(let i = 0; i < this.soundInfo.position.length; i++){
+            for(let i = 0; i < this.soundInfo.position.length; i++) {
                 let position = this.ctx.entity.getTransformPosVector3f();
                 position.add(this.soundInfo.position[i][0], this.soundInfo.position[i][1], this.soundInfo.position[i][2]);
                 this.sound[i].setData(this.soundInfo.volume, this.soundInfo.pitch, position);
@@ -196,7 +196,7 @@ Video.prototype.start = function(time) {
     if(this.sound != undefined) {
         if(this.isTrain) {
             for(let sounds of this.sound) {
-                for(let sound of sounds){
+                for(let sound of sounds) {
                     sound.play();
                 }
             }
@@ -221,9 +221,9 @@ Video.prototype.start = function(time) {
 Video.prototype.stop = function() {
     this.startTime = -1;
     if(this.sound != undefined) {
-        if(this.isTrain){
+        if(this.isTrain) {
             for(let sounds of this.sound) {
-                for(let sound of sounds){
+                for(let sound of sounds) {
                     sound.quit();
                 }
             }
@@ -250,7 +250,7 @@ Video.prototype.generateSound = function() {
             this.sound = [];
             for(let j = 0; j < this.cars.length; j++) {
                 this.sound[j] = [];
-                for(let i = 0; i < this.soundInfo.position.length; i++){
+                for(let i = 0; i < this.soundInfo.position.length; i++) {
                     let sound = new TickableSound(Resources.id(this.soundInfo.name), source);
                     sound.setLooping(false);
                     let position = ctx.trainExtra.lastCarPosition.copy();
@@ -262,7 +262,7 @@ Video.prototype.generateSound = function() {
         }else{
             this.ctx.playSound(Resources.id(this.soundInfo.name), 0, 0);
             this.sound = [];
-            for(let i = 0; i < this.soundInfo.position.length; i++){
+            for(let i = 0; i < this.soundInfo.position.length; i++) {
                 let sound = new TickableSound(Resources.id(this.soundInfo.name), source);
                 sound.setLooping(false);
                 let position = this.ctx.entity.getTransformPosVector3f();
@@ -275,7 +275,7 @@ Video.prototype.generateSound = function() {
 }
 
 Video.prototype.close = function() {
-    if(this.model instanceof DynamicModelHolder){
+    if(this.model instanceof DynamicModelHolder) {
         this.model.close();
     }
 }
