@@ -6,4 +6,4 @@ Aphrodite's Railway Aesthetics - Future
 
 欢迎加入我们的 QQ 群: 836291719
 
-下载当前版本: [Download ZIP](https://github.com/aphrodite281/RailwayAesthetics-Future/archive/refs/heads/main.zip)
+下载当前版本: [Download ZIP](https://github.com/aphrodite281/RailwayAesthetics-Future/archive/refs/heads/main/RailwayAesthetics-Future-main.zip)
