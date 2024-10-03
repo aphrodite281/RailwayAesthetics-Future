@@ -34,7 +34,7 @@ function Face(data) {
         throw new Error("无效的贴图数据" + data.texture + this);
     }
     this.path = this.texture.identifier;
-
+    this.size = [this.texture.bufferedImage.getWidth(), this.texture.bufferedImage.getHeight()];
     if(data.model instanceof DynamicModelHolder) {
         this.model = data.model;
         let mc = this.model.getUploadedModel();
@@ -49,7 +49,7 @@ function Face(data) {
     }else if(data.model.vertices != undefined && data.model.uvPoints != undefined && data.model.renderType != undefined) {
         let builder = new RawMeshBuilder(4, data.model.renderType, this.path);
         for(let i = 0; i < 4; i++) {
-            builder.vertex(new Vector3f(data.model.vertices[i][0], data.model.vertices[i][1], data.model.vertices[i][2])).uv(data.model.uvPoints[i][0], data.model.uvPoints[i][1]).endVertex();
+            builder.vertex(new Vector3f(data.model.vertices[i][0], data.model.vertices[i][1], data.model.vertices[i][2])).uv(data.model.uvPoints[i][0], data.model.uvPoints[i][1]).normal(0, 1, 0).endVertex();
         }
         let rawModel = new RawModel();
         rawModel.append(builder.getMesh());

@@ -12,15 +12,21 @@ const lineNum = 5;
 const vMax = 1;
 
 function create(ctx, state, entity) {
-    state.v = 0;
+    state.v = entity.doorValue;
 }
 
 function render(ctx, state, entity) {
     let target = entity.doorTarget;
-    state.v += (target? 1: -1) * Timing.delta() * 0.6;
+    state.v += (target? 1: -1) * Timing.delta() * 0.25;
 
     if (state.v > vMax) state.v = vMax;
     if (state.v < 0) state.v = 0;
+
+    if (state.v != 0) {
+        no(entity);
+    }else {
+        fu(entity);
+    }
     
     let v = state.v;
     let mat = new Matrices();
@@ -49,4 +55,24 @@ function alterAllRGBA (modelCluster, red ,green , blue, alpha) {
         vert = vertarray[i];
         vert.materialProp.attrState.setColor(red , green , blue , alpha);
     }
+}
+
+function fu(entity) {
+    entity.minPosX = 0;
+    entity.minPosY = 0;
+    entity.minPosZ = 0;
+    entity.maxPosX = 16;
+    entity.maxPosY = 48;
+    entity.maxPosZ = 16;
+    entity.sendUpdateC2S();
+}
+
+function no(entity) {
+    entity.minPosX = 0;
+    entity.minPosY = 0;
+    entity.minPosZ = 0;
+    entity.maxPosX = 0;
+    entity.maxPosY = 0;
+    entity.maxPosZ = 0;
+    entity.sendUpdateC2S();
 }
