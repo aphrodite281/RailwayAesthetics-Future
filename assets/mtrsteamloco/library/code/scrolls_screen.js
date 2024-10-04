@@ -97,8 +97,8 @@ ScrollsScreen.prototype.tick = function(matrices) {
             for(let i = 0 ; i < rawMesh.vertices.length ; i++) {
                 rawMesh.vertices.get(i).u += this.uvSpeed[0] * Timing.delta() / this.size[0];
                 rawMesh.vertices.get(i).v += this.uvSpeed[1] * Timing.delta() / this.size[1];
-                this.ctx.setDebugInfo("u",rawMesh.vertices.get(i).u);
-                this.ctx.setDebugInfo("v",rawMesh.vertices.get(i).v);
+                //this.ctx.setDebugInfo("u",rawMesh.vertices.get(i).u);
+                //this.ctx.setDebugInfo("v",rawMesh.vertices.get(i).v);
             }
         }
         this.rawModel.replaceAllTexture(this.path);

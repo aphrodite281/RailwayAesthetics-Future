@@ -9,7 +9,6 @@ const mcm = mcs["m"];
 const mcd = [mcs["d1"],mcs["d2"]];
 const rmsc = rms1.get("sc");
 rmsc.sourceLocation = null;
-rmsc.setAllRenderType("light");
 const mcsc = mcs["sc"];
 
 const rms2 = ModelManager.loadPartedRawModel(Resources.manager(), Resources.id("mtrsteamloco:eyecandies/psda/lineb.obj"), null);
@@ -36,17 +35,70 @@ function create(ctx, state, entity) {
     fu(entity);
     state.time = 0;
 
+    let str;
+    try {
+        str = MCU.getStationAt(entity.getWorldPosVector3f()).name;
+    }catch(e) {
+        str = "No Station";
+    }
+    let size = getSize(str, font0);
+
+    let run;
+    if (size[0] > 1400) {
+        size[0] = size[0] + 1000;
+        run = true;
+    }else { 
+        size[0] = 1400;
+        run = false;
+    }
+    size[1] = 400;//0.2 //140 0.7 
+    let h = size[1]/2000;
+    let info = {
+        ctx: ctx,
+        uvSpeed: [600, 0],
+        model: {
+            vertices: [
+                [-0.35, 1.35, 0.13 + 0.001],
+                [-0.35, 1.35-h, 0.13 + 0.001],
+                [0.35, 1.35-h, 0.13 + 0.001],
+                [0.35, 1.35, 0.13 + 0.001],
+            ],
+            uvPoints: [
+                [0, 0],
+                [0, 1],
+                [1400 / size[0], 1],
+                [1400 / size[0], 0],
+            ],
+            renderType: "light"
+        },
+        texture: size,
+        matrices: [new Matrices()],
+        running: run,
+        isTrain: false
+    }
+    scs = new ScrollsScreen(info);
+    let g = scs.texture.graphics;
+    g.setColor(new Color(0x9caaff));
+    g.fillRect(0, 0, size[0], size[1]);
+    g.setFont(font0);
+    g.setColor(new Color(0xffffff));
+    g.drawString(str, size[0]/2-getSize(str, font0)[0]/2, 350);
+    scs.texture.upload();
+
+    //ctx.setDebugInfo(1,scs.texture)
+    //ctx.setDebugInfo("size", size[0] + "x" + size[1])
+
     info = {
         ctx: ctx,
         isTrain: false,
         matrices: [new Matrices()],
-        texture: [700,1100],
-        /*model: {
+        texture: [1400,1800],
+        model: {
             vertices: [
-                [-0.35, 1.35, 0.13],
+                [-0.35, 1.35 - h, 0.13],
                 [-0.35, 0.25, 0.13],
                 [0.35, 0.25, 0.13],
-                [0.35, 1.35, 0.13],
+                [0.35, 1.35 - h, 0.13],
             ],
             uvPoints: [
                 [0, 0],
@@ -55,88 +107,35 @@ function create(ctx, state, entity) {
                 [1, 0],
             ],
             renderType: "light"
-        }*/
-        model: rmsc
+        }
     }
     let face = new Face(info);
-
-    let min = entity.schedules.get(entity.platformId)[0];
-    for (let sche of entity.schedules.get(entity.platformId)) {
-        if (sche.arrivalDiffMillis < min.arrivalDiffMillis) {
-            min = sche;
+    g = face.texture.graphics;
+    g.setColor(new Color(0x6a7cde));
+    g.fillRect(0, 0, 1400, 1800);
+    g.setFont(font0.deriveFont(Font.PLAIN, 200));
+    sche = entity.schedules.get(entity.platformId);
+    rtid = sche.routeId;
+    sches = entity.schedules.get(entity.platformId);
+    rtid = sches[0].routeId;
+    let rn;
+    for (let rot of MCD.ROUTES) {
+        if (rot.id == rtid) {
+            rn = rot.name;
         }
     }
-    state.names = getNames(min.routeId);
-
-    let tex = texture(entity);
-    face.texture = tex;
-    face.path = tex.identifier;
-
-    state.f = face;
-}
-
-function texture(entity) {
-    let min = entity.schedules.get(entity.platformId)[0];
-    for (let sche of entity.schedules.get(entity.platformId)) {
-        if (sche.arrivalDiffMillis < min.arrivalDiffMillis) {
-            min = sche;
-        }
-    }
-    let names = getNames(min.routeId);
-    let rn = names[2], sn = TextUtil.getCjkParts(names[0]), en = TextUtil.getCjkParts(names[1]);
-
-    let tex = new GraphicsTexture(700, 1100);
-    let g = tex.graphics;
-    g.setColor(new Color(0x3936ff));
-    g.fillRect(0, 0, 700, 1100);
-    font1 = font0.deriveFont(Font.PLAIN, 140);
-    g.setFont(font1);
     g.setColor(new Color(0xffffff));
-    g.drawString(rn, 700/2 - getSize(rn, font1)[0]/2, 180);
+    g.drawString(rn + "阿弥诺斯", 20, 180);
+    face.texture.upload();
 
-    font2 = font0.deriveFont(Font.PLAIN, 110);
-    g.setFont(font2);
-    g.drawString(sn, 700/2 - getSize(sn, font2)[0]/2, 420);
-    g.drawString(en, 700/2 - getSize(en, font2)[0]/2, 630);
-
-    font3 = font0.deriveFont(Font.BOLD, 80);
-    g.setFont(font3);
-    g.setColor(new Color(0xfffa6e));
-    let str = "< 往 >";
-    g.drawString(str, 700/2 - getSize(str, font3)[0]/2, 510);
-
-    font4 = font0.deriveFont(Font.PLAIN, 60);
-    g.setFont(font4);
-    g.setColor(new Color(0xffffff));
-    str = "人人爱护铁路";
-    g.drawString(str, 700/2 - getSize(str, font4)[0]/2, 900);
-
-    str = "天天守望平安";
-    g.drawString(str, 700/2 - getSize(str, font4)[0]/2, 1000);
-
-    tex.upload();
-    return tex;
+    state.b = new Board({matrices: [new Matrices]});
+    state.b.addBoard("p1").addLayer().addItem(face).addItem(scs);
+    entity.sendUpdateC2S();
 }
 
 function render(ctx, state, entity) {
-
-
-    let min = entity.schedules.get(entity.platformId)[0];
-    for (let sche of entity.schedules.get(entity.platformId)) {
-        if (sche.arrivalDiffMillis < min.arrivalDiffMillis) {
-            min = sche;
-        }
-    }
-    let names = getNames(min.routeId);
-    ctx.setDebugInfo("rid", min.routeId);
-    ctx.setDebugInfo("rt", names[2])
-    if (names[0] != state.names[0] || names[1] != state.names[1] || names[2] != state.names[2]) {
-        state.f.texture.close();
-        state.f.texture = texture(entity);
-        state.f.path = state.f.texture.identifier;
-        state.names = names;
-        ctx.setDebugInfo("ch", names[2])
-    }
+    entity.sendUpdateC2S();
+    state.b.tick();
 
     sches = entity.schedules.get(entity.platformId);
     rtid = sches[0].routeId;
@@ -146,6 +145,10 @@ function render(ctx, state, entity) {
             rn = rot.name;
         }
     }
+
+    ctx.setDebugInfo("sch",entity.schedules);
+    ctx.setDebugInfo("id", entity.platformId);
+    ctx.setDebugInfo("rn", rn)
 
     //ctx.setDebugInfo("tex",scs.texture)
 
@@ -161,6 +164,7 @@ function render(ctx, state, entity) {
             k.setData(1, 1, entity.getWorldPosVector3f());
             SoundHelper.play(k);
             state.time = Timing.elapsed();
+            ctx.setDebugInfo("p",1)
         }
     }
 
@@ -184,9 +188,6 @@ function render(ctx, state, entity) {
     mat = new Matrices();
     mat.translate(0, v * 1.1, 0);
     ctx.drawModel(mcm, mat);
-
-    entity.sendUpdateC2S();
-    state.f.tick();
 }
 
 function alterAllRGBA (modelCluster, red ,green , blue, alpha) {
@@ -248,37 +249,4 @@ function no(entity) {
     entity.maxPosY = 0;
     entity.maxPosZ = 0;
     entity.sendUpdateC2S();
-}
-
-function getNames(rtid) {
-    for (let rot of MCD.ROUTES) {
-        if (rot.id == rtid) {
-            let ns = [];
-            pids = rot.platformIds;
-            for (let i = 0; i < 2; i++) {
-                p = pids[i == 0 ? 0 : pids.size() - 1];
-                pid = p.platformId;
-                let st;
-                for (let [key, value] of MCD.DATA_CACHE.platformIdToStation) {
-                    if (key == pid) {
-                        st = value;
-                        break;
-                    }
-                }
-                if (st != null) {
-                    n = st.name;
-                }
-                ns[i] = n;
-            }
-            ns[2] = rot.name;
-            return ns;
-        }
-    }
-}
-
-function getKTime(entity, int) {
-    let schedules = entity.schedules.get(entity.platformId);
-    if (schedules[0] != null) {
-
-    }
 }
