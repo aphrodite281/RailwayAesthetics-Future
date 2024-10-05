@@ -224,7 +224,7 @@ function render(ctx, state, entity) {
         let vy = i * interval;
         let vd = v + i * minInt;
         mat.translate(0, Math.max(vd, vy), 0);
-        ctx.drawModel((i == 0 || i == lineNum - 1)? mcr : mcy, mat);
+        //ctx.drawModel((i == 0 || i == lineNum - 1)? mcr : mcy, mat);
         mat.rotateY(Math.PI);
         ctx.drawModel((i == 0 || i == lineNum - 1)? mcr : mcy, mat);
         mat.popPose();
