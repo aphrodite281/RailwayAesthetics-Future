@@ -7,10 +7,22 @@ function create(ctx, state, entity) {
 }
 
 function render(ctx, state, entity) {
-    let sches = entity.schedules.get(entity.platformId);
-    let rtid = sches[0].routeId;
-    let names = getNames(rtid);
-    ctx.setDebugInfo("names", names.toString());
+    ctx.clearDebugInfo();
+    MCD.SCHEDULES_FOR_PLATFORM.forEach((key, value) => {
+        if (key == entity.platformId) {
+            let sches1 = value;
+            let sches = sches1.toArray();
+            sches.sort((a, b) => {
+                return a.arrivalMillis - b.arrivalMillis;
+            });
+            let mins = [sches[0]], texs = []
+            ctx.setDebugInfo("sches", sches.length);
+            ctx.setDebugInfo("kk", sches1.size())
+            let n = getNames(sches[0].routeId)
+            ctx.setDebugInfo("N", n[0]+","+n[1]+","+n[2])
+        }
+    });
+
 }
 
 function getNames(rtid) {

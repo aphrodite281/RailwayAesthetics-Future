@@ -1,3 +1,9 @@
+function draw(ctx, mat, i) {
+    // ctx.drawModel((i == 0 || i == lineNum - 1)? mcr : mcy, mat);
+    mat.rotateY(Math.PI);
+    ctx.drawModel((i == 0 || i == lineNum - 1)? mcr : mcy, mat);
+}
+
 importPackage (java.awt);
 include(Resources.id("mtrsteamloco:library/code/scrolls_screen.js"));
 include(Resources.id("mtrsteamloco:library/code/board.js"));
@@ -25,7 +31,8 @@ const timeInt = 1;
 
 const fSize = [700,1100];
 const frc = Resources.getFontRenderContext();
-const font0 = Resources.readFont(Resources.id("mtrsteamloco:library/font/hkh_sxt.ttf")).deriveFont(Font.PLAIN, 350)//Resources.getSystemFont("Noto Sans").deriveFont(Font.PLAIN, 70);
+const fontb = Resources.readFont(Resources.id("mtrsteamloco:library/font/hkh_sxt.ttf")).deriveFont(Font.PLAIN, 350)//Resources.getSystemFont("Noto Sans").deriveFont(Font.PLAIN, 70);
+const fonta = Resources.readFont(Resources.id("mtrsteamloco:library/font/zhdh.ttf")).deriveFont(Font.PLAIN, 350);
 
 const MCU = MinecraftClient;
 const MCD = MTRClientData;
@@ -33,13 +40,19 @@ const MCR = MTRRailwayData;
 
 function create(ctx, state, entity) {
 
-    if (entity.data.get("sloganA1") == null || entity.data.get("sloganA2") == null) {
+    if (entity.data.get("sloganA1") == null) {
         entity.data.put("sloganA1", "人人爱护铁路");
-        entity.data.put("sloganA2", "天天守望平安");
     }
 
-    if (entity.data.get("sloganB1") == null || entity.data.get("sloganB2") == null) {
+    if (entity.data.get("sloganA2") == null) {
+        entity.data.put("sloganA2", "天天守望平安");
+    }
+    
+    if (entity.data.get("sloganB1") == null) {
         entity.data.put("sloganB1", "爱护铁路光荣");
+    }
+
+    if (entity.data.get("sloganB2") == null) {
         entity.data.put("sloganB2", "破坏铁路犯罪");
     }
 
@@ -60,9 +73,18 @@ function create(ctx, state, entity) {
         entity.data.put("colorC", "0xffffff");
     }
 
+    if (entity.data.get("slogan0") == null) {
+        entity.data.put("slogan0", "1车 ←  2车  → 3车");
+    }
+    state.os0 = entity.data.get("slogan0");
+
     state.colorA = parseInt(entity.data.get("colorA"));
     state.colorB = parseInt(entity.data.get("colorB"));
     state.colorC = parseInt(entity.data.get("colorC"));
+    state.osa1 = entity.data.get("sloganA1");
+    state.osa2 = entity.data.get("sloganA2");
+    state.osb1 = entity.data.get("sloganB1");
+    state.osb2 = entity.data.get("sloganB2");
     entity.sendUpdateC2S();
 
     state.v = entity.doorValue;
@@ -112,6 +134,7 @@ function create(ctx, state, entity) {
     state.f = face;
     entity.sendUpdateC2S();
     state.close = [];
+    state.sc = true;
 }
 
 function texture(entity, state, a) {
@@ -129,6 +152,17 @@ function texture(entity, state, a) {
         }
     }
 
+    let tt;
+    for (let pl of MCD.PLATFORMS) {
+        if (pl.id == entity.platformId) {
+            tt = pl.dwellTime;
+            break;
+        }
+    }
+
+    state.dt = getTime(mins[0].arrivalMillis);
+    state.ft = getTime(mins[0].arrivalMillis + tt / 2 * 1000);
+
     for (let i = 0; i < mins.length; i++) {
         let names = getNames(mins[i].routeId);
         let rn = names[2], sn = TextUtil.getCjkParts(names[0]), en = TextUtil.getCjkParts(names[1]);
@@ -140,30 +174,45 @@ function texture(entity, state, a) {
             let g = tex.graphics;
             g.setColor(new Color(state.colorA));
             g.fillRect(0, 0, 700, 1100);
-            font1 = font0.deriveFont(Font.PLAIN, 140);
-            g.setFont(font1);
-            g.setColor(new Color(state.colorC));
-            g.drawString(rn, 700/2 - getSize(rn, font1)[0]/2, 180);
-        
-            font2 = font0.deriveFont(Font.PLAIN, 110);
-            g.setFont(font2);
-            g.drawString(sn, 700/2 - getSize(sn, font2)[0]/2, 420);
-            g.drawString(en, 700/2 - getSize(en, font2)[0]/2, 630);
-        
-            font3 = font0.deriveFont(Font.BOLD, 80);
-            g.setFont(font3);
-            g.setColor(new Color(state.colorB));
-            let str = "< 往 >";
-            g.drawString(str, 700/2 - getSize(str, font3)[0]/2, 510);
-        
-            font4 = font0.deriveFont(Font.PLAIN, 70);
-            g.setFont(font4);
-            g.setColor(new Color(state.colorC));
-            str = entity.data.get("slogan" + (i == 0 ? "A1" : "B1"));
-            g.drawString(str, 700/2 - getSize(str, font4)[0]/2, 900);
-        
-            str = entity.data.get(("slogan" + (i == 0 ? "A2" : "B2")));
-            g.drawString(str, 700/2 - getSize(str, font4)[0]/2, 1000);
+            //try {
+                font1 = fontb.deriveFont(Font.PLAIN, 140);
+                g.setFont(font1);
+                g.setColor(new Color(state.colorC));
+                g.drawString(rn, 700/2 - getSize(rn, font1)[0]/2, 160);
+            
+                font2 = fontb.deriveFont(Font.PLAIN, 110);
+                g.setFont(font2);
+                g.drawString(sn, 700/2 - getSize(sn, font2)[0]/2, 420);
+                g.drawString(en, 700/2 - getSize(en, font2)[0]/2, 630);
+            
+                font3 = fontb.deriveFont(Font.BOLD, 80);
+                g.setFont(font3);
+                g.setColor(new Color(state.colorB));
+                let str = "< 往 >";
+                g.drawString(str, 700/2 - getSize(str, font3)[0]/2, 510);
+            
+                font4 = fontb.deriveFont(Font.PLAIN, 60);
+                g.setFont(font4);
+                g.setColor(new Color(state.colorC));
+                str = entity.data.get("slogan" + (i == 0 ? "A1" : "B1"));
+                g.drawString(str, 700/2 - getSize(str, font4)[0]/2, 900);
+            
+                str = entity.data.get(("slogan" + (i == 0 ? "A2" : "B2")));
+                g.drawString(str, 700/2 - getSize(str, font4)[0]/2, 1000);
+    
+                font5 = fontb.deriveFont(Font.PLAIN, 65);
+                g.setFont(font5);
+                g.setColor(new Color(state.colorC));
+                str = state.dt + "到, " + state.ft + "开";
+                g.drawString(str, 700/2 - getSize(str, font5)[0]/2, 750);
+    
+                font6 = fonta.deriveFont(Font.PLAIN, 65);
+                str = entity.data.get("slogan0");
+                g.setFont(font6);
+                g.drawString(str, 700/2 - getSize(str, font6)[0]/2, 260);
+                state.sc = true;
+            //}catch(e) {state.sc = false;}
+
             tex.upload();
             texs1.push(tex);
         }
@@ -174,14 +223,16 @@ function texture(entity, state, a) {
     return texs;
 }
 
-function render(ctx, state, entity) {
-    for (let texs of state.close) {
-        for (let tex of texs) {
-            tex.close();
-        }
-    }
-    state.close = [];
+function getTime(time) {
+    let hours = Math.floor((time / 3600 / 1000  + 8) % 24);
+    let minutes = Math.floor(time / 60 / 1000 % 60);
+    return hours.toString().padStart(2, '0') + ":" + minutes.toString().padStart(2, '0');
+}
 
+function render(ctx, state, entity) {
+    if (!state.sc) {
+        state.texs = texture(entity, state, true);
+    }
     let min = entity.schedules.get(entity.platformId)[0];
     for (let sche of entity.schedules.get(entity.platformId)) {
         if (sche.arrivalDiffMillis < min.arrivalDiffMillis) {
@@ -196,6 +247,18 @@ function render(ctx, state, entity) {
         state.f.path = state.f.texture.identifier;
         state.names = names;
         ctx.setDebugInfo("ch", names[2])
+    }
+    let tt;
+    for (let pl of MCD.PLATFORMS) {
+        if (pl.id == entity.platformId) {
+            tt = pl.dwellTime;
+            break;
+        }
+    }
+    if (state.dt != getTime(min.arrivalMillis) || state.ft != getTime(min.arrivalMillis + tt / 2 * 1000)) {
+        state.texs = texture(entity, state, true);
+        state.f.texture = state.texs[0][state.tex];
+        state.f.path = state.f.texture.identifier;
     }
 
 
@@ -224,9 +287,7 @@ function render(ctx, state, entity) {
         let vy = i * interval;
         let vd = v + i * minInt;
         mat.translate(0, Math.max(vd, vy), 0);
-        //ctx.drawModel((i == 0 || i == lineNum - 1)? mcr : mcy, mat);
-        mat.rotateY(Math.PI);
-        ctx.drawModel((i == 0 || i == lineNum - 1)? mcr : mcy, mat);
+        draw(ctx, mat, i);
         mat.popPose();
     }
 
@@ -245,11 +306,6 @@ function render(ctx, state, entity) {
             entity.sendUpdateC2S();
         }else {
             state.frequency = newFre;
-            for (let texs of state.texs) {
-                for (let tex of texs) {
-                    tex.close();
-                }
-            }
             state.texs = texture(entity, state, true);
         }
     }
@@ -260,11 +316,6 @@ function render(ctx, state, entity) {
             entity.sendUpdateC2S();
         }else {
             state.colorA = newColorA;
-            for (let texs of state.texs) {
-                for (let tex of texs) {
-                    tex.close();
-                }
-            }
             state.texs = texture(entity, state, true);
         }
     }
@@ -275,11 +326,6 @@ function render(ctx, state, entity) {
             entity.sendUpdateC2S();
         }else {
             state.colorB = newColorB;
-            for (let texs of state.texs) {
-                for (let tex of texs) {
-                    tex.close();
-                }
-            }
             state.texs = texture(entity, state, true);
         }
     }
@@ -290,20 +336,29 @@ function render(ctx, state, entity) {
             entity.sendUpdateC2S();
         }else {
             state.colorC = newColorC;
-            for (let texs of state.texs) {
-                for (let tex of texs) {
-                    tex.close();
-                }
-            }
             state.texs = texture(entity, state, true);
         }
     }
+    if (entity.data.get("slogan0") != state.os0) {
+        state.os0 = entity.data.get("slogan0");
+        state.texs = texture(entity, state, true);
+    }
+    if (entity.data.get("sloganA1") != state.osa1 || entity.data.get("sloganA2") != state.osa2 || entity.data.get("sloganB1") != state.osb1 || entity.data.get("sloganB2") != state.osb2) {
+        state.osa1 = entity.data.get("sloganA1");
+        state.osa2 = entity.data.get("sloganA2");
+        state.osb1 = entity.data.get("sloganB1");
+        state.osb2 = entity.data.get("sloganB2");
+        state.texs = texture(entity, state, true);
+    }
+
     if (Timing.elapsed() > state.time1 + state.frequency) {
         state.tex = (state.tex + 1) % 2;
         state.f.texture = state.texs[0][state.tex];
         state.f.path = state.f.texture.identifier;
         state.time1 = Timing.elapsed();
     }
+
+    fu(entity);
     entity.sendUpdateC2S();
     ctx.setDebugInfo("c",state.colorC + "");
 }
