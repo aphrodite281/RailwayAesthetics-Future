@@ -331,7 +331,7 @@ function texture(entity, state, a) {
 
     for (let i = 0; i < mins.length; i++) {
         let names = getNames(mins[i].routeId);
-        let rn = names[2], sn = TextUtil.getCjkParts(names[0]), en = TextUtil.getCjkParts(names[1]);
+        let rn = TextUtil.getCjkParts(names[2]), sn = TextUtil.getCjkParts(names[0]), en = TextUtil.getCjkParts(names[1]);
     
         let texs1 = [];
     
