@@ -1,6 +1,6 @@
 {
     "test": {
-        "name": "test",
+        "name": "abc",
         "scriptFiles": ["mtrsteamloco:eyecandies/test/main.js"]
     }
 }
