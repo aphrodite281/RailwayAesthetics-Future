@@ -58,6 +58,8 @@ function alterAllRGBA (modelCluster, red ,green , blue, alpha) {
 }
 
 function fu(entity) {
+    if (entity.minPosX != 0 || entity.minPosY != 0 || entity.minPosZ != 0 || entity.maxPosX != 16 || entity.maxPosY != 48 || entity.maxPosZ != 16) {} else return;
+
     entity.minPosX = 0;
     entity.minPosY = 0;
     entity.minPosZ = 0;
@@ -68,6 +70,8 @@ function fu(entity) {
 }
 
 function no(entity) {
+    if (entity.minPosX != 0 || entity.minPosY != 0 || entity.minPosZ != 0 || entity.maxPosX != 0 || entity.maxPosY != 0 || entity.maxPosZ != 0) {} else return;
+    
     entity.minPosX = 0;
     entity.minPosY = 0;
     entity.minPosZ = 0;

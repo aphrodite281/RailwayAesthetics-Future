@@ -33,49 +33,50 @@ const MCD = MTRClientData;
 
 function c(ctx, state, entity) {
 
+    let nu = false;
     if (!entity.data.containsKey("sloganA1")) {
         entity.data.put("sloganA1", "人人爱护铁路");
-        entity.sendUpdateC2S(true);
+        nu = true;
     }
     if (!entity.data.containsKey("sloganA2")) {
         entity.data.put("sloganA2", "天天守望平安");
-        entity.sendUpdateC2S(true);
+        nu = true;
     }
     
     if (!entity.data.containsKey("sloganB1")) {
         entity.data.put("sloganB1", "爱护铁路光荣");
-        entity.sendUpdateC2S(true);
+        nu = true;
     }
     
     if (!entity.data.containsKey("sloganB2")) {
         entity.data.put("sloganB2", "破坏铁路犯罪");
-        entity.sendUpdateC2S(true);
+        nu = true;
     }
     
     if (!entity.data.containsKey("frequency") || isNaN(parseFloat(entity.data.get("frequency")))) {
         entity.data.put("frequency", "5");
-        entity.sendUpdateC2S(true);
+        nu = true;
     }
     state.frequency = parseFloat(entity.data.get("frequency"));
     
     if (!entity.data.containsKey("colorA") || isNaN(parseInt(entity.data.get("colorA")))) {
         entity.data.put("colorA", "0x3936ff");
-        entity.sendUpdateC2S(true);
+        nu = true;
     }
     
     if (!entity.data.containsKey("colorB") || isNaN(parseInt(entity.data.get("colorB")))) {
         entity.data.put("colorB", "0xffff00");
-        entity.sendUpdateC2S(true);
+        nu = true;
     }
     
     if (!entity.data.containsKey("colorC") || isNaN(parseInt(entity.data.get("colorC")))) {
         entity.data.put("colorC", "0xffffff");
-        entity.sendUpdateC2S(true);
+        nu = true;
     }
     
     if (!entity.data.containsKey("slogan0")) {
         entity.data.put("slogan0", "1车 ←  2车  → 3车");
-        entity.sendUpdateC2S(true);
+        nu = true;
     }    
     state.os0 = entity.data.get("slogan0");
 
@@ -115,11 +116,18 @@ function c(ctx, state, entity) {
     }
     let face = new Face(info);
 
-    let sches = entity.schedules.get(entity.platformId);
-    sches.sort((a, b) => {
-        return a.arrivalDiffMillis - b.arrivalDiffMillis;
-    });
-    let min = sches[0];
+    let pla = MCU.getPlatformAt(entity.getWorldPosVector3f(), 3, 2, 2);
+    let sches = [];
+    for (let [key, value] of MCD.SCHEDULES_FOR_PLATFORM) {
+        if (key == pla.id) {
+            for (let sche of value) {
+                sches.push([sche, pla]);
+            }
+            break;
+        }
+    }
+
+    let min = getMin(entity);
     state.names = getNames(min.routeId);
 
     let texs = texture(entity, state, false);
@@ -134,7 +142,7 @@ function c(ctx, state, entity) {
     state.close = [];
     state.sc = true;
 
-    entity.sendUpdateC2S(true);
+    if (nu) entity.sendUpdateC2S();
 }
 
 function getTime(time) {
@@ -145,20 +153,11 @@ function getTime(time) {
 
 function r(ctx, state, entity, draw) {
 
-    if (!state.isfu) {
-        fu(entity);
-        entity.sendUpdateC2S(true);
-        state.isfu = true;
-    }
+    let nu = false;//needUpdate
 
-    if (!state.sc) {
-        state.texs = texture(entity, state, true);
-    }
-    let sches = entity.schedules.get(entity.platformId);
-    sches.sort((a, b) => {
-        return a.arrivalDiffMillis - b.arrivalDiffMillis;
-    });
-    let min = sches[0];
+    fu(entity);
+
+    let min = getMin(entity);
     let names = getNames(min.routeId);
     if (names[0] != state.names[0] || names[1] != state.names[1] || names[2] != state.names[2]) {
         state.texs = texture(entity, state, true);
@@ -222,32 +221,32 @@ function r(ctx, state, entity, draw) {
 
     if (!entity.data.containsKey("sloganA1")) {
         entity.data.put("sloganA1", "人人爱护铁路");
-        entity.sendUpdateC2S(true);
+        nu = true;
     }
     if (!entity.data.containsKey("sloganA2")) {
         entity.data.put("sloganA2", "天天守望平安");
-        entity.sendUpdateC2S(true);
+        nu = true;
     }
     
     if (!entity.data.containsKey("sloganB1")) {
         entity.data.put("sloganB1", "爱护铁路光荣");
-        entity.sendUpdateC2S(true);
+        nu = true;
     }
     
     if (!entity.data.containsKey("sloganB2")) {
         entity.data.put("sloganB2", "破坏铁路犯罪");
-        entity.sendUpdateC2S(true);
+        nu = true;
     }
     
     if (!entity.data.containsKey("slogan0")) {
         entity.data.put("slogan0", "1车 ←  2车  → 3车");
-        entity.sendUpdateC2S(true);
+        nu = true;
     }
     let newFre = parseFloat(entity.data.get("frequency"));
     if (newFre != state.frequency) {
         if (isNaN(newFre)) {
             entity.data.put("frequency", state.frequency + "");
-            entity.sendUpdateC2S(true);
+            nu = true;
         }else {
             state.frequency = newFre;
             state.texs = texture(entity, state, true);
@@ -257,7 +256,7 @@ function r(ctx, state, entity, draw) {
     if (newColorA != state.colorA) {
         if (isNaN(newColorA)) {
             entity.data.put("colorA", state.colorA + "");
-            entity.sendUpdateC2S(true);
+            nu = true;
         }else {
             state.colorA = newColorA;
             state.texs = texture(entity, state, true);
@@ -267,7 +266,7 @@ function r(ctx, state, entity, draw) {
     if (newColorB != state.colorB) {
         if (isNaN(newColorB)) {
             entity.data.put("colorB", state.colorB + "");
-            entity.sendUpdateC2S(true);
+            nu = true;
         }else {
             state.colorB = newColorB;
             state.texs = texture(entity, state, true);
@@ -277,7 +276,7 @@ function r(ctx, state, entity, draw) {
     if (newColorC != state.colorC) {
         if (isNaN(newColorC)) {
             entity.data.put("colorC", state.colorC + "");
-            entity.sendUpdateC2S(true);
+            nu = true;
         }else {
             state.colorC = newColorC;
             state.texs = texture(entity, state, true);
@@ -299,7 +298,7 @@ function r(ctx, state, entity, draw) {
         state.time1 = Timing.elapsed();
     }
 
-    entity.sendUpdateC2S(false);
+    if (nu) entity.sendUpdateC2S();
 }
 
 function dispose(ctx, state, entity) {
@@ -312,11 +311,7 @@ function dispose(ctx, state, entity) {
 }
 
 function texture(entity, state, a) {
-    let sches = entity.schedules.get(entity.platformId);
-    sches.sort((a, b) => {
-        return a.arrivalDiffMillis - b.arrivalDiffMillis;
-    });
-    let mins = [sches[0]], texs = []
+    let mins = [getMin(entity)], texs = []
      
     if (a) {
         for (let texs of state.texs) {
@@ -439,21 +434,27 @@ function getSize(str, font) {
 }
 
 function fu(entity) {
+    if (entity.minPosX != 0 || entity.minPosY != 0 || entity.minPosZ != 0 || entity.maxPosX != 16 || entity.maxPosY != 48 || entity.maxPosZ != 16) {} else return;
+
     entity.minPosX = 0;
     entity.minPosY = 0;
     entity.minPosZ = 0;
     entity.maxPosX = 16;
     entity.maxPosY = 48;
     entity.maxPosZ = 16;
+    entity.sendUpdateC2S();
 }
 
 function no(entity) {
+    if (entity.minPosX != 0 || entity.minPosY != 0 || entity.minPosZ != 0 || entity.maxPosX != 0 || entity.maxPosY != 0 || entity.maxPosZ != 0) {} else return;
+    
     entity.minPosX = 0;
     entity.minPosY = 0;
     entity.minPosZ = 0;
     entity.maxPosX = 0;
     entity.maxPosY = 0;
     entity.maxPosZ = 0;
+    entity.sendUpdateC2S();
 }
 
 function getNames(rtid) {
@@ -481,11 +482,25 @@ function getNames(rtid) {
             return ns;
         }
     }
+    return ["null", "null", "null"];
 }
 
-function getKTime(entity, int) {
-    let schedules = entity.schedules.get(entity.platformId);
-    if (schedules[0] != null) {
-
+function getMin(entity) {
+    let pla = MCU.getPlatformAt(entity.getWorldPosVector3f(), 3, 2, 2);
+    let sches = [];
+    for (let [key, value] of MCD.SCHEDULES_FOR_PLATFORM) {
+        if (key == pla.id) {
+            for (let sche of value) {
+                sches.push(sche);
+            }
+            break;
+        }
     }
+    if (sches.length == 0) return {arrivalMillis: -1, routeId: -1, trainCars: -1, currentStationIndex: -1};
+    if (sches.length == 1) return sches[0];
+
+    sches.sort((a, b) => {
+        return a.arrivalMillis - b.arrivalMillis;
+    });
+    return sches[0];
 }

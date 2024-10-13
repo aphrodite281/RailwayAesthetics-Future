@@ -104,7 +104,6 @@ ScrollsScreen.prototype.tick = function(matrices) {
         this.rawModel.replaceAllTexture(this.path);
         this.model.uploadLater(this.rawModel);
     }
-    //this.ctx.setDebugInfo("r",this.rawModel)
 
     let temp = matrices == undefined ? new Matrices() : matrices;
     temp.pushPose();
