@@ -30,7 +30,6 @@ const fonta = Resources.readFont(Resources.id("mtrsteamloco:library/font/zhdh.tt
 
 const MCU = MinecraftClient;
 const MCD = MTRClientData;
-const MCR = MTRRailwayData;
 
 function c(ctx, state, entity) {
 
@@ -301,6 +300,15 @@ function r(ctx, state, entity, draw) {
     }
 
     entity.sendUpdateC2S(false);
+}
+
+function dispose(ctx, state, entity) {
+    state.f.close();
+    for (let texs of state.texs) {
+        for (let tex of texs) {
+            tex.close();
+        }
+    }
 }
 
 function texture(entity, state, a) {

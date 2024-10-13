@@ -1,6 +1,6 @@
 {
     "stop_signb": {
-        "name": "站牌B 自定义文本",
+        "name": "站牌 B 自定义文本",
         "scriptFiles": ["mtrsteamloco:eyecandies/stop_signb/main.js"]
     }
 }

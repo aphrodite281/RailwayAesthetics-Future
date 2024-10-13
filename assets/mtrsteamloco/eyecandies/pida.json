@@ -1,0 +1,6 @@
+{
+    "pida": {
+        "name": "PID A",
+        "scriptFiles": ["mtrsteamloco:eyecandies/pida/main.js"]
+    }
+}
