@@ -22,91 +22,126 @@ const font0 = RU.getSystemFont("Noto Serif").deriveFont(Font.PLAIN, 55);
 
 const mrs = "0xffffff$欢迎来到 Railway Aesthetics - Future     我们的交流群: /0x19ffff$836291719/0xfbb8ff$        晴纱是男娘          ";
 
+const kh = 0.02
+
+const mls = "5.0/15.0";//默认限制（时间）
+
 function create(ctx, state, entity) {
     let nu = false;//needUpdate
 
-    const list = getList(entity);
-    state.list = list;
-    state.colors = [new Color(0x3936ff), new Color(0xffffff)];
+    let lts = getLimits(entity);
+    if (lts[0]) nu = true;
+    state.lts = lts[1];
+
+    state.colors = [0x3936ff, 0xffffff, 0xff0000, 0x00ff00, 0xffffff];
     
+    pn = (str, mnum) => {
+        let num = parseInt(entity.data.get(str));
+        if (isNaN(num)) {
+            entity.data.put(str, mnum + "");
+            num = mnum;
+            nu = true;
+        }
+        return num;
+    }
+
+    let ac = pn("colorA", 0x3936ff);
+    let bc = pn("colorB", 0xffffff);
+    let cc = pn("colorC", 0xff0000);
+    let dc = pn("colorD", 0x00ff00);
+    let ec = pn("colorE", 0xffffff);
+
+    state.colors = [ac, bc, cc, dc, ec];
+
     let num;
-    num = parseInt(entity.data.get("colorA"));
-    if (isNaN(num)) {
-        entity.data.put("colorA", "0x3936ff");
-        num = 0x3936ff;
-    }
-    state.colors[0] = num;
-    num = parseInt(entity.data.get("colorB"));
-    if (isNaN(num)) {
-        entity.data.put("colorB", "0xffffff");
-        num = 0xffffff;
-    }
-    state.colors[1] = num;
     num = parseFloat(entity.data.get("scale"))
     if (isNaN(num)) {
         entity.data.put("scale", "1.0");
         num = 1.0;
+        nu = true;
     }
     state.scale = num;
 
     let gs = getSlogan(entity);
     if (gs[0]) nu = true;
     state.sl = gs[1];
-    
+
     state.d0 = new DynamicModelHolder(); state.d2 = new DynamicModelHolder();
     let osc0 = sc0.copy(); osc0.sourceLocation = null; osc0.applyScale(state.scale, state.scale, state.scale);
     let od = d.copy(); od.sourceLocation = null; od.applyScale(state.scale, state.scale, state.scale);
     state.d0.uploadLater(osc0); state.d2.uploadLater(od);
+
+    const list = getList(entity, state.lts, state.colors);
+    state.list = list;
 
     state.tex = drawTexture(list, state.colors);
 
     state.slo = drawSlogan(state.sl, state.colors);
     state.ss = newSS(state.slo, ctx, state.scale);
 
+    state.lt = Timing.elapsed();
+
     if (nu) entity.sendUpdateC2S();
-    state.slc = 0;
 }
 
 function render(ctx, state, entity) {
-    //ctx.clearDebugInfo();   
 
     state.ss.tick();
-
-
     
-    const list = getList(entity);
+    let list = state.list;
 
     let isC, nu = false;//isChanged, needUpdate
 
     isC = false;
-    let num;
-    num = parseInt(entity.data.get("colorA"));
-    if (isNaN(num)) {
-        entity.data.put("colorA", "0x3936ff");
-        num = 0x3936ff;
-        nu = true;
+
+    pn = (onum, str, mnum) => {
+        let num = parseInt(entity.data.get(str));
+        if (isNaN(num)) {
+            entity.data.put(str, mnum + "");
+            num = mnum;
+            nu = true;
+        }
+        if (onum != num) isC = true;
+        return num;
     }
-    if (state.colors[0] != num) {isC = true; state.colors[0] = num;}
-    
-    num = parseInt(entity.data.get("colorB"));
-    if (isNaN(num)) {
-        entity.data.put("colorB", "0xffffff");
-        num = 0xffffff;
-        nu = true;
-    }
-    if (state.colors[1] != num) {isC = true; state.colors[1] = num;}
+
+    let ac = pn(state.colors[0], "colorA", 0x3936ff);
+    let bc = pn(state.colors[1], "colorB", 0xffffff);
+    let cc = pn(state.colors[2], "colorC", 0xff0000);
+    let dc = pn(state.colors[3], "colorD", 0x00ff00);
+    let ec = pn(state.colors[4], "colorE", 0xffffff);
+
+    state.colors = [ac, bc, cc, dc, ec];
 
     let gs = getSlogan(entity);
     if (gs[0]) nu = true;
     if (isChanged0(gs[1], state.sl)) {
-        state.slc++;
         state.sl = gs[1];
         state.ss.close();
         state.slo = drawSlogan(state.sl, state.colors);
         state.ss = newSS(state.slo, ctx, state.scale);
     }
 
-    if (isC || isChanged(list, state.list)) {
+    let lts = getLimits(entity);
+    if (lts[0]) nu = true;
+    if (isChanged1(lts[1], state.lts)) {
+        isC = true;
+    }
+    state.lts = lts[1];
+
+    if (state.lt + 3 < Timing.elapsed()) {//每3秒更新一次
+        list = getList(entity, state.lts, state.colors);
+        if (isChanged(list, state.list)) {
+            state.list = list;
+            isC = true;
+        }
+        state.lt = Timing.elapsed();
+    }
+
+    if (isC) {
+        state.lts = getLimits(entity)[1];
+        list = getList(entity, state.lts, state.colors);
+        state.list = list;
         state.tex.close();
         state.tex = drawTexture(list, state.colors);
         state.ss.close();
@@ -115,6 +150,7 @@ function render(ctx, state, entity) {
         state.list = list;
     }
 
+    let num;
     num = parseFloat(entity.data.get("scale"))
     if (isNaN(num)) {
         entity.data.put("scale", "1.0");
@@ -150,6 +186,10 @@ function getTime(time) {
     let hours = Math.ceil((time / 3600 / 1000  + 8) % 24);
     let minutes = Math.ceil(time / 60 / 1000 % 60);
     return hours.toString().padStart(2, '0') + ":" + minutes.toString().padStart(2, '0');
+}
+
+function isChanged1(l0, l1) {
+    return (l0[0] != l1[0] || l0[1] != l1[1]);
 }
 
 function isChanged0(s0, s1) {
@@ -241,6 +281,7 @@ function drawSlogan(sl, cs) {
         g.drawString(text, x, 70);
         x += ws[i];
     }
+
     tex.upload();
     return [run, tex, w1];
 }
@@ -251,7 +292,7 @@ function getW(str, font) {
     return Math.ceil(bounds.getWidth());
 }
 
-function getList(entity) {
+function getList(entity, limits, cs) {
     let station = MCU.getStationAt(entity.getWorldPosVector3f());
 
     let plaIds = []; 
@@ -286,7 +327,7 @@ function getList(entity) {
 
     const list = [];
     //list.push(["", "", "", "", "", [0xffffff, ""]])
-    list.push(["车次", "始发站", "终到站", "开点", "检票口", [0xffffff, "状态"]])
+    list.push(["车次", "始发站", "终到站", "开点", "检票口", [cs[1], "状态"]])
     for (let [sche, pla] of swp) {
         let rn = "null", sf = "null", zd = "null", kd = "null", jpk = "null", zt = [0xffffff, "null"];//车次 始发站 终到站 开点 检票口 状态
         let ns = ["null", "null", "null"];
@@ -326,9 +367,9 @@ function getList(entity) {
         }
         let time = sche.arrivalMillis - Date.now() + pla.dwellTime / 2 * 1000;
         let minus = time / 60 / 1000
-        if (minus <= 2) zt = [0xff0000, "停止检票"];
-        if (minus > 2 && minus <= 5) zt = [0x00ff00, "正在检票"];
-        if (minus > 5) zt = [0xffffff, "预计正点"];//没什么好办法判断正点晚点
+        if (minus <= limits[0]) zt = [cs[2], "停止检票"];
+        if (minus > limits[0] && minus <= limits[1]) zt = [cs[3], "正在检票"];
+        if (minus > limits[1]) zt = [cs[4], "预计正点"];//没什么好办法判断正点晚点
         list.push([rn, sf, zd, kd, jpk, zt]);
     }
     return list;
@@ -348,7 +389,7 @@ function getSlogan(entity) {
     let nu = false;
     let put = () => {entity.data.put("slogan", mrs); nu = true};
     
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < 2; i++) {//尝试2次 防止格式错误
         let text = entity.data.get("slogan") + "";
         if (text == null) {
             put();
@@ -375,6 +416,38 @@ function getSlogan(entity) {
     return [nu, [[new Color(0), "TNND 失败了"]]];
 }
 
+function getLimits(entity) {
+    let nu = false;
+    let put = () => {entity.data.put("limits", mls); nu = true};
+    
+    for (let i = 0; i < 2; i++) {
+        let text = entity.data.get("limits") + "";
+        if (text == null) {
+            put();
+            continue;
+        };
+        let ts = text.split("/");
+        try {
+            if (ts.length != 2) {
+                put();
+                continue;
+            }
+            for (let i = 0; i < 2; i++) {
+                let num = parseInt(ts[i]);
+                if (isNaN(num)) {
+                    put();
+                    continue;
+                }
+            }
+            return [nu, [parseFloat(ts[0]), parseFloat(ts[1])]];
+        }catch (e) {
+            put();
+            continue;
+        }
+    }
+    return [nu, [-1, -1]];
+}
+
 function newSS(slo, ctx, scale) {
     let v = 3000 / slo[2];
     let rawModel = sc1.copy();
@@ -398,4 +471,8 @@ function newSS(slo, ctx, scale) {
         model: rawModel
     }
     return new SS(info);
+}
+
+function rn(n1, n2) {
+    return Math.random() * (n2 - n1) + n1;
 }

@@ -81,41 +81,42 @@ function Face(data) {
             throw new Error("无效的模型数据" + data.model + this);
         }
     }
-}
 
-Face.prototype.tick = function(matrices) {
-    if(!this.display) {
-        return;
-    }
-
-        if(this.model instanceof DynamicModelHolder) {
-            this.model.getUploadedModel().replaceAllTexture(this.path);
-        }else{
-            this.model.replaceAllTexture(this.path);
-        }
-
-
-    let temp = matrices == undefined ? new Matrices() : matrices;
-    temp.pushPose();
     
-    for(let i = 0; i < this.matrices.length; i++) {
-        temp.pushPose();
-        temp.last().multiply(this.matrices[i].last());
-        if(this.isTrain) {
-            for(let car of this.cars) {
-                this.ctx.drawCarModel(this.model, car, temp);
+    this.tick = (matrices) => {
+        if(!this.display) {
+            return;
+        }
+    
+            if(this.model instanceof DynamicModelHolder) {
+                this.model.getUploadedModel().replaceAllTexture(this.path);
+            }else{
+                this.model.replaceAllTexture(this.path);
             }
-        }else {
-            this.ctx.drawModel(this.model, temp);
+    
+    
+        let temp = matrices == undefined ? new Matrices() : matrices;
+        temp.pushPose();
+        
+        for(let i = 0; i < this.matrices.length; i++) {
+            temp.pushPose();
+            temp.last().multiply(this.matrices[i].last());
+            if(this.isTrain) {
+                for(let car of this.cars) {
+                    this.ctx.drawCarModel(this.model, car, temp);
+                }
+            }else {
+                this.ctx.drawModel(this.model, temp);
+            }
+            temp.popPose();
         }
         temp.popPose();
     }
-    temp.popPose();
-}
 
-Face.prototype.close = function() {
-    if(this.model instanceof DynamicModelHolder) {
-        this.model.close();
+    this.close = () => {
+        if(this.model instanceof DynamicModelHolder) {
+            this.model.close();
+        }
+        this.texture.close();
     }
-    this.texture.close();
 }

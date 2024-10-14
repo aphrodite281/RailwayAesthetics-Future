@@ -119,163 +119,163 @@ function Video(data) {
             throw new Error("无效的模型数据" + data.model + this);
         }
     }
-}
 
-Video.prototype.tick = function(matrices) {
     
-    if(!this.display) {
-        return;
-    }
-
-    this.frame = Math.floor((Timing.elapsed() - this.startTime) * this.videoInfo.fps) + 1;
-    if(this.frame > this.videoInfo.length || this.frame <= 0) {
-        this.isStopped = true;
-        this.stop();
-    }
-
-    if(this.isStopped && this.looping) {
-        this.start();
-    }
-
-    if(this.isStopped) {
-        return;
-    }
-
-    this.frame = Math.floor((Timing.elapsed() - this.startTime) * this.videoInfo.fps) + 1;
-    this.name = this.getName();
-    this.path = Resources.id(this.name);
-
-    if(this.model instanceof DynamicModelHolder) {
-        this.model.getUploadedModel().replaceAllTexture(this.path);
-    }else{
-        this.model.replaceAllTexture(this.path);
-    }
-
-    let temp = matrices == undefined ? new Matrices() : matrices;
-    temp.pushPose();
+    this.tick = (matrices) => {
+        if(!this.display) {
+            return;
+        }
     
-    for(let i = 0; i < this.matrices.length; i++) {
+        this.frame = Math.floor((Timing.elapsed() - this.startTime) * this.videoInfo.fps) + 1;
+        if(this.frame > this.videoInfo.length || this.frame <= 0) {
+            this.isStopped = true;
+            this.stop();
+        }
+    
+        if(this.isStopped && this.looping) {
+            this.start();
+        }
+    
+        if(this.isStopped) {
+            return;
+        }
+    
+        this.frame = Math.floor((Timing.elapsed() - this.startTime) * this.videoInfo.fps) + 1;
+        this.name = this.getName();
+        this.path = Resources.id(this.name);
+    
+        if(this.model instanceof DynamicModelHolder) {
+            this.model.getUploadedModel().replaceAllTexture(this.path);
+        }else{
+            this.model.replaceAllTexture(this.path);
+        }
+    
+        let temp = matrices == undefined ? new Matrices() : matrices;
         temp.pushPose();
-        temp.last().multiply(this.matrices[i].last());
-        if(this.isTrain) {
-            for(let car of this.cars) {
-                this.ctx.drawCarModel(this.model, car, temp);
+        
+        for(let i = 0; i < this.matrices.length; i++) {
+            temp.pushPose();
+            temp.last().multiply(this.matrices[i].last());
+            if(this.isTrain) {
+                for(let car of this.cars) {
+                    this.ctx.drawCarModel(this.model, car, temp);
+                }
+            }else {
+                this.ctx.drawModel(this.model, temp);
             }
-        }else {
-            this.ctx.drawModel(this.model, temp);
+            temp.popPose();
         }
         temp.popPose();
-    }
-    temp.popPose();
-
-    if(this.isTrain) {
-        if(this.sound != undefined) {
-            for(let sounds of this.sound) {
-                for(let i = 0; i < sounds.length; i++) {
-                    let position = this.ctx.trainExtra.lastCarPosition.copy();
-                    position.add(this.soundInfo.position[i][0], this.soundInfo.position[i][1], this.soundInfo.position[i][2])
-                    sounds[i].setData(this.videoInfo.soundInfo.volume, this.videoInfo.soundInfo.pitch, position);
+    
+        if(this.isTrain) {
+            if(this.sound != undefined) {
+                for(let sounds of this.sound) {
+                    for(let i = 0; i < sounds.length; i++) {
+                        let position = this.ctx.trainExtra.lastCarPosition.copy();
+                        position.add(this.soundInfo.position[i][0], this.soundInfo.position[i][1], this.soundInfo.position[i][2])
+                        sounds[i].setData(this.videoInfo.soundInfo.volume, this.videoInfo.soundInfo.pitch, position);
+                    }
+                }
+            }
+        }else {
+            if(this.sound != undefined) {
+                for(let i = 0; i < this.soundInfo.position.length; i++) {
+                    let position = this.ctx.entity.getTransformPosVector3f();
+                    position.add(this.soundInfo.position[i][0], this.soundInfo.position[i][1], this.soundInfo.position[i][2]);
+                    this.sound[i].setData(this.soundInfo.volume, this.soundInfo.pitch, position);
                 }
             }
         }
-    }else {
-        if(this.sound != undefined) {
-            for(let i = 0; i < this.soundInfo.position.length; i++) {
-                let position = this.ctx.entity.getTransformPosVector3f();
-                position.add(this.soundInfo.position[i][0], this.soundInfo.position[i][1], this.soundInfo.position[i][2]);
-                this.sound[i].setData(this.soundInfo.volume, this.soundInfo.pitch, position);
-            }
-        }
     }
-}
 
-Video.prototype.start = function(time) {
-    this.stop();
-    this.startTime = (time != undefined ? time : Timing.elapsed());
-    this.generateSound();
-    if(this.sound != undefined) {
-        if(this.isTrain) {
-            for(let sounds of this.sound) {
-                for(let sound of sounds) {
+    this.start = () => {
+        this.stop();
+        this.startTime = Timing.elapsed();
+        this.generateSound();
+        if(this.sound != undefined) {
+            if(this.isTrain) {
+                for(let sounds of this.sound) {
+                    for(let sound of sounds) {
+                        sound.play();
+                    }
+                }
+            }else{
+                for(let sound of this.sound) {
                     sound.play();
                 }
             }
-        }else{
-            for(let sound of this.sound) {
-                sound.play();
+        }
+        if(this.promptSound != undefined) {
+            if(this.isTrain) {
+                for(let car of this.cars) {
+                    this.ctx.playCarSound(this.promptSound, this.promptInfo.sound.volume, this.promptInfo.sound.pitch, this.promptInfo.sound.position[0], this.promptInfo.sound.position[1], this.promptInfo.sound.position[2], car);
+                }
+            }else{
+                this.ctx.playSound(this.promptSound, this.promptInfo.sound.volume, this.promptInfo.sound.pitch);
             }
         }
+        this.isStopped = false;
     }
-    if(this.promptSound != undefined) {
-        if(this.isTrain) {
-            for(let car of this.cars) {
-                this.ctx.playCarSound(this.promptSound, this.promptInfo.sound.volume, this.promptInfo.sound.pitch, this.promptInfo.sound.position[0], this.promptInfo.sound.position[1], this.promptInfo.sound.position[2], car);
-            }
-        }else{
-            this.ctx.playSound(this.promptSound, this.promptInfo.sound.volume, this.promptInfo.sound.pitch);
-        }
-    }
-    this.isStopped = false;
-}
 
-Video.prototype.stop = function() {
-    this.startTime = -1;
-    if(this.sound != undefined) {
-        if(this.isTrain) {
-            for(let sounds of this.sound) {
-                for(let sound of sounds) {
+    this.stop = () => {
+        this.startTime = -1;
+        if(this.sound != undefined) {
+            if(this.isTrain) {
+                for(let sounds of this.sound) {
+                    for(let sound of sounds) {
+                        sound.quit();
+                    }
+                }
+            }else{
+                for(let sound of this.sound) {
                     sound.quit();
                 }
             }
-        }else{
-            for(let sound of this.sound) {
-                sound.quit();
-            }
+        }
+        this.isStopped = true;
+    }
+
+    this.close = () => {
+        if(this.model instanceof DynamicModelHolder) {
+            this.model.close();
         }
     }
-    this.isStopped = true;
-}
 
-Video.prototype.getName = function() {
-    let name = this.frame + "";
-    name = name.padStart(this.videoInfo.numFormat, "0");
-    return this.videoInfo.path + name + ".png";
-}
+    this.getName = function() {
+        let name = this.frame + "";
+        name = name.padStart(this.videoInfo.numFormat, "0");
+        return this.videoInfo.path + name + ".png";
+    }
 
-Video.prototype.generateSound = function() {
-    if(this.soundInfo.name!= undefined && this.soundInfo.pitch!= undefined && this.soundInfo.volume!= undefined && this.soundInfo.position!= undefined) {
-        const source = this.videoInfo.source != undefined ? SoundHelper.getSoundSource(this.videoInfo.source) : SoundHelper.getSoundSource("block");
-        if(this.isTrain) {
-            this.ctx.playCarSound(Resources.id(this.soundInfo.name), 0, 0, 0, 0, 0, 0);
-            this.sound = [];
-            for(let j = 0; j < this.cars.length; j++) {
-                this.sound[j] = [];
+    this.generateSound = function() {
+        if(this.soundInfo.name!= undefined && this.soundInfo.pitch!= undefined && this.soundInfo.volume!= undefined && this.soundInfo.position!= undefined) {
+            const source = this.videoInfo.source != undefined ? SoundHelper.getSoundSource(this.videoInfo.source) : SoundHelper.getSoundSource("block");
+            if(this.isTrain) {
+                this.ctx.playCarSound(Resources.id(this.soundInfo.name), 0, 0, 0, 0, 0, 0);
+                this.sound = [];
+                for(let j = 0; j < this.cars.length; j++) {
+                    this.sound[j] = [];
+                    for(let i = 0; i < this.soundInfo.position.length; i++) {
+                        let sound = new TickableSound(Resources.id(this.soundInfo.name), source);
+                        sound.setLooping(false);
+                        let position = ctx.trainExtra.lastCarPosition.copy();
+                        position.add(this.soundInfo.position[i][0], this.soundInfo.position[i][1], this.soundInfo.position[i][2])
+                        sound.setData(this.videoInfo.soundInfo.volume, this.videoInfo.soundInfo.pitch, position);
+                        this.sound[j].push(sound);
+                    }
+                }
+            }else{
+                this.ctx.playSound(Resources.id(this.soundInfo.name), 0, 0);
+                this.sound = [];
                 for(let i = 0; i < this.soundInfo.position.length; i++) {
                     let sound = new TickableSound(Resources.id(this.soundInfo.name), source);
                     sound.setLooping(false);
-                    let position = ctx.trainExtra.lastCarPosition.copy();
-                    position.add(this.soundInfo.position[i][0], this.soundInfo.position[i][1], this.soundInfo.position[i][2])
-                    sound.setData(this.videoInfo.soundInfo.volume, this.videoInfo.soundInfo.pitch, position);
-                    this.sound[j].push(sound);
+                    let position = this.ctx.entity.getTransformPosVector3f();
+                    position.add(this.soundInfo.position[i][0], this.soundInfo.position[i][1], this.soundInfo.position[i][2]);
+                    sound.setData(this.soundInfo.volume, this.soundInfo.pitch, position);
+                    this.sound.push(sound);
                 }
             }
-        }else{
-            this.ctx.playSound(Resources.id(this.soundInfo.name), 0, 0);
-            this.sound = [];
-            for(let i = 0; i < this.soundInfo.position.length; i++) {
-                let sound = new TickableSound(Resources.id(this.soundInfo.name), source);
-                sound.setLooping(false);
-                let position = this.ctx.entity.getTransformPosVector3f();
-                position.add(this.soundInfo.position[i][0], this.soundInfo.position[i][1], this.soundInfo.position[i][2]);
-                sound.setData(this.soundInfo.volume, this.soundInfo.pitch, position);
-                this.sound.push(sound);
-            }
         }
-    }
-}
-
-Video.prototype.close = function() {
-    if(this.model instanceof DynamicModelHolder) {
-        this.model.close();
     }
 }

@@ -84,46 +84,48 @@ function ScrollsScreen(data) {
             throw new Error("无效的模型数据" + data.model + this);
         }
     }
-}
+    this.lastTime = Date.now();
 
-ScrollsScreen.prototype.tick = function(matrices) {
-    if(!this.display) {
-        return;
-    }
-
-    if(this.running) {
-        let meshList = this.rawModel.meshList;
-        for(let rawMesh of meshList.values()) {
-            for(let i = 0 ; i < rawMesh.vertices.length ; i++) {
-                rawMesh.vertices.get(i).u += this.uvSpeed[0] * Timing.delta() / this.size[0];
-                rawMesh.vertices.get(i).v += this.uvSpeed[1] * Timing.delta() / this.size[1];
-                //this.ctx.setDebugInfo("u",rawMesh.vertices.get(i).u);
-                //this.ctx.setDebugInfo("v",rawMesh.vertices.get(i).v);
-            }
+    this.tick = (matrices) => {
+        if(!this.display) {
+            return;
         }
-        this.rawModel.replaceAllTexture(this.path);
-        this.model.uploadLater(this.rawModel);
-    }
-
-    let temp = matrices == undefined ? new Matrices() : matrices;
-    temp.pushPose();
     
-    for(let i = 0; i < this.matrices.length; i++) {
-        temp.pushPose();
-        temp.last().multiply(this.matrices[i].last());
-        if(this.isTrain) {
-            for(let car of this.cars) {
-                this.ctx.drawCarModel(this.model, car, temp);
+        if(this.running) {
+            let meshList = this.rawModel.meshList;
+            let tp = Date.now() / 1000 - this.lastTime / 1000; 
+            this.ctx.setDebugInfo("tp", tp);
+            for(let rawMesh of meshList.values()) {
+                for(let i = 0 ; i < rawMesh.vertices.length ; i++) {
+                    rawMesh.vertices.get(i).u += this.uvSpeed[0] * tp / this.size[0];
+                    rawMesh.vertices.get(i).v += this.uvSpeed[1] * tp / this.size[1];
+                }
             }
-        }else {
-            this.ctx.drawModel(this.model, temp);
+            this.rawModel.replaceAllTexture(this.path);
+            this.model.uploadLater(this.rawModel);
+        }
+        this.lastTime = Date.now();
+    
+        let temp = matrices == undefined ? new Matrices() : matrices;
+        temp.pushPose();
+        
+        for(let i = 0; i < this.matrices.length; i++) {
+            temp.pushPose();
+            temp.last().multiply(this.matrices[i].last());
+            if(this.isTrain) {
+                for(let car of this.cars) {
+                    this.ctx.drawCarModel(this.model, car, temp);
+                }
+            }else {
+                this.ctx.drawModel(this.model, temp);
+            }
+            temp.popPose();
         }
         temp.popPose();
     }
-    temp.popPose();
-}
 
-ScrollsScreen.prototype.close = function() {
-    this.model.close();
-    this.texture.close();
+    this.close = () => {
+        this.model.close();
+        this.texture.close();
+    }
 }
