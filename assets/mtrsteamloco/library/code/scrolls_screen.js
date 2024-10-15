@@ -93,8 +93,7 @@ function ScrollsScreen(data) {
     
         if(this.running) {
             let meshList = this.rawModel.meshList;
-            let tp = Date.now() / 1000 - this.lastTime / 1000; 
-            this.ctx.setDebugInfo("tp", tp);
+            let tp = Date.now() / 1000 - this.lastTime / 1000;
             for(let rawMesh of meshList.values()) {
                 for(let i = 0 ; i < rawMesh.vertices.length ; i++) {
                     rawMesh.vertices.get(i).u += this.uvSpeed[0] * tp / this.size[0];
