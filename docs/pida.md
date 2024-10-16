@@ -15,7 +15,7 @@
 - `colorE` 正在候车颜色 默认为 0xffffff (黄色)
 请确保输入颜色可以被读取为整数如 0、0xff、0xffffff 等。
 
-- `slogan` 下方标语 默认为 "0xffffff$欢迎来到 Railway Aesthetics - Future     我们的交流群: /0x19ffff$836291719/0xfbb8ff$        晴纱是男娘          "
+- `slogan` 下方标语 默认为 `0xffffff$欢迎来到 Railway Aesthetics - Future     我们的交流群: /0x19ffff$836291719/0xfbb8ff$        晴纱是男娘          `
 格式为 `color0$text0/color1$text1/color2$text2/...` 对颜色的要求与上述一致，对文本没有任何要求。在长度超多 `2800` 像素时会自动开启滚动模式。
 
 - `scale` 整体的缩放 默认为 1.0
