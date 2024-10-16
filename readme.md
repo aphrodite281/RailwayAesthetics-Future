@@ -1,4 +1,4 @@
-Aphrodite's Railway Aesthetics - Future
+# Aphrodite's Railway Aesthetics - Future
 
 
 欢迎来到Aphrodite的铁路美学-未来！
@@ -7,3 +7,9 @@ Aphrodite's Railway Aesthetics - Future
 欢迎加入我们的 QQ 群: 836291719
 
 下载当前版本: 点击 Code -> Download ZIP 下载最新版本的资源包。
+
+
+
+## 文档
+
+- [乘客资讯显示屏A](https://aphrodite281.github.io/RailwayAesthetics-Future/docs/pida.md)
