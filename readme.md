@@ -1,7 +1,3 @@
----
-layout: post
-title:  "ARAF - 欢迎来到Aphrodite的铁路美学-未来!"
----
 # Aphrodite's Railway Aesthetics - Future
 
 
