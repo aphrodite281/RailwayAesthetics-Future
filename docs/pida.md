@@ -1,8 +1,4 @@
----
-layout: post
-title:  "ARAF - 乘客资讯显示屏A"
----
-[点击此链接返回主页](https://aphrodite281.github.io/RailwayAesthetics-Future/readme.html)
+[点击此链接返回主页](https://aphrodite281.github.io/RailwayAesthetics-Future/)
 
 # 乘客资讯显示屏A
 
