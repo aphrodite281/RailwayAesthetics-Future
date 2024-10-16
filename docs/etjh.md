@@ -1,5 +1,3 @@
-[点击此链接返回主页](https://aphrodite281.github.io/RailwayAesthetics-Future/)
-
 # 装饰物件的交互
 
 ## data

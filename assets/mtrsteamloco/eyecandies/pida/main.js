@@ -27,6 +27,8 @@ const kh = 0.02
 
 const mls = "5.0/15.0";//默认限制（时间）
 
+const zt = new Matrices(); zt.translate(0, 0, -0.05);
+
 function create(ctx, state, entity) {
     let nu = false;//needUpdate
 
@@ -211,7 +213,9 @@ function render(ctx, state, entity) {
     let msc0 = state.d0.getUploadedModel(); msc0.replaceAllTexture(state.tex[0].identifier);
     let msc1 = state.d1.getUploadedModel(); msc1.replaceAllTexture(state.tex[1].identifier);
 
-    ctx.drawModel(state.tnum ? state.d0 : state.d1, null); ctx.drawModel(state.d2, null);
+    ctx.drawModel(state.d0, state.tnum ? zt : null); 
+    ctx.drawModel(state.d1, state.tnum ? null : zt);
+    ctx.drawModel(state.d2, null);
 
     if(nu) entity.sendUpdateC2S();
 }
