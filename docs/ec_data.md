@@ -1,3 +1,7 @@
+---
+layout: post
+title:  "Welcome to Jekyll!"
+---
 [点击此链接返回主页](https://aphrodite281.github.io/RailwayAesthetics-Future/readme.md)
 
 # 装饰物件 data 交互
@@ -9,7 +13,7 @@
 
 右键 `装饰物件` 打开对应的 `装饰物件屏幕`， 从上往下数第一个输入栏即为 `data` 的交互栏。您应该可以看到上面的提示信息，这里我将具体说明。
 
-- 关键字 `#` ：尝试将输入栏中的键值对保存进 `data` 中。如输入 `key,value#` ，将会把 `key` 与 `value` 保存进 `data` 中。若 `key` 已经存在，则会覆盖原有的值。同时如果程序无法解析这个字符串为键值对，则不会有任何效果。
+- 关键字 `#` ：尝试将输入栏中的键值对保存进 `data` 中。如输入 `key,value#` ，将会把 `key` 与 `value` 保存进 `data` 中，并将输入栏清空。若 `key` 已经存在，则会覆盖原有的值。同时如果程序无法解析这个字符串为键值对，则不会有任何效果。
 
 - 关键字 `%` ：尝试从 `data` 中查找键值对。如输入 `key%` ，将会将输入栏替换为 `key,value`。若 `data` 中没有 `key` 这个键，则会显示 `key,null`
 
