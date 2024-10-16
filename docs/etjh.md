@@ -1,15 +1,17 @@
 ---
 layout: post
-title:  "Welcome to Jekyll!"
+title:  "ARAF - 装饰物件的交互"
 ---
-[点击此链接返回主页](https://aphrodite281.github.io/RailwayAesthetics-Future/readme.md)
+[点击此链接返回主页](https://aphrodite281.github.io/RailwayAesthetics-Future/readme.html)
 
-# 装饰物件 data 交互
+# 装饰物件的交互
+
+## data
 
 在 `NTE 0.5.3` 版本中，每个 `装饰物件` 都包含有他自己的 `data` 成员，它是一个 `HashMap<String, String>` 即 key 与 value 都是字符串类型。您可以通过 `装饰物件屏幕` 中的第一个输入栏保存键值对、修改键值对、查看值或查看所有键。他会被保存在存档中，即所有客户端的内容都是一样的，修改后也会同步，保存存档时会被写入存档，下次打开时也会被读取。
 请注意 如果希望您传入的键值对能够起作用，需要使用带有 `javascript脚本` 并添加了对应相应逻辑的 `装饰物件`，否则将不会起到任何作用。
 
-## 使用方法
+## data 使用方法
 
 右键 `装饰物件` 打开对应的 `装饰物件屏幕`， 从上往下数第一个输入栏即为 `data` 的交互栏。您应该可以看到上面的提示信息，这里我将具体说明。
 

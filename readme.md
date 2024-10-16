@@ -1,3 +1,7 @@
+---
+layout: post
+title:  "ARAF - 欢迎来到Aphrodite的铁路美学-未来!"
+---
 # Aphrodite's Railway Aesthetics - Future
 
 
@@ -12,4 +16,6 @@
 
 ## 文档
 
-- [乘客资讯显示屏A](https://aphrodite281.github.io/RailwayAesthetics-Future/docs/pida.md)
+- [装饰物件的交互](https://aphrodite281.github.io/RailwayAesthetics-Future/docs/etjh.html)
+
+- [乘客资讯显示屏A](https://aphrodite281.github.io/RailwayAesthetics-Future/docs/pida.html)
