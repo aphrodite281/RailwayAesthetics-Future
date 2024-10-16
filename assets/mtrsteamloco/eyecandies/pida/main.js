@@ -1,6 +1,7 @@
 importPackage(java.awt);
 
 include(Resources.id("mtrsteamloco:library/code/scrolls_screen.js"));
+include(Resources.id("mtrsteamloco:library/code/text_u.js"));
 
 const MCU = MinecraftClient;
 const MCD = MTRClientData;
@@ -66,10 +67,11 @@ function create(ctx, state, entity) {
     if (gs[0]) nu = true;
     state.sl = gs[1];
 
-    state.d0 = new DynamicModelHolder(); state.d2 = new DynamicModelHolder();
+    state.d0 = new DynamicModelHolder(); state.d1 = new DynamicModelHolder(); state.d2 = new DynamicModelHolder();
     let osc0 = sc0.copy(); osc0.sourceLocation = null; osc0.applyScale(state.scale, state.scale, state.scale);
+    let osc1 = sc0.copy(); osc0.sourceLocation = null; osc1.applyScale(state.scale, state.scale, state.scale);
     let od = d.copy(); od.sourceLocation = null; od.applyScale(state.scale, state.scale, state.scale);
-    state.d0.uploadLater(osc0); state.d2.uploadLater(od);
+    state.d0.uploadLater(osc0); state.d1.uploadLater(osc1); state.d2.uploadLater(od);
 
     const list = getList(entity, state.lts, state.colors);
     state.list = list;
@@ -81,10 +83,23 @@ function create(ctx, state, entity) {
 
     state.lt = Timing.elapsed();
 
+    state.tnum = 0;
+
     if (nu) entity.sendUpdateC2S();
 }
 
 function render(ctx, state, entity) {
+
+    //ctx.setDebugInfo("0",state.tex[0]);
+    //ctx.setDebugInfo("1",state.tex[1]);
+    ctx.setDebugInfo("tnum",state.tnum);
+
+    ctx.setDebugInfo("cp", TextU.CP("abc|edf"));
+
+    gn = [(str) => {return TextU.CP(str)}, (str) => {return TextU.NP(str)}];
+    ctx.setDebugInfo("cpp", gn[0]("abc|edf"));
+
+    ctx.setDebugInfo("l10", state.list[0][0][0]);
 
     state.ss.tick();
     
@@ -135,6 +150,7 @@ function render(ctx, state, entity) {
             state.list = list;
             isC = true;
         }
+        state.tnum = (state.tnum + 1) % 2;
         state.lt = Timing.elapsed();
     }
 
@@ -142,7 +158,8 @@ function render(ctx, state, entity) {
         state.lts = getLimits(entity)[1];
         list = getList(entity, state.lts, state.colors);
         state.list = list;
-        state.tex.close();
+        state.tex[0].close();
+        state.tex[1].close();
         state.tex = drawTexture(list, state.colors);
         state.ss.close();
         state.slo = drawSlogan(state.sl, state.colors);
@@ -167,15 +184,17 @@ function render(ctx, state, entity) {
         state.d0.uploadLater(osc0); state.d2.uploadLater(od);
     }
 
-    let msc0 = state.d0.getUploadedModel(); msc0.replaceAllTexture(state.tex.identifier);
+    let msc0 = state.d0.getUploadedModel(); msc0.replaceAllTexture(state.tex[0].identifier);
+    let msc1 = state.d1.getUploadedModel(); msc1.replaceAllTexture(state.tex[1].identifier);
 
-    ctx.drawModel(state.d0, null); ctx.drawModel(state.d2, null);
+    ctx.drawModel(state.tnum ? state.d0 : state.d1, null); ctx.drawModel(state.d2, null);
 
     if(nu) entity.sendUpdateC2S();
 }
 
 function disposes(ctx, state, entity) {
-    state.tex.close();
+    state.tex[0].close();
+    state.tex[1].close();
     state.ss.close();
     state.d0.close();
     state.d1.close();
@@ -211,45 +230,50 @@ function isChanged(list0, list1) {
 
 function drawTexture(list, cs) {
     let x = 0, y = 0;
-    const  w = 500, h = 60, lw = 4;
+    const w = 500, h = 60, lw = 4;
     const sx = 3000, sy = 1200;
-    const texture = new GraphicsTexture(sx, sy);
-    const g = texture.graphics;
-
-    x = 0, y = 0;
-    g.setColor(new Color(cs[0]))
-    g.fillRect(x, y, sx, sy);
-    g.setColor(new Color(cs[1]));
-    for (let i = 0; i < 7; i++) {
-        g.fillRect(x - lw / 2, y, lw, sy);
-        x += w;
-    }
-
-    x = 0, y = 0;
-    for (let i = 0; i < 21; i++) {
-        g.fillRect(x, y - lw / 2, sx, lw);
-        y += h;
-    }
-
-    x = 0, y = 50;
-    g.setFont(font0);
-    for (let i = 0; i < 20; i++) {
+    const texs = [];
+    for (let j = 0; j < 2; j++){
+        let tex = new GraphicsTexture(sx, sy);
+        let g = tex.graphics;
+    
+        x = 0, y = 0;
+        g.setColor(new Color(cs[0]))
+        g.fillRect(x, y, sx, sy);
         g.setColor(new Color(cs[1]));
-        if (list[i] == null) break;
-
-        let entry = list[i];
-        for (let i = 0; i < 5; i++) {
-            g.drawString(entry[i], x + 500 / 2 - getW(entry[i], font0) / 2, y);
+        for (let i = 0; i < 7; i++) {
+            g.fillRect(x - lw / 2, y, lw, sy);
             x += w;
         }
-        g.setColor(new Color(entry[5][0]));
-        g.drawString(entry[5][1], x + 500 / 2 - getW(entry[5][1], font0) / 2, y);
-        y += h;
-        x = 0;
+    
+        x = 0, y = 0;
+        for (let i = 0; i < 21; i++) {
+            g.fillRect(x, y - lw / 2, sx, lw);
+            y += h;
+        }
+    
+        let list0 = list[j];
+        x = 0, y = 50;
+        g.setFont(font0);
+        for (let i = 0; i < 20; i++) {
+            g.setColor(new Color(cs[1]));
+            if (list0[i] == null) break;
+    
+            let entry = list0[i];
+            for (let i = 0; i < 5; i++) {
+                g.drawString(entry[i], x + 500 / 2 - getW(entry[i], font0) / 2, y);
+                x += w;
+            }
+            g.setColor(new Color(entry[5][0]));
+            g.drawString(entry[5][1], x + 500 / 2 - getW(entry[5][1], font0) / 2, y);
+            y += h;
+            x = 0;
+        }
+        tex.upload();
+        texs.push(tex);
     }
-
-    texture.upload();
-    return texture;
+    
+    return texs;
 }
 
 function drawSlogan(sl, cs) {
@@ -325,54 +349,63 @@ function getList(entity, limits, cs) {
     }
     swp.sort((a, b) => a[0].arrivalMillis - b[0].arrivalMillis);
 
-    const list = [];
-    //list.push(["", "", "", "", "", [0xffffff, ""]])
-    list.push(["车次", "始发站", "终到站", "开点", "检票口", [cs[1], "状态"]])
-    for (let [sche, pla] of swp) {
-        let rn = "null", sf = "null", zd = "null", kd = "null", jpk = "null", zt = [0xffffff, "null"];//车次 始发站 终到站 开点 检票口 状态
-        let ns = ["null", "null", "null"];
-        for (let rot of MCD.ROUTES) {
-            if (rot.id == sche.routeId) {
-                let pids = rot.platformIds;
-                for (let i = 0; i < 2; i++) {
-                    let p = pids[i == 0 ? 0 : pids.size() - 1];
-                    let pid = p.platformId;
-                    let st;
-                    for (let [key, value] of MCD.DATA_CACHE.platformIdToStation) {
-                        if (key == pid) {
-                            st = value;
-                            break;
+    gn = [(str) => {return TextU.CP(str)}, (str) => {return TextU.NP(str)}];
+
+    const lists = [];
+    for (let j = 0; j < 2; j++) {
+        let list = [];
+        //list.push(["", "", "", "", "", [0xffffff, ""]])
+        if (!j) list.push(["车次", "始发站", "终到站", "开点", "检票口", [cs[1], "状态"]]);//第一次中文
+        if (j)  list.push(["Train", "From", "To", "Departure", "Check-in", [cs[1], "Status"]]);//第二次英文
+
+        for (let [sche, pla] of swp) {
+            let rn = "null", sf = "null", zd = "null", kd = "null", jpk = "null", zt = [0xffffff, "null"];//车次 始发站 终到站 开点 检票口 状态
+            let ns = ["null", "null", "null"];
+            for (let rot of MCD.ROUTES) {
+                if (rot.id == sche.routeId) {
+                    let pids = rot.platformIds;
+                    for (let i = 0; i < 2; i++) {
+                        let p = pids[i == 0 ? 0 : pids.size() - 1];
+                        let pid = p.platformId;
+                        let st;
+                        for (let [key, value] of MCD.DATA_CACHE.platformIdToStation) {
+                            if (key == pid) {
+                                st = value;
+                                break;
+                            }
                         }
+                        let n = "null";
+                        if (st != null) {
+                            n = st.name;
+                        }
+                        ns[i] = n;
                     }
-                    let n = "null";
-                    if (st != null) {
-                        n = st.name;
-                    }
-                    ns[i] = n;
+                    ns[2] = rot.name;
                 }
-                ns[2] = rot.name;
             }
-        }
-        rn = ns[2], sf = ns[0], zd = ns[1];
-        kd = getTime(sche.arrivalMillis);
-        let num = parseInt(pla.name);
-        if (!isNaN(num)) {
-            if (num % 2 == 0) {
-                jpk = sche.trainCars > 8 ? ((num - 1) + "A·" + (num - 1) + "B·" + num + "A·" + num + "B") : ((num - 1 ) + "A·" + num + "B");
+            rn = gn[j](ns[2]), sf = gn[j](ns[0]), zd = gn[j](ns[1]);
+            kd = getTime(sche.arrivalMillis);
+            let num = parseInt(pla.name);
+            if (!isNaN(num)) {
+                if (num % 2 == 0) {
+                    jpk = sche.trainCars > 8 ? ((num - 1) + "A·" + (num - 1) + "B·" + num + "A·" + num + "B") : ((num - 1 ) + "A·" + num + "B");
+                }else {
+                    jpk = sche.trainCars > 8 ? (num + "A·" + num + "B·" + (num + 1) + "A·" + (num + 1) + "B") : (num + "A·" + (num + 1) + "B");
+                }
             }else {
-                jpk = sche.trainCars > 8 ? (num + "A·" + num + "B·" + (num + 1) + "A·" + (num + 1) + "B") : (num + "A·" + (num + 1) + "B");
+                jpk = pla.name;
             }
-        }else {
-            jpk = pla.name;
+            let time = sche.arrivalMillis - Date.now() + pla.dwellTime / 2 * 1000;
+            let minus = time / 60 / 1000
+            if (minus <= limits[0]) zt = [cs[2], gn[j]("停止检票|Stop Checking")];
+            if (minus > limits[0] && minus <= limits[1]) zt = [cs[3], gn[j]("正在检票|Checking")];
+            if (minus > limits[1]) zt = [cs[4], gn[j]("正在候车|Waiting")];
+            list.push([rn, sf, zd, kd, jpk, zt]);
         }
-        let time = sche.arrivalMillis - Date.now() + pla.dwellTime / 2 * 1000;
-        let minus = time / 60 / 1000
-        if (minus <= limits[0]) zt = [cs[2], "停止检票"];
-        if (minus > limits[0] && minus <= limits[1]) zt = [cs[3], "正在检票"];
-        if (minus > limits[1]) zt = [cs[4], "预计正点"];//没什么好办法判断正点晚点
-        list.push([rn, sf, zd, kd, jpk, zt]);
+        lists.push(list);
     }
-    return list;
+    
+    return lists;
 }
 
 function uploadPartedModels(rawModels) {
