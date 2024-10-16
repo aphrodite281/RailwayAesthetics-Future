@@ -46,6 +46,16 @@ function create(ctx, state, entity) {
         return num;
     }
 
+    pf = (str, mnum) => {
+        let num = parseFloat(entity.data.get(str));
+        if (isNaN(num)) {
+            entity.data.put(str, mnum + "");
+            num = mnum;
+            nu = true;
+        }
+        return num;
+    }
+
     let ac = pn("colorA", 0x3936ff);
     let bc = pn("colorB", 0xffffff);
     let cc = pn("colorC", 0xff0000);
@@ -53,6 +63,8 @@ function create(ctx, state, entity) {
     let ec = pn("colorE", 0xffffff);
 
     state.colors = [ac, bc, cc, dc, ec];
+
+    state.in = pn("interval", 5.0);
 
     let num;
     num = parseFloat(entity.data.get("scale"))
@@ -120,6 +132,16 @@ function render(ctx, state, entity) {
         return num;
     }
 
+    pf = (str, mnum) => {
+        let num = parseFloat(entity.data.get(str));
+        if (isNaN(num)) {
+            entity.data.put(str, mnum + "");
+            num = mnum;
+            nu = true;
+        }
+        return num;
+    }
+
     let ac = pn(state.colors[0], "colorA", 0x3936ff);
     let bc = pn(state.colors[1], "colorB", 0xffffff);
     let cc = pn(state.colors[2], "colorC", 0xff0000);
@@ -127,6 +149,8 @@ function render(ctx, state, entity) {
     let ec = pn(state.colors[4], "colorE", 0xffffff);
 
     state.colors = [ac, bc, cc, dc, ec];
+
+    state.in = pf("interval", 5.0);
 
     let gs = getSlogan(entity);
     if (gs[0]) nu = true;
@@ -144,7 +168,7 @@ function render(ctx, state, entity) {
     }
     state.lts = lts[1];
 
-    if (state.lt + 3 < Timing.elapsed()) {//每3秒更新一次
+    if (state.lt + state.in < Timing.elapsed()) {//每几秒更新一次
         list = getList(entity, state.lts, state.colors);
         if (isChanged(list, state.list)) {
             state.list = list;
