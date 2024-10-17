@@ -1,15 +1,18 @@
 include(Resources.id("mtrsteamloco:library/code/face.js"));
+include(Resources.id("mtrsteamloco:library/code/text_u.js"));
 
 //const font0 = Resources.getSystemFont("Noto Serif");
 const font0 = Resources.readFont(Resources.id("mtrsteamloco:library/font/hkh_sxt.ttf"));
 const fontSize = 256;
 const font = font0.deriveFont(Font.PLAIN, fontSize);
 
+const cp = (str) => {return TextU.CP(str)};
+
 function create(ctx, state, entity) {
     //try{
         let text = "";
         try {
-            text = MinecraftClient.getStationAt(entity.getWorldPosVector3f()).name + ""
+            text = cp(MinecraftClient.getStationAt(entity.getWorldPosVector3f()).name + "");
         }catch(e) {
             text = "无车站";
         }
@@ -20,7 +23,6 @@ function create(ctx, state, entity) {
         if(entity.data.get("color") == null) {
             entity.data.put("color", "0x000000");
         }
-        entity.data.put("text", text);
 
         if(isNaN(parseFloat(entity.data.get("scale")))){
             state.scale = 1;
@@ -68,7 +70,7 @@ function render(ctx, state, entity) {
 
         let newText = "";
         try {
-            newText = MinecraftClient.getStationAt(entity.getWorldPosVector3f()).name + ""
+            newText = cp(MinecraftClient.getStationAt(entity.getWorldPosVector3f()).name + "");
         }catch(e) {
             newText = "无车站";
         }
