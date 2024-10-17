@@ -19,7 +19,7 @@ const d = ras.get("d");
 const mcs = uploadPartedModels(ras);
 
 //const font0 = Resources.readFont(Resources.id("mtrsteamloco:library/font/zhdh.ttf")).deriveFont(Font.PLAIN, 56);
-const font0 = RU.getSystemFont("Noto Serif").deriveFont(Font.PLAIN, 55);
+const font0 = RU.getSystemFont("Noto Serif").deriveFont(Font.PLAIN, 45);
 
 const mrs = "0xffffff$欢迎来到 Railway Aesthetics - Future     我们的交流群: /0x19ffff$836291719/0xfbb8ff$        晴纱是男娘          ";
 
@@ -63,11 +63,11 @@ function create(ctx, state, entity) {
     let cc = pn("colorC", 0xff0000);
     let dc = pn("colorD", 0x00ff00);
     let ec = pn("colorE", 0xffffff);
+    let fc = pn("colorF", 0x3936ff);
 
-    state.colors = [ac, bc, cc, dc, ec];
+    state.colors = [ac, bc, cc, dc, ec, fc];
 
-    state.in0 = pn("interval0", 10.0);
-    state.in0 = pn("interval1", 5.0);
+    state.in = pn("interval", 10.0);
 
     let num;
     num = parseFloat(entity.data.get("scale"))
@@ -167,13 +167,20 @@ function render(ctx, state, entity) {
         return num;
     }
 
+    ns = () => {
+        let newss = newSS(drawSlogan(state.sl, state.colors), ctx, state.scale);
+        state.ss.close();
+        state.ss = newss;
+    }
+
     let ac = pn(state.colors[0], "colorA", 0x3936ff);
     let bc = pn(state.colors[1], "colorB", 0xffffff);
     let cc = pn(state.colors[2], "colorC", 0xff0000);
     let dc = pn(state.colors[3], "colorD", 0x00ff00);
     let ec = pn(state.colors[4], "colorE", 0xffffff);
+    let fc = pn(state.colors[5], "colorF", 0x3936ff);
 
-    state.colors = [ac, bc, cc, dc, ec];
+    state.colors = [ac, bc, cc, dc, ec, fc];
 
     state.in = pf("interval", 10.0);
 
@@ -212,6 +219,7 @@ function render(ctx, state, entity) {
         list = getList(entity, state.lts, state.colors);
         state.list = list;
         push(drawTexture(list, state.colors));
+        ns();
     }
 
     let num;
@@ -223,10 +231,7 @@ function render(ctx, state, entity) {
     }
     if (state.scale != num) {
         state.scale = num;
-        let newss = newSS(drawSlogan(state.sl, state.colors), ctx, state.scale);
-        cs(newss);
-        state.ss.close();
-        state.ss = newss;
+        ns();
         let osc0 = sc0.copy(); osc0.sourceLocation = null; osc0.applyScale(state.scale, state.scale, state.scale);
         let osc01 = sc0.copy(); osc01.sourceLocation = null; osc01.applyScale(state.scale, state.scale, state.scale);
         let od = d.copy(); od.sourceLocation = null; od.applyScale(state.scale, state.scale, state.scale);
@@ -309,7 +314,7 @@ function drawTexture(list, cs) {
         }
     
         let list0 = list[j];
-        x = 0, y = 50;
+        x = 0, y = 45;
         g.setFont(font0);
         for (let i = 0; i < 20; i++) {
             g.setColor(new Color(cs[1]));
@@ -350,7 +355,7 @@ function drawSlogan(sl, cs) {
     }
     let tex = new GraphicsTexture(w1, 80);
     let g = tex.graphics;
-    g.setColor(new Color(cs[0]));
+    g.setColor(new Color(cs[5]));
     g.fillRect(0, 0, w1, 80);
     g.setFont(font);
     let x = w1 / 2 - w0 / 2;
