@@ -6,7 +6,7 @@
 
 欢迎加入我们的 QQ 群: 836291719
 
-下载当前版本: 点击 Code -> Download ZIP 下载最新版本的资源包。
+> 下载当前版本: 点击 Code -> Download ZIP 下载最新版本的资源包。
 
 
 
@@ -15,3 +15,5 @@
 - [装饰物件的交互](https://aphrodite281.github.io/RailwayAesthetics-Future/docs/etjh.html)
 
 - [乘客资讯显示屏A](https://aphrodite281.github.io/RailwayAesthetics-Future/docs/pida.html)
+
+- [屏蔽门A](https://aphrodite281.github.io/RailwayAesthetics-Future/docs/psda.html)

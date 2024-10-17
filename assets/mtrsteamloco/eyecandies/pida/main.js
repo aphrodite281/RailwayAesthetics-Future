@@ -66,7 +66,8 @@ function create(ctx, state, entity) {
 
     state.colors = [ac, bc, cc, dc, ec];
 
-    state.in = pn("interval", 5.0);
+    state.in0 = pn("interval0", 10.0);
+    state.in0 = pn("interval1", 5.0);
 
     let num;
     num = parseFloat(entity.data.get("scale"))
@@ -83,40 +84,62 @@ function create(ctx, state, entity) {
 
     state.d0 = new DynamicModelHolder(); state.d1 = new DynamicModelHolder(); state.d2 = new DynamicModelHolder();
     let osc0 = sc0.copy(); osc0.sourceLocation = null; osc0.applyScale(state.scale, state.scale, state.scale);
-    let osc1 = sc0.copy(); osc0.sourceLocation = null; osc1.applyScale(state.scale, state.scale, state.scale);
+    let osc01 = sc0.copy(); osc01.sourceLocation = null; osc01.applyScale(state.scale, state.scale, state.scale);
     let od = d.copy(); od.sourceLocation = null; od.applyScale(state.scale, state.scale, state.scale);
-    state.d0.uploadLater(osc0); state.d1.uploadLater(osc1); state.d2.uploadLater(od);
+    state.d0.uploadLater(osc0); state.d1.uploadLater(osc01); state.d2.uploadLater(od);
 
     const list = getList(entity, state.lts, state.colors);
     state.list = list;
 
-    state.tex = drawTexture(list, state.colors);
+    state.tws = [];
+    state.tws.push(drawTexture(list, state.colors));
 
-    state.slo = drawSlogan(state.sl, state.colors);
-    state.ss = newSS(state.slo, ctx, state.scale);
+    state.lt = Date.now() / 1000;
 
-    state.lt = Timing.elapsed();
+    state.lt1 = -100;
+    state.lt2 = Date.now() / 1000;
+    state.nshift = true;
 
     state.tnum = 0;
+
+    state.ss = newSS(drawSlogan(state.sl, state.colors), ctx, state.scale);
 
     if (nu) entity.sendUpdateC2S();
 }
 
 function render(ctx, state, entity) {
+    ctx.setDebugInfo("len", state.tws.length)
 
-    //ctx.setDebugInfo("0",state.tex[0]);
-    //ctx.setDebugInfo("1",state.tex[1]);
-    ctx.setDebugInfo("tnum",state.tnum);
+    ut = () => {
+        let msc0 = state.d0.getUploadedModel(); msc0.replaceAllTexture(state.tws[0][0].identifier);
+        let msc1 = state.d1.getUploadedModel(); msc1.replaceAllTexture(state.tws[0][1].identifier);
+    }
 
-    ctx.setDebugInfo("cp", TextU.CP("abc|edf"));
+    so = () => {
+        while (state.tws.length > 1) {
+            let ts = state.tws.shift();
+            ts[0].close();
+            ts[1].close();
+        }
+    }
 
-    gn = [(str) => {return TextU.CP(str)}, (str) => {return TextU.NP(str)}];
-    ctx.setDebugInfo("cpp", gn[0]("abc|edf"));
+    push = (texs) => {
+        while (state.tws.length > 1) {
+            let ts = state.tws.pop();
+            ts[0].close();
+            ts[1].close();
+        }
+        state.tws.push(texs);
+        state.lt1 = Date.now() / 1000;
+        state.nshift = true;
+    }
 
-    ctx.setDebugInfo("l10", state.list[0][0][0]);
+    if (state.nshift && state.lt1 + 1 < Date.now() / 1000) {
+        so();
+        state.nshift = false;
+        state.lt1 = Date.now() / 1000;
+    }
 
-    state.ss.tick();
-    
     let list = state.list;
 
     let isC, nu = false;//isChanged, needUpdate
@@ -152,15 +175,15 @@ function render(ctx, state, entity) {
 
     state.colors = [ac, bc, cc, dc, ec];
 
-    state.in = pf("interval", 5.0);
+    state.in = pf("interval", 10.0);
 
     let gs = getSlogan(entity);
     if (gs[0]) nu = true;
     if (isChanged0(gs[1], state.sl)) {
         state.sl = gs[1];
+        let newss = newSS(drawSlogan(state.sl, state.colors), ctx, state.scale);
         state.ss.close();
-        state.slo = drawSlogan(state.sl, state.colors);
-        state.ss = newSS(state.slo, ctx, state.scale);
+        state.ss = newss;
     }
 
     let lts = getLimits(entity);
@@ -170,27 +193,25 @@ function render(ctx, state, entity) {
     }
     state.lts = lts[1];
 
-    if (state.lt + state.in < Timing.elapsed()) {//每几秒更新一次
+    if (state.lt + state.in < Date.now() / 1000) {
+        state.tnum = (state.tnum + 1) % 2;
+        state.lt = Date.now() / 1000;
+    }
+
+    if (state.lt2 + 2 < Date.now() / 1000) {
         list = getList(entity, state.lts, state.colors);
         if (isChanged(list, state.list)) {
             state.list = list;
             isC = true;
-        }
-        state.tnum = (state.tnum + 1) % 2;
-        state.lt = Timing.elapsed();
+        }   
+        state.lt2 = Date.now() / 1000;
     }
 
     if (isC) {
         state.lts = getLimits(entity)[1];
         list = getList(entity, state.lts, state.colors);
         state.list = list;
-        state.tex[0].close();
-        state.tex[1].close();
-        state.tex = drawTexture(list, state.colors);
-        state.ss.close();
-        state.slo = drawSlogan(state.sl, state.colors);
-        state.ss = newSS(state.slo, ctx, state.scale);
-        state.list = list;
+        push(drawTexture(list, state.colors));
     }
 
     let num;
@@ -202,27 +223,31 @@ function render(ctx, state, entity) {
     }
     if (state.scale != num) {
         state.scale = num;
+        let newss = newSS(drawSlogan(state.sl, state.colors), ctx, state.scale);
+        cs(newss);
         state.ss.close();
-        state.slo = drawSlogan(state.sl, state.colors);
-        state.ss = newSS(state.slo, ctx, state.scale);
+        state.ss = newss;
         let osc0 = sc0.copy(); osc0.sourceLocation = null; osc0.applyScale(state.scale, state.scale, state.scale);
+        let osc01 = sc0.copy(); osc01.sourceLocation = null; osc01.applyScale(state.scale, state.scale, state.scale);
         let od = d.copy(); od.sourceLocation = null; od.applyScale(state.scale, state.scale, state.scale);
-        state.d0.uploadLater(osc0); state.d2.uploadLater(od);
+        state.d0.uploadLater(osc0); state.d1.uploadLater(osc01); state.d2.uploadLater(od);
     }
-
-    let msc0 = state.d0.getUploadedModel(); msc0.replaceAllTexture(state.tex[0].identifier);
-    let msc1 = state.d1.getUploadedModel(); msc1.replaceAllTexture(state.tex[1].identifier);
 
     ctx.drawModel(state.d0, state.tnum ? zt : null); 
     ctx.drawModel(state.d1, state.tnum ? null : zt);
     ctx.drawModel(state.d2, null);
+    state.ss.tick();
+
+    ut();
 
     if(nu) entity.sendUpdateC2S();
 }
 
 function disposes(ctx, state, entity) {
-    state.tex[0].close();
-    state.tex[1].close();
+    for (let [t0, t1] of state.tws) {
+        t0.close();
+        t1.close();
+    }
     state.ss.close();
     state.d0.close();
     state.d1.close();
@@ -247,11 +272,14 @@ function isChanged0(s0, s1) {
     return false;
 }
 
-function isChanged(list0, list1) {
-    if (list0.length != list1.length) return true;
-    for (let i = 0; i < list0.length; i++) {
-        entry0 = list0[i]; entry1 = list1[i];
-        if (entry0[0] != entry1[0] || entry0[1] != entry1[1] || entry0[2] != entry1[2] || entry0[3] != entry1[3] || entry0[4] != entry1[4] || entry0[5][0] != entry1[5][0] || entry0[5][1] != entry1[5][1]) return true;
+function isChanged(lists0, lists1) {
+    for (let i = 0; i < 2; i++) {
+        let list0 = lists0[i]; let list1 = lists1[i];
+        if (list0.length != list1.length) return true;
+        for (let i = 0; i < list0.length; i++) {
+            entry0 = list0[i]; entry1 = list1[i];
+            if (entry0[0] != entry1[0] || entry0[1] != entry1[1] || entry0[2] != entry1[2] || entry0[3] != entry1[3] || entry0[4] != entry1[4] || entry0[5][0] != entry1[5][0] || entry0[5][1] != entry1[5][1]) return true;
+        }
     }
     return false;
 }
