@@ -19,7 +19,7 @@ const d = ras.get("d");
 const mcs = uploadPartedModels(ras);
 
 //const font0 = Resources.readFont(Resources.id("mtrsteamloco:library/font/zhdh.ttf")).deriveFont(Font.PLAIN, 56);
-const font0 = RU.getSystemFont("Noto Serif").deriveFont(Font.PLAIN, 45);
+const font0 = RU.getSystemFont("Serif").deriveFont(Font.PLAIN, 45);
 
 const mrs = "0xffffff$欢迎来到 Railway Aesthetics - Future     我们的交流群: /0x19ffff$836291719/0xfbb8ff$        晴纱是男娘          ";
 
@@ -322,8 +322,8 @@ function isChanged(lists0, lists1) {
 
 function drawTexture(list, cs) {
     let x = 0, y = 0;
-    const w = 500, h = 60, lw = 4;
-    const sx = 3000, sy = 1200;
+    const w = 300, h = 60, lw = 4;//500 3000
+    const sx = 1800, sy = 1200;
     const texs = [];
     for (let j = 0; j < 2; j++){
         let tex = new GraphicsTexture(sx, sy);
@@ -353,11 +353,11 @@ function drawTexture(list, cs) {
     
             let entry = list0[i];
             for (let i = 0; i < 5; i++) {
-                g.drawString(entry[i], x + 500 / 2 - getW(entry[i], font0) / 2, y);
+                g.drawString(entry[i], x + 300 / 2 - getW(entry[i], font0) / 2, y);
                 x += w;
             }
             g.setColor(new Color(entry[5][0]));
-            g.drawString(entry[5][1], x + 500 / 2 - getW(entry[5][1], font0) / 2, y);
+            g.drawString(entry[5][1], x + 300 / 2 - getW(entry[5][1], font0) / 2, y);
             y += h;
             x = 0;
         }
@@ -377,9 +377,9 @@ function drawSlogan(sl, cs) {
         ws.push(ww);
     }
     let run = false;
-    if (w0 < 2800) {
+    if (w0 < 1800) {
         run = false;
-        w1 = 3000;
+        w1 = 1800;
     } else {
         run = true;
         w1 = w0;
@@ -578,7 +578,7 @@ function getLimits(entity) {
 }
 
 function newSS(slo, ctx, scale, speed) {
-    let v = 3000 / slo[2];
+    let v = 1800 / slo[2];
     let rawModel = sc1.copy();
     rawModel.sourceLocation = null;
     for (let [key, value] of rawModel.meshList) {
