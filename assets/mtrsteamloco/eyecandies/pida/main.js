@@ -78,6 +78,16 @@ function create(ctx, state, entity) {
     }
     state.scale = num;
 
+    let mode = parseInt(entity.data.get("mode"));
+    switch (mode) {
+        case 0: state.mode = 0; break;
+        case 1: state.mode = 1; break;
+        default: entity.data.put("mode", "0"); state.mode = 0; nu = true; break;
+    }
+
+    let speed = pf("speed", 100);
+    state.speed = speed;
+
     let gs = getSlogan(entity);
     if (gs[0]) nu = true;
     state.sl = gs[1];
@@ -88,7 +98,7 @@ function create(ctx, state, entity) {
     let od = d.copy(); od.sourceLocation = null; od.applyScale(state.scale, state.scale, state.scale);
     state.d0.uploadLater(osc0); state.d1.uploadLater(osc01); state.d2.uploadLater(od);
 
-    const list = getList(entity, state.lts, state.colors);
+    const list = getList(entity, state.lts, state.colors, state.mode);
     state.list = list;
 
     state.tws = [];
@@ -102,13 +112,18 @@ function create(ctx, state, entity) {
 
     state.tnum = 0;
 
-    state.ss = newSS(drawSlogan(state.sl, state.colors), ctx, state.scale);
+    state.ss = newSS(drawSlogan(state.sl, state.colors), ctx, state.scale, state.speed);
+
+    state.num = 0;
 
     if (nu) entity.sendUpdateC2S();
 }
 
 function render(ctx, state, entity) {
     ctx.setDebugInfo("len", state.tws.length)
+    ctx.setDebugInfo("mode", state.mode)
+    ctx.setDebugInfo("mo", entity.data.get("mode"));
+    ctx.setDebugInfo("num", state.num);
 
     ut = () => {
         let msc0 = state.d0.getUploadedModel(); msc0.replaceAllTexture(state.tws[0][0].identifier);
@@ -168,7 +183,7 @@ function render(ctx, state, entity) {
     }
 
     ns = () => {
-        let newss = newSS(drawSlogan(state.sl, state.colors), ctx, state.scale);
+        let newss = newSS(drawSlogan(state.sl, state.colors), ctx, state.scale, state.speed);
         state.ss.close();
         state.ss = newss;
     }
@@ -184,11 +199,27 @@ function render(ctx, state, entity) {
 
     state.in = pf("interval", 10.0);
 
+    let speed = pf("speed", 100);
+    state.speed = speed;
+    state.ss.uvSpeed[0] = speed;
+
+    let mode = parseInt(entity.data.get("mode"));
+    let nm;
+    switch (mode) {
+        case 0: nm = 0; break;
+        case 1: nm = 1; break;
+        default: entity.data.put("mode", "0"); nm = 0; nu = true; state.num ++; break;
+    }
+    if (state.mode != nm) {
+        state.mode = nm;
+        isC = true;
+    }
+
     let gs = getSlogan(entity);
     if (gs[0]) nu = true;
     if (isChanged0(gs[1], state.sl)) {
         state.sl = gs[1];
-        let newss = newSS(drawSlogan(state.sl, state.colors), ctx, state.scale);
+        let newss = newSS(drawSlogan(state.sl, state.colors), ctx, state.scale, state.speed);
         state.ss.close();
         state.ss = newss;
     }
@@ -206,7 +237,7 @@ function render(ctx, state, entity) {
     }
 
     if (state.lt2 + 2 < Date.now() / 1000) {
-        list = getList(entity, state.lts, state.colors);
+        list = getList(entity, state.lts, state.colors, state.mode);
         if (isChanged(list, state.list)) {
             state.list = list;
             isC = true;
@@ -216,7 +247,7 @@ function render(ctx, state, entity) {
 
     if (isC) {
         state.lts = getLimits(entity)[1];
-        list = getList(entity, state.lts, state.colors);
+        list = getList(entity, state.lts, state.colors, state.mode);
         state.list = list;
         push(drawTexture(list, state.colors));
         ns();
@@ -377,7 +408,7 @@ function getW(str, font) {
     return Math.ceil(bounds.getWidth());
 }
 
-function getList(entity, limits, cs) {
+function getList(entity, limits, cs, mode) {
     let station = MCU.getStationAt(entity.getWorldPosVector3f());
 
     let plaIds = []; 
@@ -416,8 +447,8 @@ function getList(entity, limits, cs) {
     for (let j = 0; j < 2; j++) {
         let list = [];
         //list.push(["", "", "", "", "", [0xffffff, ""]])
-        if (!j) list.push(["车次", "始发站", "终到站", "开点", "检票口", [cs[1], "状态"]]);//第一次中文
-        if (j)  list.push(["Train", "From", "To", "Departure", "Check-in", [cs[1], "Status"]]);//第二次英文
+        if (!j) list.push(["车次", "始发站", "终到站", "开点", mode ? "检票口" : "站台", [cs[1], "状态"]]);//第一次中文
+        if (j)  list.push(["Train", "From", "To", "Departure", mode ? "Check-in" : "Platform", [cs[1], "Status"]]);//第二次英文
 
         for (let [sche, pla] of swp) {
             let rn = "null", sf = "null", zd = "null", kd = "null", jpk = "null", zt = [0xffffff, "null"];//车次 始发站 终到站 开点 检票口 状态
@@ -447,11 +478,15 @@ function getList(entity, limits, cs) {
             rn = gn[j](ns[2]), sf = gn[j](ns[0]), zd = gn[j](ns[1]);
             kd = getTime(sche.arrivalMillis);
             let num = parseInt(pla.name);
-            if (!isNaN(num)) {
-                if (num % 2 == 0) {
-                    jpk = sche.trainCars > 8 ? ((num - 1) + "A·" + (num - 1) + "B·" + num + "A·" + num + "B") : ((num - 1 ) + "A·" + num + "B");
+            if (mode) {
+                if (!isNaN(num)) {
+                    if (num % 2 == 0) {
+                        jpk = sche.trainCars > 8 ? ((num - 1) + "A·" + (num - 1) + "B·" + num + "A·" + num + "B") : ((num - 1 ) + "A·" + num + "B");
+                    }else {
+                        jpk = sche.trainCars > 8 ? (num + "A·" + num + "B·" + (num + 1) + "A·" + (num + 1) + "B") : (num + "A·" + (num + 1) + "B");
+                    }
                 }else {
-                    jpk = sche.trainCars > 8 ? (num + "A·" + num + "B·" + (num + 1) + "A·" + (num + 1) + "B") : (num + "A·" + (num + 1) + "B");
+                    jpk = pla.name;
                 }
             }else {
                 jpk = pla.name;
@@ -542,7 +577,7 @@ function getLimits(entity) {
     return [nu, [-1, -1]];
 }
 
-function newSS(slo, ctx, scale) {
+function newSS(slo, ctx, scale, speed) {
     let v = 3000 / slo[2];
     let rawModel = sc1.copy();
     rawModel.sourceLocation = null;
@@ -556,7 +591,7 @@ function newSS(slo, ctx, scale) {
     rawModel.applyScale(scale, scale, scale);
     rawModel.replaceAllTexture(slo[1].identifier);
     let info = {
-        uvSpeed: [100, 0],
+        uvSpeed: [speed, 0],
         running: slo[0],
         ctx: ctx,
         isTrain: false,
