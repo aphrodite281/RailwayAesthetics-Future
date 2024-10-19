@@ -210,7 +210,7 @@ function render(ctx, state, entity) {
     switch (mode) {
         case 0: nm = 0; break;
         case 1: nm = 1; break;
-        default: entity.data.put("mode", "0"); nm = 0; nu = true; state.num ++; break;
+        default: {entity.data.put("mode", "0"); nm = 0; nu = true; state.num ++; break;}
     }
     if (state.mode != nm) {
         state.mode = nm;

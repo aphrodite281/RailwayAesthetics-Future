@@ -16,7 +16,7 @@
 
 - [装饰物件的交互](https://aphrodite281.github.io/RailwayAesthetics-Future/docs/etjh.html)
 
-- [站牌A](https://aphrodite281.github.io/RailwayAesthetics-Future/docs/stop_signa.html)
+- [站牌A](/docs/stop_signa.html)
 
 - [站牌B](https://aphrodite281.github.io/RailwayAesthetics-Future/docs/stop_signb.html)
   
