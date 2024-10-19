@@ -10,8 +10,10 @@ const SS = ScrollsScreen;
 
 const ras = ModelManager.loadPartedRawModel(Resources.manager(), Resources.id("mtrsteamloco:eyecandies/pida/main.obj"), null);
 const sc0 = ras.get("sc0");
+sc0.setAllRenderType("light");
 //sc0.applyUVMirror(false, true);
 const sc1 = ras.get("sc1");
+sc1.setAllRenderType("light");
 //sc1.applyUVMirror(false, true);
 const d = ras.get("d");
 //d.applyUVMirror(false, true);

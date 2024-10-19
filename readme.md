@@ -16,10 +16,13 @@
 
 - [装饰物件的交互](https://aphrodite281.github.io/RailwayAesthetics-Future/docs/etjh.html)
 
-- [乘客资讯显示屏A](https://aphrodite281.github.io/RailwayAesthetics-Future/docs/pida.html)
-
-- [屏蔽门A](https://aphrodite281.github.io/RailwayAesthetics-Future/docs/psda.html)
-
 - [站牌A](https://aphrodite281.github.io/RailwayAesthetics-Future/docs/stop_signa.html)
 
 - [站牌B](https://aphrodite281.github.io/RailwayAesthetics-Future/docs/stop_signb.html)
+  
+- [屏蔽门A](https://aphrodite281.github.io/RailwayAesthetics-Future/docs/psda.html)
+  
+- [乘客资讯显示屏A](https://aphrodite281.github.io/RailwayAesthetics-Future/docs/pida.html)
+
+- [信号灯A](https://aphrodite281.github.io/RailwayAesthetics-Future/docs/signal_lighta.html)
+

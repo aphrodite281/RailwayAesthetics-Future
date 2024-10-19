@@ -1,6 +1,10 @@
 {
-    "signal_lighta": {
-        "name": "信号灯 A",
+    "signal_lighta_3l": {
+        "name": "信号灯 A 3灯",
         "scriptFiles": ["mtrsteamloco:eyecandies/signal_lighta/main0.js"]
+    },
+    "signal_lighta_2l": {
+        "name": "信号灯 A 2灯",
+        "scriptFiles": ["mtrsteamloco:eyecandies/signal_lighta/main1.js"]
     }
 }
