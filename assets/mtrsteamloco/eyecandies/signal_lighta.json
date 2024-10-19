@@ -1,0 +1,6 @@
+{
+    "signal_lighta": {
+        "name": "信号灯 A",
+        "scriptFiles": ["mtrsteamloco:eyecandies/signal_lighta/main0.js"]
+    }
+}
