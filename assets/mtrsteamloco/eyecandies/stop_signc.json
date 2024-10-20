@@ -1,0 +1,6 @@
+{
+    "stop_signc": {
+        "name": "站牌 C",
+        "scriptFiles": ["mtrsteamloco:eyecandies/stop_signc/main.js"]
+    }
+}

@@ -9,6 +9,13 @@ const TextU = {
         str = str + "";
         let ts = str.split(/\|/);
         if (ts.length > 1) return ts[1];
-        return str;
+        return "";
+    }
+,
+    EP: (str) => {
+        str = str + "";
+        let ts = str.split(/\|\|/);
+        if (ts.length > 1) return ts[1];
+        return "";
     }
 }

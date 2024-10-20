@@ -101,6 +101,14 @@ function render(ctx, state, entity) {
     if (nu) entity.sendUpdateC2S();
 }
 
+function dispose(ctx, state, entity) {
+    state.l0.close();
+    state.l1.close();
+    state.m.close();
+    state.d0.close();
+    state.z.close();
+}
+
 function uploadPartedModels(rawModels) {
     let result = {};
     for (it = rawModels.entrySet().iterator(); it.hasNext(); ) {
