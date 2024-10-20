@@ -19,6 +19,8 @@
 - #### [站牌 A](/RailwayAesthetics-Future/docs/stop_signa.html)
 
 - #### [站牌 B](/RailwayAesthetics-Future/docs/stop_signb.html)
+
+- #### [站牌 C](/RailwayAesthetics-Future/docs/stop_signc.html)
   
 - #### [屏蔽门 A](/RailwayAesthetics-Future/docs/psda.html)
   
