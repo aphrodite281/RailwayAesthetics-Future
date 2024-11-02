@@ -8,7 +8,7 @@
 
 欢迎加入我们的 QQ 群: 836291719
 
-相关链接：[RailwayAesthetics-Future仓库](https://github.com/aphrodite281/RailwayAesthetics-Future)，[NTE下载](https://github.com/aphrodite281/mtr-nte/releases/)，[NTE文档](https://www.zbx1425.cn/nautilus/mtr-nte/#/)
+相关链接：[RailwayAesthetics-Future仓库](https://github.com/aphrodite281/RailwayAesthetics-Future)，[NTE下载](https://github.com/aphrodite281/mtr-nte/releases/)，[NTE文档](https://aphrodite281.github.io/mtr-nte/)
 
 > 下载当前版本: 点击 Code -> Download ZIP 下载最新版本的资源包。
 
