@@ -1,6 +1,7 @@
 importPackage(java.awt);
 importPackage(java.awt.geom);
 include(Resources.id("mtrsteamloco:library/code/text_u.js"));
+include(Resources.id("mtrsteamloco:library/code/shape_u.js"));
 
 const MCU = MinecraftClient;
 const MCD = MTRClientData;
@@ -11,6 +12,7 @@ const rms = MM.loadPartedRawModel(RU.manager(), RU.id("mtrsteamloco:eyecandies/s
 
 //const zhdh = RU.readFont(RU.id("mtrsteamloco:library/font/zhdh.ttf")).deriveFont(Font.PLAIN, 60);
 const zhdh = RU.getSystemFont("Noto Serif");
+const m = "0, 1.5, 15, 16, 14.5, 16";
 
 function create(ctx, state, entity) {
     let nu = false;
@@ -42,9 +44,7 @@ function create(ctx, state, entity) {
     state.d0 = new DynamicModelHolder(); state.d0.uploadLater(rmd);
     state.d1 = new DynamicModelHolder(); state.d1.uploadLater(rmf);
 }
-
 function render(ctx, state, entity) {
-
     ctx.setDebugInfo("list", state.list[3].length)
     let nu = false, isC = false, isC0 = false;
     pi = (key, mnum) => {
@@ -90,7 +90,6 @@ function render(ctx, state, entity) {
 
     ctx.drawModel(state.d0, null);
     ctx.drawModel(state.d1, null);
-    if (nu) entity.sendUpdateC2S();
 }
 
 function dispose(ctx, state, entity) {

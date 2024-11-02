@@ -57,26 +57,37 @@ function alterAllRGBA (modelCluster, red ,green , blue, alpha) {
     }
 }
 
+const sh = "0, 4, 7, 16, 24, 9";
 function fu(entity) {
-    if (entity.minPosX != 0 || entity.minPosY != 0 || entity.minPosZ != 0 || entity.maxPosX != 16 || entity.maxPosY != 48 || entity.maxPosZ != 16) {} else return;
-
-    entity.minPosX = 0;
-    entity.minPosY = 0;
-    entity.minPosZ = 0;
-    entity.maxPosX = 16;
-    entity.maxPosY = 48;
-    entity.maxPosZ = 16;
-    entity.sendUpdateC2S();
+    let nu = false;
+    if (entity.shape + "" != sh) {
+        entity.shape = sh;
+        nu = true;
+    }
+    if (entity.noCollision == true) {
+        entity.noCollision = false;
+        nu = true;
+    }
+    if (entity.noMove == true) {
+        entity.noMove = false;
+        nu = true;
+    }
+    if (nu) entity.sendUpdateC2S();
 }
 
 function no(entity) {
-    if (entity.minPosX != 0 || entity.minPosY != 0 || entity.minPosZ != 0 || entity.maxPosX != 0 || entity.maxPosY != 0 || entity.maxPosZ != 0) {} else return;
-    
-    entity.minPosX = 0;
-    entity.minPosY = 0;
-    entity.minPosZ = 0;
-    entity.maxPosX = 0;
-    entity.maxPosY = 0;
-    entity.maxPosZ = 0;
-    entity.sendUpdateC2S();
+    let nu = false;
+    if (entity.shape + "" != sh) {
+        entity.shape = sh;
+        nu = true;
+    }
+    if (entity.noCollision == false) {
+        entity.noCollision = true;
+        nu = true;
+    }
+    if (entity.noMove == true) {
+        entity.noMove = false;
+        nu = true;
+    }
+    if (nu) entity.sendUpdateC2S();
 }

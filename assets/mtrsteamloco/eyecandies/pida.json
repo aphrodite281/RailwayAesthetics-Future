@@ -1,6 +1,8 @@
 {
     "pida": {
+        "mod_version": "0.5.4",
         "name": "乘客资讯显示屏 A",
-        "scriptFiles": ["mtrsteamloco:eyecandies/pida/main.js"]
+        "scriptFiles": ["mtrsteamloco:eyecandies/pida/main.js"],
+        "lightLevel": 7
     }
 }

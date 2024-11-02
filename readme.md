@@ -4,9 +4,11 @@
 欢迎来到Aphrodite的铁路美学-未来！
 这是一个Minecraft资源包，它依赖于 `NTE` 与 `MTR` mod。
 
+当前版本: V0.24.1102 适配 `NTE 0.5.4`
+
 欢迎加入我们的 QQ 群: 836291719
 
-相关链接：[RailwayAesthetics-Future仓库](https://github.com/aphrodite281/RailwayAesthetics-Future)，[NTE0.5.3](https://github.com/aphrodite281/mtr-nte/releases/tag/Alpha)，[NTE文档](https://www.zbx1425.cn/nautilus/mtr-nte/#/)
+相关链接：[RailwayAesthetics-Future仓库](https://github.com/aphrodite281/RailwayAesthetics-Future)，[NTE下载](https://github.com/aphrodite281/mtr-nte/releases/)，[NTE文档](https://www.zbx1425.cn/nautilus/mtr-nte/#/)
 
 > 下载当前版本: 点击 Code -> Download ZIP 下载最新版本的资源包。
 

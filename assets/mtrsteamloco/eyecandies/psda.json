@@ -1,18 +1,25 @@
 {
     "psda1": {
+        "mod_version": "0.5.4",
         "name": "屏蔽门 A-中部",
         "scriptFiles": ["mtrsteamloco:eyecandies/psda/main1.js"]
     },
     "psda2l": {
+        "mod_version": "0.5.4",
         "name": "屏蔽门 A-端部(左侧)",
-        "scriptFiles": ["mtrsteamloco:eyecandies/psda/main2l.js"]
+        "scriptFiles": ["mtrsteamloco:eyecandies/psda/main2l.js"],
+        "lightLevel": 8
     },
     "psda2r": {
+        "mod_version": "0.5.4",
         "name": "屏蔽门 A-端部(右侧)",
-        "scriptFiles": ["mtrsteamloco:eyecandies/psda/main2r.js"]
+        "scriptFiles": ["mtrsteamloco:eyecandies/psda/main2r.js"],
+        "lightLevel": 8
     },
     "psda3": {
+        "mod_version": "0.5.4",
         "name": "屏蔽门 A-端部(两侧)",
-        "scriptFiles": ["mtrsteamloco:eyecandies/psda/main3.js"]
+        "scriptFiles": ["mtrsteamloco:eyecandies/psda/main3.js"],
+        "lightLevel": 8
     }
 }

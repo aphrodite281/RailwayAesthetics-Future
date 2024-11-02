@@ -5,7 +5,7 @@ function create(ctx, state, entity) {
 }
 
 function render(ctx, state, entity) {
-    r(ctx, state, entity, draw);
+    r(ctx, state, entity, draw, sh0 + '/' + sh + '/' + sh1);
 }
 
 function draw(ctx, mat, i) {

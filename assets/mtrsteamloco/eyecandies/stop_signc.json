@@ -1,5 +1,6 @@
 {
     "stop_signc": {
+        "mod_version": "0.5.4",
         "name": "站牌 C",
         "scriptFiles": ["mtrsteamloco:eyecandies/stop_signc/main.js"]
     }

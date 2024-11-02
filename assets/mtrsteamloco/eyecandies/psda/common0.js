@@ -3,6 +3,7 @@ include(Resources.id("mtrsteamloco:library/code/scrolls_screen.js"));
 include(Resources.id("mtrsteamloco:library/code/board.js"));
 include(Resources.id("mtrsteamloco:library/code/face.js"));
 
+const f = 3;
 const rms1 = ModelManager.loadPartedRawModel(Resources.manager(), Resources.id("mtrsteamloco:eyecandies/psda/movea.obj"), null);
 const mcs = uploadPartedModels(rms1);
 const mcm = mcs["m"];
@@ -117,6 +118,7 @@ function c(ctx, state, entity) {
     let face = new Face(info);
 
     let pla = MCU.getPlatformAt(entity.getWorldPosVector3f(), 3, 2, 2);
+    //ctx.setDebugInfo("pla", pla.dwellTime);
     let sches = [];
     for (let [key, value] of MCD.SCHEDULES_FOR_PLATFORM) {
         if (key == pla.id) {
@@ -151,11 +153,9 @@ function getTime(time) {
     return hours.toString().padStart(2, '0') + ":" + minutes.toString().padStart(2, '0');
 }
 
-function r(ctx, state, entity, draw) {
-
+function r(ctx, state, entity, draw, shape) {
+    //ctx.setDebugInfo("shape", entity.getShape());
     let nu = false;//needUpdate
-
-    fu(entity);
 
     let min = getMin(entity);
     let names = getNames(min.routeId);
@@ -165,15 +165,10 @@ function r(ctx, state, entity, draw) {
         
         state.f.path = state.f.texture.identifier;
         state.names = names;
-        ctx.setDebugInfo("ch", names[2])
+        //ctx.setDebugInfo("ch", names[2])
     }
-    let tt;
-    for (let pl of MCD.PLATFORMS) {
-        if (pl.id == entity.platformId) {
-            tt = pl.dwellTime;
-            break;
-        }
-    }
+    let pla = MCU.getPlatformAt(entity.getWorldPosVector3f(), f, 2, 2);
+    let tt = pla.dwellTime;
     if (state.dt != getTime(min.arrivalMillis) || state.ft != getTime(min.arrivalMillis + tt / 2 * 1000)) {
         state.texs = texture(entity, state, true);
         state.f.texture = state.texs[0][state.tex];
@@ -187,6 +182,9 @@ function r(ctx, state, entity, draw) {
 
     if (state.v > vMax) state.v = vMax;
     if (state.v < 0) state.v = 0;
+
+    if (state.v != 0) fu(entity, sh);
+    if (state.v == 0) fu(entity, shape);
 
     if (state.v != 0 && state.v != vMax) {
         if (Timing.elapsed() > state.time + timeInt) {
@@ -321,13 +319,8 @@ function texture(entity, state, a) {
         }
     }
 
-    let tt;
-    for (let pl of MCD.PLATFORMS) {
-        if (pl.id == entity.platformId) {
-            tt = pl.dwellTime;
-            break;
-        }
-    }
+    let pla = MCU.getPlatformAt(entity.getWorldPosVector3f(), f, 2, 2);
+    let tt = pla.dwellTime;
 
     state.dt = getTime(mins[0].arrivalMillis);
     state.ft = getTime(mins[0].arrivalMillis + tt / 2 * 1000);
@@ -433,28 +426,25 @@ function getSize(str, font) {
     return [Math.ceil(bounds.getWidth()), Math.ceil(bounds.getHeight())];
 }
 
-function fu(entity) {
-    if (entity.minPosX != 0 || entity.minPosY != 0 || entity.minPosZ != 0 || entity.maxPosX != 16 || entity.maxPosY != 48 || entity.maxPosZ != 16) {} else return;
+const sh0 = "0, 4, 7, 8, 24, 9";
+const sh1 = "8, 4, 7, 16, 24, 9"
+const sh = "1, 0, 4, 15, 26, 11";
 
-    entity.minPosX = 0;
-    entity.minPosY = 0;
-    entity.minPosZ = 0;
-    entity.maxPosX = 16;
-    entity.maxPosY = 48;
-    entity.maxPosZ = 16;
-    entity.sendUpdateC2S();
-}
-
-function no(entity) {
-    if (entity.minPosX != 0 || entity.minPosY != 0 || entity.minPosZ != 0 || entity.maxPosX != 0 || entity.maxPosY != 0 || entity.maxPosZ != 0) {} else return;
-    
-    entity.minPosX = 0;
-    entity.minPosY = 0;
-    entity.minPosZ = 0;
-    entity.maxPosX = 0;
-    entity.maxPosY = 0;
-    entity.maxPosZ = 0;
-    entity.sendUpdateC2S();
+function fu(entity, s) {
+    let nu = false;
+    if (entity.shape + "" != s) {
+        entity.shape = s;
+        nu = true;
+    }
+    if (entity.noCollision == true) {
+        entity.noCollision = false;
+        nu = true;
+    }
+    if (entity.noMove == true) {
+        entity.noMove = false;
+        nu = true;
+    }
+    if (nu) entity.sendUpdateC2S();
 }
 
 function getNames(rtid) {
