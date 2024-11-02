@@ -10,7 +10,7 @@
 
 相关链接：[RailwayAesthetics-Future仓库](https://github.com/aphrodite281/RailwayAesthetics-Future)，[NTE下载](https://github.com/aphrodite281/mtr-nte/releases/)，[NTE文档](https://aphrodite281.github.io/mtr-nte/)
 
-> 下载当前版本: 点击 Code -> Download ZIP 下载最新版本的资源包。
+> 下载方法: 跳转至 [Railway Aesthetics - Future 发行版](https://github.com/aphrodite281/RailwayAesthetics-Future/releases) 下载最新版本
 
 
 

@@ -5,7 +5,7 @@ const MCD = MTRClientData;
 const RU = Resources;
 const MM = ModelManager;
 
-const model = MM.loadRawModel(RU.mgr(), RU.idr("end.obj"), null);
+const model = MM.loadRawModel(RU.mgr(), RU.idr("endr.obj"), null);
 
 function create(ctx, state, entity) {
     c(ctx, state, entity, model);
