@@ -40,8 +40,8 @@ function setColor0(dyn, c) {
 }
 
 function duv(rm) {
-    let shift = Math.random();
     for (let [mat, ml] of rm.meshList) {
+        let shift = Math.random();
         for (let v of ml.vertices) {
             v.u = v.u * 2 + shift;
             v.v = v.v * 2 + shift;
