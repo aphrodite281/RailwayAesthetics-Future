@@ -295,6 +295,10 @@ function disposes(ctx, state, entity) {
 function getTime(time) {
     let hours = Math.ceil((time / 3600 / 1000  + 8) % 24);
     let minutes = Math.ceil(time / 60 / 1000 % 60);
+    if (minutes == 60) {
+        hours = (hours + 1) % 24;
+        minutes = 0;
+    }
     return hours.toString().padStart(2, '0') + ":" + minutes.toString().padStart(2, '0');
 }
 
