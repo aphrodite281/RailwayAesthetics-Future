@@ -1,7 +1,7 @@
 importPackage (java.awt);
-include(Resources.id("mtrsteamloco:library/code/scrolls_screen.js"));
-include(Resources.id("mtrsteamloco:library/code/board.js"));
-include(Resources.id("mtrsteamloco:library/code/face.js"));
+include(Resources.id("aphrodite:library/code/scrolls_screen.js"));
+include(Resources.id("aphrodite:library/code/board.js"));
+include(Resources.id("aphrodite:library/code/face.js"));
 
 const rms1 = ModelManager.loadPartedRawModel(Resources.manager(), Resources.id("mtrsteamloco:eyecandies/psda/movea.obj"), null);
 const mcs = uploadPartedModels(rms1);
@@ -24,7 +24,7 @@ const timeInt = 1;
 
 const fSize = [700,1100];
 const frc = Resources.getFontRenderContext();
-const font0 = Resources.readFont(Resources.id("mtrsteamloco:library/font/hkh_sxt.ttf")).deriveFont(Font.PLAIN, 350)//Resources.getSystemFont("Noto Sans").deriveFont(Font.PLAIN, 70);
+const font0 = Resources.readFont(Resources.id("aphrodite:library/font/hkh_sxt.ttf")).deriveFont(Font.PLAIN, 350)//Resources.getSystemFont("Noto Sans").deriveFont(Font.PLAIN, 70);
 
 const MCU = MinecraftClient;
 const MCD = MTRClientData;

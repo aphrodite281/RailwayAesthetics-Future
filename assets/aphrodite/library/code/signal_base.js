@@ -27,7 +27,7 @@ const SignalBase = {
 }
 
 /*
-    include(Resources.id("mtrsteamloco:library/code/signal_base.js"));
+    include(Resources.id("aphrodite:library/code/signal_base.js"));
     const paths = ["不亮灯的模型路径", "红灯的模型路径", "黄灯的模型路径", "绿灯的模型路径"]
 
     function create(ctx, state, entity) {

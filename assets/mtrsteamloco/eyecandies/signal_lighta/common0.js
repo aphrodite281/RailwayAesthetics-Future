@@ -8,6 +8,14 @@ const cl = rms.get("l"); cl.sourceLocation = null;
 const cd = rms.get("d"); cd.sourceLocation = null;
 const cz = rms.get("z"); cz.sourceLocation = null;
 
+function create(ctx, state, entity) {
+    c(ctx, state, entity, lights);
+}
+
+function render(ctx, state, entity) {
+    r(ctx, state, entity, lights);
+}
+
 function c(ctx, state, entity, lights) {
     let nu = false;
     pi = (key, mnum) => {

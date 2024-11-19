@@ -2,13 +2,18 @@
     "test": {
         "mod_version": "0.5.4",
         "name": "abc",
-        "scriptFiles": ["mtrsteamloco:eyecandies/test/main.js"],
+        "scriptFiles": ["mtrsteamloco:eyecandies/test/main1.js"],
         "model1": "mtrsteamloco:eyecandies/test/main.obj",
         "shape1": "0, 0, 0, 16, 8, 16/ 0, 8, 8, 16, 16, 16",
-        "shape": "0, 0, 0, 16, 24, 16",
-        "translation": [0, 0.5, 0],
-        "noCollision": false,
-        "noMove": false,
-        "lightLevel": 15
+        "shape2": "0, 0, 0, 16, 24, 16",
+        "translation1": [0, 0.5, 0],
+        "noCollision1": false,
+        "noMove1": false,
+        "lightLevel1": 15
+    },
+    "test2": {
+        "mod_version": "0.5.4",
+        "name": "def",
+        "scriptFiles": ["mtrsteamloco:eyecandies/test/qiehuan.js"]
     }
 }

@@ -1,7 +1,7 @@
 importPackage(java.awt);
 importPackage(java.awt.geom);
-include(Resources.id("mtrsteamloco:library/code/text_u.js"));
-include(Resources.id("mtrsteamloco:library/code/shape_u.js"));
+include(Resources.id("aphrodite:library/code/text_u.js"));
+include(Resources.id("aphrodite:library/code/shape_u.js"));
 
 const MCU = MinecraftClient;
 const MCD = MTRClientData;
@@ -10,7 +10,7 @@ const MM = ModelManager;
 
 const rms = MM.loadPartedRawModel(RU.manager(), RU.id("mtrsteamloco:eyecandies/stop_signc/main.obj"), null);
 
-//const zhdh = RU.readFont(RU.id("mtrsteamloco:library/font/zhdh.ttf")).deriveFont(Font.PLAIN, 60);
+//const zhdh = RU.readFont(RU.id("aphrodite:library/font/zhdh.ttf")).deriveFont(Font.PLAIN, 60);
 const zhdh = RU.getSystemFont("Noto Serif");
 const m = "0, 1.5, 15, 16, 14.5, 16";
 

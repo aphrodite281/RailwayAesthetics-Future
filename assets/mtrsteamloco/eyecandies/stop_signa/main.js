@@ -1,9 +1,9 @@
-include(Resources.id("mtrsteamloco:library/code/face.js"));
-include(Resources.id("mtrsteamloco:library/code/text_u.js"));
-include(Resources.id("mtrsteamloco:library/code/color_int_base.js"));
+include(Resources.id("aphrodite:library/code/face.js"));
+include(Resources.id("aphrodite:library/code/text_u.js"));
+include(Resources.id("aphrodite:library/code/color_int_base.js"));
 
 //const font0 = Resources.getSystemFont("Noto Serif");
-const font0 = Resources.readFont(Resources.id("mtrsteamloco:library/font/hkh_sxt.ttf"));
+const font0 = Resources.readFont(Resources.id("aphrodite:library/font/hkh_sxt.ttf"));
 const fontSize = 256;
 const font = font0.deriveFont(Font.PLAIN, fontSize);
 

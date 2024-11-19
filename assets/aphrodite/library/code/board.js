@@ -76,6 +76,7 @@ function Board(data) {
                 for(let k = 0; k < this.boards.get(this.nowBoard)[j].length; k++) {
                     this.boards.get(this.nowBoard)[j][k].tick(temp);
                 }
+                temp.translate(0, 0, this.interval);
             }
             temp.popPose();
         }
@@ -88,4 +89,6 @@ function Board(data) {
             }
         }
     }
+
+    this.addBoard("default");
 }

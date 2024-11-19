@@ -1,7 +1,7 @@
 importPackage(java.awt);
 
-include(Resources.id("mtrsteamloco:library/code/scrolls_screen.js"));
-include(Resources.id("mtrsteamloco:library/code/text_u.js"));
+include(Resources.id("aphrodite:library/code/scrolls_screen.js"));
+include(Resources.id("aphrodite:library/code/text_u.js"));
 
 const MCU = MinecraftClient;
 const MCD = MTRClientData;
@@ -20,7 +20,7 @@ const d = ras.get("d");
 
 const mcs = uploadPartedModels(ras);
 
-//const font0 = Resources.readFont(Resources.id("mtrsteamloco:library/font/zhdh.ttf")).deriveFont(Font.PLAIN, 56);
+//const font0 = Resources.readFont(Resources.id("aphrodite:library/font/zhdh.ttf")).deriveFont(Font.PLAIN, 56);
 const font0 = RU.getSystemFont("Serif").deriveFont(Font.PLAIN, 45);
 
 const mrs = "0xffffff$欢迎来到 Railway Aesthetics - Future     我们的交流群: /0x19ffff$836291719/0xfbb8ff$        晴纱是男娘          ";
@@ -293,12 +293,8 @@ function disposes(ctx, state, entity) {
 }
 
 function getTime(time) {
-    let hours = Math.ceil((time / 3600 / 1000  + 8) % 24);
-    let minutes = Math.ceil(time / 60 / 1000 % 60);
-    if (minutes == 60) {
-        hours = (hours + 1) % 24;
-        minutes = 0;
-    }
+    let hours = Math.ceil((time / 3600 / 1000  + 8)) % 24;
+    let minutes = Math.ceil(time / 60 / 1000) % 60;
     return hours.toString().padStart(2, '0') + ":" + minutes.toString().padStart(2, '0');
 }
 

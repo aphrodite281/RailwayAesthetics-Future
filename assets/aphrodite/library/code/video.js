@@ -8,10 +8,10 @@
 //Compress-Archive -Path ./pack.mcmeta -DestinationPath ../abc.zip
 
 function Video(data) {
-    if(data.isTrain != undefined && data.ctx != undefined && data.matrices != undefined) {
+    if( data.ctx != undefined && data.matrices != undefined) {
         this.cars = data.cars!= undefined ? data.cars : [];
-        this.isTrain = data.isTrain;
         this.ctx = data.ctx;
+        this.isTrain = ctx.isTrain();
         this.matrices = [];
         for(let i = 0; i < data.matrices.length; i++) {
             if(data.matrices[i] instanceof Array) {
@@ -95,10 +95,11 @@ function Video(data) {
         this.rawModel = rawModel;
         this.model = new DynamicModelHolder();
         this.model.uploadLater(rawModel);
-    }else if(data.model.size != undefined && data.model.renderType != undefined) {
+    }else if(data.model.size != undefined && data.model.renderType != undefined && data.model.uvSize != undefined) {
         let builder = new RawMeshBuilder(4, data.model.renderType, this.path);
+        let [w, h] = data.model.uvSize;
         for(let i = 0; i < 4; i++) {
-            builder.vertex(new Vector3f(data.model.size[0] * (i == 0 || i == 1? 0.5 : -0.5), data.model.size[1] * (i == 0 || i == 3 ? -0.5 : 0.5), 0)).uv(i == 0 || i ==1 ? 1 : 0, i == 0 || i == 3 ? 1 : 0).normal(0, 0, 0).endVertex();
+            builder.vertex(new Vector3f(data.model.size[0] * (i == 0 || i == 1? 0.5 : -0.5), data.model.size[1] * (i == 0 || i == 3 ? -0.5 : 0.5), 0)).uv(i == 0 || i ==1 ? w : 0, i == 0 || i == 3 ? h : 0).normal(0, 0, 0).endVertex();
         }
         let rawModel = new RawModel();
         rawModel.append(builder.getMesh());
