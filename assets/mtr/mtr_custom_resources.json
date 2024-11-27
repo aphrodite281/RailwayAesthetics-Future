@@ -4,7 +4,7 @@
         "name": "LCDA",
         "base_type": "train_25_2",
         "color": "2AF0AD",
-        "script_files": ["mtr:lcda/main.js"]
+        "script_files": ["mtr:lcda/lcda_main.js"]
       }
     }
 }

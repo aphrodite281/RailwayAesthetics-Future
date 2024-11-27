@@ -34,7 +34,7 @@ try {
 const r = RU.id("mtrsteamloco:eyecandies/test/k.mp4");
 const t = "arar-temp/videoo/";
 
-let is = RU.readStream(r);
+let is = Resources.readStream(r);
 let opf = new File(t + "k.mp4");
 if (!opf.getParentFile().exists()) {
     opf.getParentFile().mkdirs();

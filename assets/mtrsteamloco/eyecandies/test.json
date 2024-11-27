@@ -15,5 +15,10 @@
         "mod_version": "0.5.4",
         "name": "def",
         "scriptFiles": ["mtrsteamloco:eyecandies/test/qiehuan.js"]
+    },
+    "test3": {
+        "mod_version": "0.5.4",
+        "name": "ghi",
+        "scriptFiles": ["mtrsteamloco:eyecandies/test/main2.js"]
     }
 }
