@@ -1,15 +1,20 @@
 /**
- * @author: Aphrodite281
+ * @author: Aphrodite281 QQ: 3435494979
  */
 
 importPackage (java.lang);
 importPackage (java.awt);
 importPackage (java.awt.image);
+importPackage (java.awt.geom);
+importPackage (java.awt.font);
 
 include(Resources.id("aphrodite:library/code/face.js"));
 include(Resources.id("aphrodite:library/code/text_u.js"));
+include(Resources.id("aphrodite:library/code/canvas.js"));
+include(Resources.id("mtr:lcda/icon/hc.js"));
+const logo = Resources.readBufferedImage(Resources.id("mtr:lcda/icon/logo.png"));
 
-const defaultScreenTextureSize = [1600 * 2, 400 * 2];
+const defaultScreenTextureSize = [1600 * 5 / 4, 400 * 5 / 4];
 const defaultScreenModelSize = [1600 / 2000, 400 / 2000];
 
 const textureSize = defaultScreenTextureSize;
@@ -23,8 +28,6 @@ const leftMatrices = getMatrices(true);
 const fontA = Resources.getSystemFont("Noto Sans");
 const fontB = Resources.readFont(Resources.id("aphrodite:library/font/zhdh.ttf"));
 const fontC = Resources.getSystemFont("Noto Serif");
-
-const logo = Resources.readBufferedImage(Resources.idr("logo.png"));
 
 function create(ctx, state, train) {
     state.running = true;
@@ -48,10 +51,8 @@ function create(ctx, state, train) {
         info.matrices = leftMatrices;
         let leftFace = new Face(info);
     
-        let rightThread = getThread(rightFace, true, ctx, state, train, i + 1);
-        let leftThread = getThread(leftFace, false, ctx, state, train, i + 1);
-        rightThread.start();
-        leftThread.start();
+        let rightThread = new LCDThread(rightFace, true, ctx, state, train, i + 1);
+        let leftThread = new LCDThread(leftFace, false, ctx, state, train, i + 1);
 
         tickList.push(() => {rightFace.tick(); leftFace.tick();});
         disposeList.push(() => {rightFace.close(); leftFace.close();});
@@ -82,7 +83,7 @@ function render(ctx, state, train) {
         ctx.setDebugInfo("dest", e);
     }
     acc += Timing.delta() * 1000 * 6;
-    ctx.setDebugInfo("abc", train.mtrTrain().getIsOnRoute());
+    ctx.setDebugInfo("abc", train.doorTarget());
 }
 
 function dispose(ctx, state, train) {
@@ -122,14 +123,16 @@ const smooth = (k, value) => {// 平滑变化
     return (Math.cos(value / k * Math.PI + Math.PI) + 1) / 2 * k;
 }
 
-function getThread(face, isRight, ctx, state, train, carIndex) {
-    var font0 = fontA.deriveFont(Font.PLAIN, 45);
-    var font1 = fontB.deriveFont(Font.PLAIN, 45);
-    var font2 = fontC.deriveFont(Font.PLAIN, 45);
-    var main = () => {
+function LCDThread(face, isRight, ctx, state, train, carIndex) {
+    let dispose = [];
+    let thread = new Thread(() => {
         try {
             print("ARAF-LCD-Thread " + (isRight ? "Right" : "Left") + " Start");
             ctx.setDebugInfo("LCD-Thread " + (isRight ? "Right " : "Left ") + carIndex + " Start", System.currentTimeMillis().toString());
+
+            const font0 = fontA.deriveFont(Font.PLAIN, 45);
+            const font1 = fontB.deriveFont(Font.PLAIN, 45);
+            const font2 = fontC.deriveFont(Font.PLAIN, 45);
             
             const tex = face.texture;
             const w = tex.width, h = tex.height;
@@ -137,6 +140,7 @@ function getThread(face, isRight, ctx, state, train, carIndex) {
             const g0 = img0.createGraphics();
             const img1 = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);// 合并
             const g1 = img1.createGraphics();
+            dispose.push(() => {g0.dispose(); g1.dispose();});
 
             const drawCalls = [];// [旧图, [新渐变的, 新alpha]] 渐变绘制
             let dynLambda = (g) => {};// 动态绘制函数
@@ -147,10 +151,12 @@ function getThread(face, isRight, ctx, state, train, carIndex) {
             let lastFrameTime = 0;// 上一帧时间
             let startTime = 0;// 开始时间
             let info = [-1];// 信息
-            let doorValue = 0;// 本侧门值
+            let doorValue = train.doorValue();// 本侧门值
             let doorOpen = false;// 本侧门开关
             // const fps = 24;// 帧率
             // const frameTime = 1000 / fps;// 帧时间
+            let outAlpha = 0;// 门里面的出口指示值
+            let outTarget = 1;// 门里面的出口变化目标
             const now = () => Date.now();
             const getInfo = () => {
                 let color = 0x00ffff, color1 = 0xffffff, cname = "无线路", ename = "No Route", cdest = "无线路", edest = "No Route", time0 , time1, is = true, t1 = "非运营列车  Non-operating train", t2 = "", t3 = "", t4 = "", isArrive = false, open = -1;
@@ -163,10 +169,10 @@ function getThread(face, isRight, ctx, state, train, carIndex) {
                 time0 = year + "-" + month + "-" + day;
                 time1 = hour + ":" + minute;
                 const getColor = (color) => {
-                    let r = color >> 16 & 0xff;
+                    let rr = color >> 16 & 0xff;
                     let g = color >> 8 & 0xff;
                     let b = color & 0xff;
-                    let luminance  = 0.299 * r + 0.587 * g + 0.114 * b;
+                    let luminance  = 0.299 * rr + 0.587 * g + 0.114 * b;
                     return luminance > 255 / 2 ? 0 : 0xffffff;
                 }
                 try {
@@ -246,6 +252,7 @@ function getThread(face, isRight, ctx, state, train, carIndex) {
                     let img = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
                     let g = img.createGraphics();
                     lambda0(g);
+                    g.dispose();
                     drawCalls[0] = img;
                 } else {
                     let img = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
@@ -255,6 +262,8 @@ function getThread(face, isRight, ctx, state, train, carIndex) {
                     let newImg = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
                     let newG = newImg.createGraphics();
                     lambda0(newG);
+                    g.dispose();
+                    newG.dispose();
                     drawCalls[1] = [newImg, 0];
                 }
             }
@@ -273,25 +282,205 @@ function getThread(face, isRight, ctx, state, train, carIndex) {
             const fill = (g, width, x1, y1, x2, y2) => {
                 g.fillRoundRect(x1 - width / 2, y1 - width / 2, x2 - x1 + width, y2 - y1 + width, width, width);
             }
-            const getWH = (str, font) => {
-                let frc = Resources.getFontRenderContext();
-                bounds = font.getStringBounds(str, frc);
-                return [Math.ceil(bounds.getWidth()), Math.ceil(bounds.getHeight())];
+            const getWH = (g, str, font) => {
+                g.setFont(font);
+                // const frc = g.getFontRenderContext();
+                // bounds = font.getStringBounds(str, frc);
+                // const width = bounds.getWidth(), height = bounds.getHeight();
+                const fm = g.getFontMetrics(font);
+                const width = fm.stringWidth(str), height = fm.getHeight();
+                return [width, height];
             }
             const drawMiddle = (g, str, font, x, y) => {
-                let [ww, hh] = getWH(str, font);
-                g.setFont(font);
+                let [ww, hh] = getWH(g, str, font);
                 g.drawString(str, x - ww / 2, y);
             }
+
+            const getT1 = () => {// 440 * 375
+                let w0 = w * 110 / 500, h0 = h * 0.75;
+                const dx = (v) => w0 * v;
+                const dy = (v) => h0 * v;
+                let ox = 0.28, oy = 0.43, sx = 0.6, sy = 0.6, wi = 1100, hi = 900;
+                const fx = (v) => dx(sx * v / wi + ox);
+                const fy = (v) => dy(sy * v / hi + oy);
+                let img = new BufferedImage(w0, h0, BufferedImage.TYPE_INT_ARGB);
+                let g = img.createGraphics();
+                let x, y, w1, h1, path, x0, y0, line, ww, font;
+                x0 = w0 * 0.6, y0 = dy(0.7);
+                g.setColor(new Color(0xefefef));
+                ww = h0 * 0.1;
+                g.fillRoundRect(0, 0, w0, h0, ww, ww);
+
+                path = new GeneralPath();
+                path.moveTo(fx(438), fy(373));
+                path.lineTo(fx(400), fy(282));
+                path.lineTo(fx(481), fy(327));
+                path.lineTo(fx(541), fy(264));
+                path.lineTo(fx(550), fy(354));
+                path.lineTo(fx(653), fy(266));
+                path.lineTo(fx(636), fy(373));
+                path.lineTo(fx(715), fy(395));
+                path.lineTo(fx(657), fy(446));
+                path.lineTo(fx(651), fy(536));
+                path.lineTo(fx(576), fy(487));
+                path.lineTo(fx(514), fy(550));
+                path.lineTo(fx(497), fy(461));
+                path.lineTo(fx(433), fy(527));
+                path.lineTo(fx(429), fy(444));
+                path.lineTo(fx(331), fy(406));
+                path.lineTo(fx(438), fy(373));
+                path.closePath();
+                let num = info[0];
+                let rr = num >> 16 & 0xff, gr = num >> 8 & 0xff, b = num & 0xff;
+                rr = (rr - 60), gr = (gr - 60), b = (b - 60);
+                rr = rr < 0 ? 0 : rr, gr = gr < 0 ? 0 : gr, b = b < 0 ? 0 : b;
+                rr = (255 - rr), gr = (255 - gr), b = (255 - b);
+                g.setColor(new Color(rr << 16 | gr << 8 | b));
+                g.fill(path);
+
+                
+                ww = dy(0.02);
+                g.setColor(new Color(num));
+                g.fillRect(0, y0, dx(0.58), h0 * 0.03);
+                g.fillRect(dx(0.6), y0, w0 * 0.45, h0 * 0.03);
+                rr = num >> 16 & 0xff, gr = num >> 8 & 0xff, b = num & 0xff;
+                rr = (rr - 60), gr = (gr - 60), b = (b - 60);
+                rr = rr < 0 ? 0 : rr, gr = gr < 0 ? 0 : gr, b = b < 0 ? 0 : b;
+                let color = rr << 16 | gr << 8 | b;
+                g.setColor(new Color(color));
+                g.fillRect(0, dy(0.73), dx(0.58), dy(0.02));
+                path = new GeneralPath();
+                path.moveTo(dx(1), dy(0.73) - 1);
+                path.lineTo(dx(0.6), dy(0.73) - 1);
+                path.quadTo(dx(0.6), dy(0.75), dx(0.63), dy(0.75));
+                path.lineTo(dx(1), dy(0.75));
+                path.lineTo(dx(1), dy(0.73) - 1);
+                path.closePath();
+                g.fill(path);
+                g.draw(path);
+                // g.fillRoundRect(dx(0.65), y0 + ww * 1.8, w0 * 0.45 + ww, h0 * 0.03, ww, ww);
+
+                path = new GeneralPath();
+                y = dy(0.08), x = dx(0.5);
+                path.moveTo(0, dy(0.08));
+                path.lineTo(dx(0.5), dy(0.08));
+                path.quadTo(dx(0.57), dy(0.08), dx(0.57), dy(0.18));
+                path.lineTo(dx(0.57), y0);
+                path.lineTo(dx(0.54), y0);
+                path.lineTo(dx(0.54), dy(0.18));
+                path.quadTo(dx(0.54), dy(0.11), dx(0.45), dy(0.11));
+                path.lineTo(0, dy(0.095));
+                path.lineTo(0, dy(0.08));
+                path.closePath();
+
+                g.setColor(new Color(0x000040));
+                g.fill(path);
+                g.setColor(new Color(0xffffff));
+                setComp(g, 0.8);
+                ww = dy(0.02);
+                g.fillRoundRect(dx(0.548), dy(0.2), dx(0.562) - dx(0.548), dy(0.49), ww, ww);
+
+                g.setColor(new Color(0));
+                
+                setComp(g, 1);
+
+
+                sx = 0.34, sy = 0.6;
+                wi = 210, hi = 297;
+                oy = 0.15, ox = 0.4;
+
+                path = new GeneralPath();
+                path.moveTo(fx(146.75451),fy(83.261275));
+                path.curveTo(fx(146.75451),fy(83.261275),fx(121.97769000000001),fy(77.18393499999999),fx(112.62796),fy(96.818389));
+                path.curveTo(fx(103.27821),fy(116.45285),fx(92.058533),fy(139.35971),fx(92.058533),fy(139.35971));
+                path.lineTo(fx(120.57523),fy(150.11192));
+                path.closePath();
+                g.fill(path);
+
+                path = new GeneralPath();
+                path.moveTo(fx(91.621403),fy(142.27392));
+                path.lineTo(fx(116.86569),fy(152.58898));
+                path.lineTo(fx(135.06733),fy(207.61283));
+                path.lineTo(fx(134.13236),fy(264.17876));
+                path.curveTo(fx(134.13236),fy(264.17876),fx(119.17277),fy(248.2842),fx(119.17277),fy(233.7921));
+                path.curveTo(fx(119.17277),fy(219.30001000000001),fx(117.30282),fy(209.01529),fx(117.30282),fy(209.01529));
+                path.closePath();
+                g.fill(path);
+
+                path = new GeneralPath();
+                path.moveTo(fx(98.135863),fy(184.70597));
+                path.curveTo(fx(100.0058),fy(184.70597),fx(108.88806),fy(203.87294),fx(108.88806),fy(203.87294));
+                path.lineTo(fx(43.43987),fy(231.45468));
+                path.curveTo(fx(43.43987),fy(231.45468),fx(52.322122),fy(209.95027),fx(65.411761),fy(202.47048));
+                path.curveTo(fx(78.501402),fy(194.99069),fx(98.135863),fy(184.70597),fx(98.135863),fy(184.70597));
+                path.closePath();
+                g.fill(path);
+
+                path = new GeneralPath();
+                path.moveTo(fx(107.0181),fy(97.28588));
+                path.lineTo(fx(54.65955700000001),fy(115.98536000000001));
+                path.curveTo(fx(54.65955700000001),fy(115.98536000000001),fx(64.47678900000001),fy(122.06269000000002),fx(76.163966),fy(118.32280000000002));
+                path.curveTo(fx(87.851133),fy(114.58290000000001),fx(98.740273),fy(106.80577000000001),fx(98.740273),fy(106.80577000000001));
+                path.closePath();
+                g.fill(path);
+
+                g.setColor(new Color(0xefefef));
+
+                path = new GeneralPath();
+                path.moveTo(fx(112.72867),fy(122.77143));
+                path.lineTo(fx(140.12411),fy(135.89064));
+                path.lineTo(fx(136.61186),fy(142.41928));
+                path.lineTo(fx(111.98491000000001),fy(125.78780999999998));
+                path.curveTo(fx(111.98491000000001),fy(125.78780999999998),fx(111.36510000000001),fy(124.87876999999997),fx(111.73698000000002),fy(123.84574999999998));      
+                path.curveTo(fx(112.10886000000002),fy(122.81274999999998),fx(112.72867000000002),fy(122.77142999999998),fx(112.72867000000002),fy(122.77142999999998));      
+                path.closePath();
+                g.fill(path);
+
+                g.setColor(Color.black);
+
+                path = new GeneralPath();
+                path.moveTo(fx(121.97769),fy(112.71296));
+                path.lineTo(fx(168.68344),fy(149.08785));
+                path.curveTo(fx(168.68344),fy(149.08785),fx(158.62072999999998),fy(154.11189000000002),fx(149.66799999999998),fy(148.30842));
+                path.curveTo(fx(135.64989999999997),fy(139.22140000000002),fx(111.55118999999998),fy(123.04953),fx(111.55118999999998),fy(123.04953));
+                path.closePath();
+                g.fill(path);
+
+                let r = dy(0.08);
+                g.fillRoundRect(dx(0.6), dy(0.22), r, r, r, r);
+
+
+                setComp(g, 1);
+                g.setColor(Color.black);
+                font = font0.deriveFont(Font.PLAIN, dy(0.09));
+                drawMiddle(g, "请小心站台间隙", font, dx(0.5), dy(0.88));
+                font = font0.deriveFont(Font.PLAIN, dy(0.04));
+                drawMiddle(g, "Pleace mind the gap", font, dx(0.5), dy(0.96));
+                g.dispose();
+
+                return img;
+            }
             
+            const getT2 = () => {
+                let w0 = w * 110 / 500, h0 = h * 0.75;
+                let img = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+                let g = img.createGraphics();
+                const dx = (x) => w0 * x / 440;
+                const dy = (y) => h0 * y / 375;
+                let scale = dy(50), x = dx(40), y = dy(40);
+                let canvas = Canvas.createWithCenterAndScale(g, x, y, scale, 50, 50);
+                hc(canvas);
+
+                g.dispose();
+            }
+
             const backGround = (g) => {
                 let [color0, color1, cname, ename, cdest, edest, time0, time1, is, t1, t2, t3, t4, isArrive, open] = info;
                 g.setColor(new Color(0xffffff));
                 g.fillRect(0, 0, w, h);
                 g.setColor(new Color(0xd9d9d9));
-                let ww = h / 100;
-                let x, y, x1, y1, w1, h1, wh, wh1, font, k, str;
-                x = w * 4 / 500, y = y1 = h * 0.2;
+                let x, y, x1, y1, w1, h1, wh, wh1, font, k, str, ww;
+                x = w * 4 / 500, y = y1 = h * 0.2, ww = h / 100;
                 fill(g, ww, x, y, w - x, y);
                 x = w * 120 / 500, y = h * 4 / 300;
                 fill(g, ww, x, y, x, y1 - y);
@@ -309,12 +498,12 @@ function getThread(face, isRight, ctx, state, train, carIndex) {
                 font = font0.deriveFont(Font.PLAIN, k);
                 g.setFont(font);
                 g.setColor(new Color(color1));
-                wh = getWH(cname, font);
+                wh = getWH(g, cname, font);
                 g.drawString(cname, x + (w1 - wh[0]) / 2, y + k);
                 k = h1 * 0.3;
                 font = font0.deriveFont(Font.PLAIN, k);
                 g.setFont(font);
-                wh = getWH(ename, font);
+                wh = getWH(g, ename, font);
                 g.drawString(ename, x + (w1 - wh[0]) / 2, y + h1 * 0.85);
 
                 x = w * 10 / 500, w1 = h1;
@@ -352,11 +541,11 @@ function getThread(face, isRight, ctx, state, train, carIndex) {
                 w1 = 0;
                 k = y1 * 0.7;
                 font = font0.deriveFont(Font.PLAIN, k);
-                wh1 = getWH(carIndex, font);
+                wh1 = getWH(g, carIndex, font);
                 w1 += wh1[0];
                 k = y1 * 0.35;
                 font = font0.deriveFont(Font.PLAIN, k);
-                wh = getWH("车厢", font);
+                wh = getWH(g, "车厢", font);
                 w1 += wh[0];
 
                 x1 = w * (410 + 450) / 2 / 500;
@@ -392,7 +581,7 @@ function getThread(face, isRight, ctx, state, train, carIndex) {
                     font = font0.deriveFont(Font.PLAIN, k);
                     drawMiddle(g, t1, font, x, y);
                 } else {
-                    x = w * 140 / 500, y = y1 * 0.5;
+                    x = w * 145 / 500, y = y1 * 0.5;
                     k = y1 * 0.35;
                     font = font0.deriveFont(Font.PLAIN, k);
                     drawMiddle(g, t1, font, x, y);
@@ -405,16 +594,16 @@ function getThread(face, isRight, ctx, state, train, carIndex) {
                     k = y1 * 0.6;
                     w1 = 0;
                     font = font0.deriveFont(Font.BOLD, k);
-                    wh = getWH(t3, font);
+                    wh = getWH(g, t3, font);
                     w1 += wh[0];
                     k = y1 * 0.4;
                     font = font0.deriveFont(Font.BOLD, k);
-                    wh1 = getWH(t4, font);
+                    wh1 = getWH(g, t4, font);
                     w1 += wh1[0];
                     x1 = w * 10 / 500;
                     w1 += x1;
                     x = w * 250 / 500 - w1 / 2;
-                    y = y1 * 0.72;
+                    y = y1 * 0.73;
                     k = y1 * 0.6;
                     font = font0.deriveFont(Font.BOLD, k);
                     g.setFont(font);
@@ -454,37 +643,33 @@ function getThread(face, isRight, ctx, state, train, carIndex) {
                 if (isArrive) {
                     g.setColor(new Color(color0));
                     str = "到达 " + t3;
-                    k = h * 0.16;
-                    font = font0.deriveFont(Font.PLAIN, k);
-                    x = w * 200 / 500, y = h * 0.6;
+                    k = h * 0.2;
+                    font = font0.deriveFont(Font.BOLD, k);
+                    x = w * (120 + 320) / 2 / 500, y = h * 0.6;
                     drawMiddle(g, str, font, x, y);
                     str = "Arrived: " + t4;
-                    k = h * 0.12;
+                    k = h * 0.1;
                     font = font0.deriveFont(Font.PLAIN, k);
-                    y = h * 0.8;
+                    y = h * 0.75;
                     drawMiddle(g, str, font, x, y);
+                    
+                    g.setColor(new Color(0xe0e0e0));
+                    x = w * (500 - 110 - 4) / 500, y = h * 0.23;
+                    g.drawImage(getT2(), x, y, null);
                 }
             }
 
             const d = [];
-            for (let i = -1; i < 2; i += 2) {
+            const drawDoor = () => {
                 let x0 = 0, y0 = h * 0.4, w0 = w * 20 / 500 * 1.1, h0 = h * 0.4;
                 let img = new BufferedImage(w0, h0, BufferedImage.TYPE_INT_ARGB);
                 let g = img.createGraphics();
                 let draw = (x, y, w1, h1, ww) => {
                     if (ww == 0) {
-                        if (i > 0) {
-                            g.fillRect(x, y, w1, h1);
-                        } else {
-                            g.fillRect(w0 - x - w1, y, w1, h1);
-                        }
+                        g.fillRect(x, y, w1, h1);
                         return;
                     }
-                    if (i > 0) {
-                        g.fillRoundRect(x, y, w1, h1, ww, ww);
-                    } else {
-                        g.fillRoundRect(w0 - x - w1, y, w1, h1, ww, ww);
-                    }
+                    g.fillRoundRect(x, y, w1, h1, ww, ww);
                 }
                 let x1, y1, w1, h1, w2, h2, ww, t;
                 w1 = w * 20 / 500, h1 = h * 0.4, ww = w1 * 0.3;
@@ -494,25 +679,68 @@ function getThread(face, isRight, ctx, state, train, carIndex) {
                 draw(x1, y1, w2, h2, ww);
                 x1 = x0, y1 = y0 - h1, w2 = w1, h2 = h1;
                 draw(x1, y1, w2, h2, ww);
-                draw(x1 - 1, y1, w1 - ww, h2, 0);
+                draw(x1, y1, w1 - ww, h2, 0);
                 g.setColor(new Color(0xd0d0d0));
                 t = w1 * 0.03;
                 x1 += t, y1 += t, w2 -= 2 * t, h2 -= 2 * t, ww -= t;
                 draw(x1, y1, w2, h2, ww);
-                draw(x1 - 1, y1, w1 - ww, h2, 0);
+                draw(x1, y1, w1 - ww, h2, 0);
                 g.setColor(new Color(0xc0c0c0));
                 t = w1 * 0.12;
                 x1 += t, y1 += t, w2 -= 2 * t, h2 = h1 * 0.5, ww -= t;
                 draw(x1, y1, w2, h2, ww);
                 d.push(img);
+                g.dispose();
+                {
+                    let img = d[1] = new BufferedImage(w0, h0, BufferedImage.TYPE_INT_ARGB);
+                    g = img.createGraphics();
+                    let tx = new AffineTransform();
+                    tx.scale(-1, 1);
+                    tx.translate(-w0, 0);
+                    g.setTransform(tx);
+                    g.drawImage(d[0], 0, 0, null);
+                    g.dispose();
+                }
             }
+            drawDoor();
             const dWidth = w * 20 / 500 * 1.1;
+
+            const out = [];
+            const drawOut = (isFill) => {
+                let w0 = w * 30 / 500, h0 = h * 0.4;
+                let img = new BufferedImage(w0, h0, BufferedImage.TYPE_INT_ARGB);
+                let g = img.createGraphics();
+                let h1 = h * 0.06, x = w * 15 / 500, y = h0;
+                for (let i = 0; i < 3; i++) {
+                    let xs = [];
+                    let ys = [];
+                    let add = (x, y) => {xs.push(x); ys.push(y)};
+                    add((w0 - x) / 2, y);
+                    add(w0 / 2, y - h1);
+                    add((w0 + x) / 2, y);
+                    add(w0 / 2, y - h1 * 0.3);
+                    y -= h1 * 1.3;
+                    h1 *= 0.75;
+                    x *= 0.75;
+                    g.setColor(new Color(0xff0000));
+                    g.setStroke(new BasicStroke(h1 * 0.1));
+                    let pol = new Polygon(xs, ys, 4);
+                    if (isFill) g.fillPolygon(pol);
+                    else g.drawPolygon(pol);
+                }
+                out.push(img);
+                g.dispose();
+            }
+            drawOut(false);
+            drawOut(true);
+            const outWidth = w * 30 / 500;
             const d0 = (g) => {
+                setComp(g, 1);
                 let x = w * 50 / 500, y = h * (0.7 - 0.4);
-                let v = smooth(1, doorValue * 3);
-                let tx = v * w * 20 / 500;
-                g.drawImage(d[1], x + tx - 1, y, null);
-                g.drawImage(d[0], x - dWidth - tx + 1, y, null);
+                let v = doorValue;
+                let tx = v * w * 15 / 500;
+                g.drawImage(d[0], x + tx, y, null);
+                g.drawImage(d[1], x - dWidth - tx, y, null);
                 if (doorOpen == false) {
                     let ww = w * 40 / 500 * 0.7;
                     y = h * (0.7 + 0.3) / 2 - h * 0.02 - ww / 2;
@@ -527,22 +755,42 @@ function getThread(face, isRight, ctx, state, train, carIndex) {
                     g.setColor(new Color(0xffffff));
                     g.fillRect(x, y, w1, h1);
                 }
+                if (v == 1) {
+                    x = w * 50 / 500 - outWidth / 2, y = h * (0.7 - 0.4);
+                    g.drawImage(out[0], x, y, null);
+                    setComp(g, smooth(1, outAlpha));
+                    g.drawImage(out[1], x, y, null);
+                }
             }
             
             const ctrl = () => {
                 let [color0, color1, cname, ename, cdest, edest, time0, time1, is, t1, t2, t3, t4, isArrive, open] = info;
                 let newOpen = open > 0 ? 1 : 0;
-                let newValue = train.doorValue() * newOpen;
+                let newValue = smooth(1, newOpen * train.doorValue() * 3);
+                let need = false;
+                /* if (doorOpen == true) {
+                    newValue = doorValue + (train.doorTarget() ? 1 : -1) * lastFrameTime / 1000 / (64 / 20);
+                    newValue = Math.max(0, Math.min(1, newValue));
+                }*/
+                if (newValue < 1) {
+                    outAlpha = 0;
+                }else {
+                    outAlpha += (outTarget ? 1 : -1) * lastFrameTime / 1000 * 1.5 / 1;
+                    if (outAlpha > 1) outTarget = false;
+                    if (outAlpha < 0) outTarget = true;
+                    need = true;
+                }
+
                 if (doorOpen != newOpen || doorValue != newValue) {
                     doorOpen = newOpen;
                     doorValue = newValue;
-                    return true;
+                    need = true;
                 }
-                return false;
+                return need;
             }
 
             let first = true;
-            while (state.running && state.lastTime + 30000 > now()) {
+            while (state.running && state.lastTime + 60000 > now()) {
                 try {
                     if (first) {
                         info = getInfo();
@@ -620,7 +868,12 @@ function getThread(face, isRight, ctx, state, train, carIndex) {
         } catch (e) {
             ctx.setDebugInfo("LCD-Thread " + (isRight ? "Right " : "Left ") + carIndex + " Error At: ", System.currentTimeMillis() + e.message);
             print("ARAF-LCD-Thread " + (isRight ? "Right " : "Left ") + carIndex + " Error At: " + System.currentTimeMillis() + e.message);
-        } 
-    } 
-    return new Thread(main, "ARAF-LCD-Thread On Train" + ctx.hashCode() + (isRight? "Right" : "Left"));
+        } finally {
+            for (let fun of dispose) {
+                fun();
+            }
+        }
+    } , "ARAF-LCD-Thread On Train" + ctx.hashCode() + (isRight? "Right" : "Left"));
+    thread.start();
+    return thread;
 }

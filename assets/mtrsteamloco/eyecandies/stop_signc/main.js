@@ -1,3 +1,7 @@
+/**
+ * @author: Aphrodite281 QQ: 3435494979
+ */
+
 importPackage(java.awt);
 importPackage(java.awt.geom);
 include(Resources.id("aphrodite:library/code/text_u.js"));
