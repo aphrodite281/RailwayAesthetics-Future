@@ -179,7 +179,7 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
             const now = () => Date.now();
             const getInfo = () => {
                 let color = 0x00ffff, color1 = 0xffffff, cname = "无线路", ename = "No Route", cdest = "无线路", edest = "No Route", time0 , time1, is = true, t1 = "非运营列车  Non-operating train", t2 = "", t3 = "", t4 = "", isArrive = false, open = -1, huancheng = new Map();
-                let date = new Date(acc);
+                let date = new Date();
                 let year = date.getFullYear();
                 let month = (date.getMonth() + 1).toString().padStart(2, '0');
                 let day = date.getDate().toString().padStart(2, '0');
