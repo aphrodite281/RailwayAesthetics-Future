@@ -32,8 +32,9 @@ function Canvas(g, fx, fy, fl) {
     this.fontPattern = Font.PLAIN;
     this.font = "11.45px";
     this.beginPath = () => this.path = new GeneralPath();
-    this.moveTo = (x, y) => this.path.moveTo(fx(x), fx(y));
-    this.bezierCurveTo = (x1, y1, x2, y2, x3, y3) => this.path.curveTo(fx(x1), fx(y1), fx(x2), fx(y2), fx(x3), fx(y3));
+    this.moveTo = (x, y) => this.path.moveTo(fx(x), fy(y));
+    this.lineTo = (x, y) => this.path.lineTo(fx(x), fy(y));
+    this.bezierCurveTo = (x1, y1, x2, y2, x3, y3) => this.path.curveTo(fx(x1), fy(y1), fx(x2), fy(y2), fx(x3), fy(y3));
     this.closePath = () => this.path.closePath();
     this.setColor = (str) => {
         str = str.substring(4, str.length-1);
@@ -64,7 +65,9 @@ function Canvas(g, fx, fy, fl) {
         this.g.setColor(this.fillStyle);
         this.g.drawString(text, fx(x), fy(y));
     }
-    this.rect = (x, y, w, h) => this.g.fillRect(fx(x), fy(y), fl(w), fl(h));
+    this.rect = (x, y, w, h) => {this.setColor(this.fillStyle); this.g.fillRect(fx(x), fy(y), fx(w), fy(h));};
+    this.drawArc = (x, y, r, w, h, start, end) => {this.setColor(this.srokeStyle); this.setStroke(); this.g.drawArc(fx(x - r), fy(y - r), fx(2 * r), fx(2 * r), start, end);}
+    this.toString = () => "Canvas by Aphrodite281";
 }
 
 /** 
@@ -77,8 +80,8 @@ function Canvas(g, fx, fy, fl) {
  * @param {Number} h - 图像的相对高度。
  */
 Canvas.createWithCenterAndScale = function(g, x, y, s, w, h) {
-    let fx = (ax) => x - s * ax / w;
-    let fy = (ay) => y - s * ay / h;
+    let fx = (ax) => x - s * w / 2 + s * ax;
+    let fy = (ay) => y - s * h / 2 + s * ay;
     let fl = (al) => s * al;
     return new Canvas(g, fx, fy, fl);
 }

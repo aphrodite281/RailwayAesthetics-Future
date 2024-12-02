@@ -11,6 +11,8 @@ importPackage (java.awt.font);
 include(Resources.id("aphrodite:library/code/face.js"));
 include(Resources.id("aphrodite:library/code/text_u.js"));
 include(Resources.id("aphrodite:library/code/canvas.js"));
+include(Resources.id("aphrodite:library/code/map_tostring.js"));
+include(Resources.id("aphrodite:library/code/array_tostring.js"));
 include(Resources.id("mtr:lcda/icon/hc.js"));
 const logo = Resources.readBufferedImage(Resources.id("mtr:lcda/icon/logo.png"));
 
@@ -31,7 +33,7 @@ const fontC = Resources.getSystemFont("Noto Serif");
 
 function create(ctx, state, train) {
     state.running = true;
-    state.lastTime = System.currentTimeMillis();
+    state.lastTime = Date.now();
     let infoArray = [];
     let tickList = [];
     let disposeList = [];
@@ -82,7 +84,7 @@ function render(ctx, state, train) {
     } catch (e) {
         ctx.setDebugInfo("dest", e);
     }
-    acc += Timing.delta() * 1000 * 6;
+    acc += Timing.delta() * 1000 * 0.6;
     ctx.setDebugInfo("abc", train.doorTarget());
 }
 
@@ -123,6 +125,22 @@ const smooth = (k, value) => {// 平滑变化
     return (Math.cos(value / k * Math.PI + Math.PI) + 1) / 2 * k;
 }
 
+const route0 = [];
+{
+    const getColor = (color) => {
+        let rr = color >> 16 & 0xff;
+        let g = color >> 8 & 0xff;
+        let b = color & 0xff;
+        let luminance  = 0.299 * rr + 0.587 * g + 0.114 * b;
+        return luminance > 255 / 2 ? 0 : 0xffffff;
+    }
+    for (let i = 1; i <= 100; i++) {
+        let color = Math.random() * 0xffffff;
+        route0.push([i + "号线", "Line " + i, color, getColor(color)]);
+    }
+}
+
+
 function LCDThread(face, isRight, ctx, state, train, carIndex) {
     let dispose = [];
     let thread = new Thread(() => {
@@ -157,9 +175,10 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
             // const frameTime = 1000 / fps;// 帧时间
             let outAlpha = 0;// 门里面的出口指示值
             let outTarget = 1;// 门里面的出口变化目标
+            let icolor, icolor1, icname, iename, icdest, iename1, icname1, iename2, icname2, iename3, icname3, iename4, icname4, itime0, itime1, iis, it1, it2, it3, it4, iisArrive, iopen, ihuancheng = new Map();// info 数据
             const now = () => Date.now();
             const getInfo = () => {
-                let color = 0x00ffff, color1 = 0xffffff, cname = "无线路", ename = "No Route", cdest = "无线路", edest = "No Route", time0 , time1, is = true, t1 = "非运营列车  Non-operating train", t2 = "", t3 = "", t4 = "", isArrive = false, open = -1;
+                let color = 0x00ffff, color1 = 0xffffff, cname = "无线路", ename = "No Route", cdest = "无线路", edest = "No Route", time0 , time1, is = true, t1 = "非运营列车  Non-operating train", t2 = "", t3 = "", t4 = "", isArrive = false, open = -1, huancheng = new Map();
                 let date = new Date(acc);
                 let year = date.getFullYear();
                 let month = (date.getMonth() + 1).toString().padStart(2, '0');
@@ -180,7 +199,7 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                     let pla = plas[train.getThisRoutePlatformsNextIndex()];
                     let station = pla.destinationStation;
                     const ss = () => {
-                        if (station == null) station = {name: "无车站|No Station"};
+                        if (station == null) station = {name: "无车站|No Station", id: 0};
                     }
                     ss();
                     let dest = pla.destinationName;
@@ -238,13 +257,29 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                     if (isRight && o2) open = 1;
                     if (!isRight && o1) open = 1;
                     if (o1 && o2) open = 2;
-                    // ctx.setDebugInfo(isRight + " " + carIndex, p01, p02, po1, rv1, po2, rv2);
+                    let k = acc / 1000 % 100;
+                    for (let i = 0; i < k; i++) {
+                        huancheng.set(route0[i][0] + "|" + route0[i][1], [route0[i][0], route0[i][1], route0[i][2], route0[i][3]]);
+                    }
+                    throw new Error();
+                    let dataCache = MTRClientData.DATA_CACHE;
+                    let plass = dataCache.requestStationIdToPlatforms(station.id);
+                    for (let [id, platform] of plass) {
+                        let platformRouteDetails = dataCache.requestPlatformIdToRoutes(id);
+                        for (let platformRouteDetail of platformRouteDetails) {
+                            let name = platformRouteDetail.routeName;
+                            let color = platformRouteDetail.routeColor;
+                            huancheng.set(TU.CP(name) + "|" + TU.NP(name), [TU.CP(name), TU.NP(name), color, getColor(color)]);
+                        }
+                    }
+                    huancheng.delete(TU.CP(route.name) + "|" + TU.NP(route.name));
                 } catch (e) {
-                    // throw e;
                     print("ARAF-LCD-getInfo Error: " + e.message);
                 }
+                ctx.setDebugInfo("huancheng", huancheng.size);
                 color1 = getColor(color);
-                return [color, color1, cname, ename, cdest, edest, time0, time1, is, t1, t2, t3, t4, isArrive, open];
+                icolor = color, icolor1 = color1, icname = cname, iename = ename, icdest = cdest, idest = edest, itime0 = time0, itime1 = time1, iis = is, it1 = t1, it2 = t2, it3 = t3, it4 = t4, iisArrive = isArrive, iopen = open, ihuancheng = huancheng;
+                return [color, color1, cname, ename, cdest, edest, time0, time1, is, t1, t2, t3, t4, isArrive, open, huancheng];
             }
 
             const addDrawCall0 = (lambda0) => {
@@ -463,15 +498,73 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
             
             const getT2 = () => {
                 let w0 = w * 110 / 500, h0 = h * 0.75;
-                let img = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+                let img = new BufferedImage(w0, h0, BufferedImage.TYPE_INT_ARGB);
                 let g = img.createGraphics();
-                const dx = (x) => w0 * x / 440;
-                const dy = (y) => h0 * y / 375;
-                let scale = dy(50), x = dx(40), y = dy(40);
-                let canvas = Canvas.createWithCenterAndScale(g, x, y, scale, 50, 50);
-                hc(canvas);
+                const dx = (ax) => w0 * ax / 440;
+                const dy = (ay) => h0 * ay / 375;
+                g.setColor(new Color(0xefefef));
+                let ww = h0 * 0.1;
+                g.fillRoundRect(0, 0, w0, h0, ww, ww);
+                let scale = dy(80) / 52, x = dx(120), y = dy(80);
+                let canvas = Canvas.createWithCenterAndScale(g, x, y, scale, 52, 52);
+                hc(canvas, g, ctx);
+                g.setColor(new Color(0xa0a0a0));
+                let font = font0.deriveFont(Font.PLAIN, dy(58));
+                drawMiddle(g, "可 换 乘", font, dx(280), dy(80));
+                font = font0.deriveFont(Font.PLAIN, dy(30));
+                drawMiddle(g, "Transfer To", font, dx(280), dy(120));
+
+                const draw = (x, y, w1, h1, color0, color1, c, n) => {
+                    g.setColor(new Color(color0));
+                    g.fillRoundRect(x, y, w1, h1, dy(10), dy(10));
+                    g.setColor(new Color(color1));
+                    let font  = font0.deriveFont(Font.PLAIN, dy(h1 * 0.5));
+                    drawMiddle(g, c, font, x + w1 / 2, y + h1 * 0.5);
+                    font = font0.deriveFont(Font.PLAIN, dy(h1 * 0.3));
+                    drawMiddle(g, n, font, x + w1 / 2, y + h1 * 0.85);
+                }
+
+                let array = [];
+                for (let [key, value] of ihuancheng) {
+                    array.push(value);
+                }
+                array.sort((a, b) => (a[0] + a[1]).localeCompare(b[0] + b[1]));
+                let y0 = dy(140), y1 = dy(280), h1 = dy(100), w1 = dx(180)
+                let jx = dx(20), jy = dy(20), col = 1, row = 1;
+                scale = 1;
+                while (row * col < array.length) {
+                    scale -= 0.05;
+                    h1 = dy(100) * scale;
+                    w1 = dx(180) * scale;
+                    jx = dx(20) * scale;
+                    jy = dy(20) * scale;
+                    col = Math.floor(dx(440) / (w1 + jx));
+                    row = Math.floor((y1 - y0) / (h1 + jy));
+                }
+                jx = (dx(440) - col * w1) / (col);
+                jy = ((y1 - y0) - row * h1) / (row);
+                col = Math.ceil(array.length / row);
+                for (let i = 0; i < array.length; i++) {
+                    let k = (row - 1) * col, a = i;
+                    let colu = col;
+                    if (a >= k) colu = array.length - (row - 1) * col;// 如果是最后一行 且有多行不一定是col列
+                    a = a % col;
+                    let rowt = Math.floor((i / col));
+                    let startx = (dx(440) - colu * w1 - (colu - 1) * jx) / 2;
+                    let x = startx + a * (w1 + jx);
+                    let starty = y0 + ((y1 - y0) - (row * h1 + (row - 1) * jy)) / 2;
+                    let y = starty + rowt * (h1 + jy);
+                    draw(x, y, w1, h1, array[i][2], array[i][3], array[i][0], array[i][1]);
+                }
+                setComp(g, 1);
+                g.setColor(Color.black);
+                font = font0.deriveFont(Font.PLAIN, dy(40));
+                drawMiddle(g, "请小心站台间隙", font, dx(220), dy(325));
+                font = font0.deriveFont(Font.PLAIN, dy(25));
+                drawMiddle(g, "Pleace mind the gap", font, dx(220), dy(360));
 
                 g.dispose();
+                return img;
             }
 
             const backGround = (g) => {
@@ -656,6 +749,8 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                     g.setColor(new Color(0xe0e0e0));
                     x = w * (500 - 110 - 4) / 500, y = h * 0.23;
                     g.drawImage(getT2(), x, y, null);
+                } else {
+                    acc = -1000;
                 }
             }
 
