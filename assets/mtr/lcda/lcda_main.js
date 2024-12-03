@@ -14,6 +14,8 @@ include(Resources.id("aphrodite:library/code/canvas.js"));
 include(Resources.id("aphrodite:library/code/map_tostring.js"));
 include(Resources.id("aphrodite:library/code/array_tostring.js"));
 include(Resources.id("mtr:lcda/icon/hc.js"));
+include(Resources.id("mtr:lcda/icon/bz.js"));
+
 const logo = Resources.readBufferedImage(Resources.id("mtr:lcda/icon/logo.png"));
 
 const defaultScreenTextureSize = [1600 * 5 / 4, 400 * 5 / 4];
@@ -125,7 +127,7 @@ const smooth = (k, value) => {// 平滑变化
     return (Math.cos(value / k * Math.PI + Math.PI) + 1) / 2 * k;
 }
 
-const route0 = [];
+/* const route0 = [];
 {
     const getColor = (color) => {
         let rr = color >> 16 & 0xff;
@@ -138,12 +140,11 @@ const route0 = [];
         let color = Math.random() * 0xffffff;
         route0.push([i + "号线", "Line " + i, color, getColor(color)]);
     }
-}
-
+}*/
 
 function LCDThread(face, isRight, ctx, state, train, carIndex) {
-    let dispose = [];
     let thread = new Thread(() => {
+        const dispose = [];
         try {
             print("ARAF-LCD-Thread " + (isRight ? "Right" : "Left") + " Start");
             ctx.setDebugInfo("LCD-Thread " + (isRight ? "Right " : "Left ") + carIndex + " Start", System.currentTimeMillis().toString());
@@ -257,11 +258,11 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                     if (isRight && o2) open = 1;
                     if (!isRight && o1) open = 1;
                     if (o1 && o2) open = 2;
-                    let k = acc / 1000 % 100;
+                    /* let k = acc / 1000 % 100;
                     for (let i = 0; i < k; i++) {
                         huancheng.set(route0[i][0] + "|" + route0[i][1], [route0[i][0], route0[i][1], route0[i][2], route0[i][3]]);
                     }
-                    throw new Error();
+                    throw new Error(); */
                     let dataCache = MTRClientData.DATA_CACHE;
                     let plass = dataCache.requestStationIdToPlatforms(station.id);
                     for (let [id, platform] of plass) {
@@ -346,32 +347,14 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                 ww = h0 * 0.1;
                 g.fillRoundRect(0, 0, w0, h0, ww, ww);
 
-                path = new GeneralPath();
-                path.moveTo(fx(438), fy(373));
-                path.lineTo(fx(400), fy(282));
-                path.lineTo(fx(481), fy(327));
-                path.lineTo(fx(541), fy(264));
-                path.lineTo(fx(550), fy(354));
-                path.lineTo(fx(653), fy(266));
-                path.lineTo(fx(636), fy(373));
-                path.lineTo(fx(715), fy(395));
-                path.lineTo(fx(657), fy(446));
-                path.lineTo(fx(651), fy(536));
-                path.lineTo(fx(576), fy(487));
-                path.lineTo(fx(514), fy(550));
-                path.lineTo(fx(497), fy(461));
-                path.lineTo(fx(433), fy(527));
-                path.lineTo(fx(429), fy(444));
-                path.lineTo(fx(331), fy(406));
-                path.lineTo(fx(438), fy(373));
-                path.closePath();
+
                 let num = info[0];
                 let rr = num >> 16 & 0xff, gr = num >> 8 & 0xff, b = num & 0xff;
                 rr = (rr - 60), gr = (gr - 60), b = (b - 60);
                 rr = rr < 0 ? 0 : rr, gr = gr < 0 ? 0 : gr, b = b < 0 ? 0 : b;
                 rr = (255 - rr), gr = (255 - gr), b = (255 - b);
                 g.setColor(new Color(rr << 16 | gr << 8 | b));
-                g.fill(path);
+                g.fill(bz());
 
                 
                 ww = dy(0.02);
@@ -419,71 +402,14 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                 
                 setComp(g, 1);
 
-
                 sx = 0.34, sy = 0.6;
                 wi = 210, hi = 297;
                 oy = 0.15, ox = 0.4;
 
-                path = new GeneralPath();
-                path.moveTo(fx(146.75451),fy(83.261275));
-                path.curveTo(fx(146.75451),fy(83.261275),fx(121.97769000000001),fy(77.18393499999999),fx(112.62796),fy(96.818389));
-                path.curveTo(fx(103.27821),fy(116.45285),fx(92.058533),fy(139.35971),fx(92.058533),fy(139.35971));
-                path.lineTo(fx(120.57523),fy(150.11192));
-                path.closePath();
-                g.fill(path);
-
-                path = new GeneralPath();
-                path.moveTo(fx(91.621403),fy(142.27392));
-                path.lineTo(fx(116.86569),fy(152.58898));
-                path.lineTo(fx(135.06733),fy(207.61283));
-                path.lineTo(fx(134.13236),fy(264.17876));
-                path.curveTo(fx(134.13236),fy(264.17876),fx(119.17277),fy(248.2842),fx(119.17277),fy(233.7921));
-                path.curveTo(fx(119.17277),fy(219.30001000000001),fx(117.30282),fy(209.01529),fx(117.30282),fy(209.01529));
-                path.closePath();
-                g.fill(path);
-
-                path = new GeneralPath();
-                path.moveTo(fx(98.135863),fy(184.70597));
-                path.curveTo(fx(100.0058),fy(184.70597),fx(108.88806),fy(203.87294),fx(108.88806),fy(203.87294));
-                path.lineTo(fx(43.43987),fy(231.45468));
-                path.curveTo(fx(43.43987),fy(231.45468),fx(52.322122),fy(209.95027),fx(65.411761),fy(202.47048));
-                path.curveTo(fx(78.501402),fy(194.99069),fx(98.135863),fy(184.70597),fx(98.135863),fy(184.70597));
-                path.closePath();
-                g.fill(path);
-
-                path = new GeneralPath();
-                path.moveTo(fx(107.0181),fy(97.28588));
-                path.lineTo(fx(54.65955700000001),fy(115.98536000000001));
-                path.curveTo(fx(54.65955700000001),fy(115.98536000000001),fx(64.47678900000001),fy(122.06269000000002),fx(76.163966),fy(118.32280000000002));
-                path.curveTo(fx(87.851133),fy(114.58290000000001),fx(98.740273),fy(106.80577000000001),fx(98.740273),fy(106.80577000000001));
-                path.closePath();
-                g.fill(path);
-
-                g.setColor(new Color(0xefefef));
-
-                path = new GeneralPath();
-                path.moveTo(fx(112.72867),fy(122.77143));
-                path.lineTo(fx(140.12411),fy(135.89064));
-                path.lineTo(fx(136.61186),fy(142.41928));
-                path.lineTo(fx(111.98491000000001),fy(125.78780999999998));
-                path.curveTo(fx(111.98491000000001),fy(125.78780999999998),fx(111.36510000000001),fy(124.87876999999997),fx(111.73698000000002),fy(123.84574999999998));      
-                path.curveTo(fx(112.10886000000002),fy(122.81274999999998),fx(112.72867000000002),fy(122.77142999999998),fx(112.72867000000002),fy(122.77142999999998));      
-                path.closePath();
-                g.fill(path);
-
-                g.setColor(Color.black);
-
-                path = new GeneralPath();
-                path.moveTo(fx(121.97769),fy(112.71296));
-                path.lineTo(fx(168.68344),fy(149.08785));
-                path.curveTo(fx(168.68344),fy(149.08785),fx(158.62072999999998),fy(154.11189000000002),fx(149.66799999999998),fy(148.30842));
-                path.curveTo(fx(135.64989999999997),fy(139.22140000000002),fx(111.55118999999998),fy(123.04953),fx(111.55118999999998),fy(123.04953));
-                path.closePath();
-                g.fill(path);
+                xr(g, fx, fy);
 
                 let r = dy(0.08);
                 g.fillRoundRect(dx(0.6), dy(0.22), r, r, r, r);
-
 
                 setComp(g, 1);
                 g.setColor(Color.black);
@@ -748,7 +674,7 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                     
                     g.setColor(new Color(0xe0e0e0));
                     x = w * (500 - 110 - 4) / 500, y = h * 0.23;
-                    g.drawImage(getT2(), x, y, null);
+                    g.drawImage((ihuancheng.size > 0 ? getT2() : getT1()), x, y, null);
                 } else {
                     acc = -1000;
                 }
