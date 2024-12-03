@@ -1,4 +1,4 @@
-function bz() {
+function bz(fx, fy) {
     const path = new GeneralPath();
     path.moveTo(fx(438), fy(373));
     path.lineTo(fx(400), fy(282));

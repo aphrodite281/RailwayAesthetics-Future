@@ -144,7 +144,7 @@ const smooth = (k, value) => {// 平滑变化
 
 function LCDThread(face, isRight, ctx, state, train, carIndex) {
     let thread = new Thread(() => {
-        const dispose = [];
+        const disposeList = [];
         try {
             print("ARAF-LCD-Thread " + (isRight ? "Right" : "Left") + " Start");
             ctx.setDebugInfo("LCD-Thread " + (isRight ? "Right " : "Left ") + carIndex + " Start", System.currentTimeMillis().toString());
@@ -159,7 +159,7 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
             const g0 = img0.createGraphics();
             const img1 = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);// 合并
             const g1 = img1.createGraphics();
-            dispose.push(() => {g0.dispose(); g1.dispose();});
+            disposeList.push(() => {g0.dispose(); g1.dispose();});
 
             const drawCalls = [];// [旧图, [新渐变的, 新alpha]] 渐变绘制
             let dynLambda = (g) => {};// 动态绘制函数
@@ -354,7 +354,7 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                 rr = rr < 0 ? 0 : rr, gr = gr < 0 ? 0 : gr, b = b < 0 ? 0 : b;
                 rr = (255 - rr), gr = (255 - gr), b = (255 - b);
                 g.setColor(new Color(rr << 16 | gr << 8 | b));
-                g.fill(bz());
+                g.fill(bz(fx, fy));
 
                 
                 ww = dy(0.02);
@@ -882,7 +882,7 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                 } catch (e) {
                     ctx.setDebugInfo("LCD-Thread " + (isRight ? "Right " : "Left ") + carIndex + " Error At: ", now() + e.message);
                     print("ARAF-LCD-Thread " + (isRight ? "Right " : "Left ") + carIndex + " Error At: " + now() + e.message);
-                    // Thread.sleep(3000);
+                    Thread.sleep(100);
                 }
             }
             print("ARAF-LCD-Thread " + (isRight ? "Right" : "Left") + " Exit");
@@ -890,11 +890,11 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
             ctx.setDebugInfo("LCD-Thread " + (isRight ? "Right " : "Left ") + carIndex + " Error At: ", System.currentTimeMillis() + e.message);
             print("ARAF-LCD-Thread " + (isRight ? "Right " : "Left ") + carIndex + " Error At: " + System.currentTimeMillis() + e.message);
         } finally {
-            for (let fun of dispose) {
+            for (let fun of disposeList) {
                 fun();
             }
         }
-    } , "ARAF-LCD-Thread On Train" + ctx.hashCode() + (isRight? "Right" : "Left"));
+    } , "ARAF-LCD-Thread On Train " + ctx.hashCode() + " " + carIndex + " " + (isRight? "Right" : "Left"));
     thread.start();
     return thread;
 }
