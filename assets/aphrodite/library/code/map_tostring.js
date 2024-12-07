@@ -5,7 +5,7 @@ Object.defineProperty(Map.prototype, 'toString', {
         let entry = entries.next();
         while (!entry.done) {
             let [key, value] = entry.value;
-            str += `[${key.toString()},${value.toString()}]`;
+            try {str += `[${key.toString()},${value.toString()}]`;} catch (e) {str += `[${key},${value}]`}
             entry = entries.next();
             if (!entry.done) {
                 str += ',';

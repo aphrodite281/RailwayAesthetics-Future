@@ -22,7 +22,7 @@ importPackage (java.awt.font);
  * @param {Map<Number, Number>} colorMap - 颜色映射表。类似 {[0, 0xff00ff], [0xff0000, 0xffffff]}。
  */
 
-function Canvas(g, fx, fy, fw, fh, fl, colorMap, ctx) {
+function Canvas(g, fx, fy, fw, fh, fl, colorMap) {
     /**
      * @param {Graphics2D} g - 图形上下文对象。
      */
@@ -32,31 +32,31 @@ function Canvas(g, fx, fy, fw, fh, fl, colorMap, ctx) {
      * @param {Function<Number, Number>} fx - 用于转换 x 坐标的函数。
      */
     this.fx = fx;
-    fx = (...args) => this.fx(...args);
+    fx = (x) => this.fx(x);
 
     /**
      * @param {Function<Number, Number>} fy - 用于转换 y 坐标的函数。
      */
     this.fy = fy;
-    fy = (...args) => this.fy(...args);
+    fy = (y) => this.fy(y);
     
     /**
      * @param {Function<Number, Number>} fw - 用于转换宽度的函数。
      */
     this.fw = fw;
-    fw = (...args) => this.fw(...args);
+    fw = (w) => this.fw(w);
 
     /**
      * @param {Function<Number, Number>} fh - 用于转换高度的函数。
      */
     this.fh = fh;
-    fh = (...args) => this.fh(...args);
+    fh = (h) => this.fh(h);
 
     /**
      * @param {Function<Number, Number>} fl - 用于转换粗细的函数。
      */
     this.fl = fl;
-    fl = (...args) => this.fl(...args);
+    fl = (l) => this.fl(l);
 
     if (colorMap == null) colorMap = new Map();
     if (!(colorMap instanceof Map)) {
