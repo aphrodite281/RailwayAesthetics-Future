@@ -19,9 +19,10 @@ importPackage (java.awt.font);
  * @param {Function} fx - 用于转换 x 坐标的函数。
  * @param {Function} fy - 用于转换 y 坐标的函数。
  * @param {Function} fl - 用于转换长度的函数。
+ * @param {Map<Number, Number>} colorMap - 颜色映射表。类似 {[0, 0xff00ff], [0xff0000, 0xffffff]}。
  */
 
-function Canvas(g, fx, fy, fl) {
+function Canvas(g, fx, fy, fw, fh, fl, colorMap, ctx) {
     /**
      * @param {Graphics2D} g - 图形上下文对象。
      */
@@ -38,9 +39,29 @@ function Canvas(g, fx, fy, fl) {
     this.fy = fy;
     
     /**
+     * @param {Function<Number, Number>} fw - 用于转换宽度的函数。
+     */
+    this.fw = fw;
+
+    /**
+     * @param {Function<Number, Number>} fh - 用于转换高度的函数。
+     */
+    this.fh = fh;
+
+    /**
      * @param {Function<Number, Number>} fl - 用于转换粗细的函数。
      */
     this.fl = fl;
+
+    if (colorMap == null) colorMap = new Map();
+    if (!(colorMap instanceof Map)) {
+        print ("Canvas: colorMap must be a Map" + colorMap);
+        throw new Error("Canvas: colorMap must be a Map" + colorMap);
+    }
+    /**
+     * @param {Map<Number, Number>} colorMap - 颜色映射表。类似 {[0, 0xff00ff], [0xff0000, 0xffffff]}。
+     */
+    this.colorMap = colorMap;
 
     let path = new GeneralPath();
     
@@ -84,6 +105,52 @@ function Canvas(g, fx, fy, fl) {
      */
     this.font = "11.45px";
 
+    const stack = [];
+    let transform = new AffineTransform();
+
+    /**
+     * 保存当前状态。
+     */
+    this.save = () => {
+        stack.push([this.lineCap, this.lineJoin, this.fillStyle, this.strokeStyle, this.lineWidth, this.font, this.fontPattern, this.fontType, new AffineTransform(transform)]);
+    }
+
+    this.save();
+
+    /**
+     * 恢复上一次保存的状态。
+     */
+    this.restore = () => {
+        let [lineCap, lineJoin, fillStyle, strokeStyle, lineWidth, font, fontPattern, fontType, oldTransform] = stack.pop();
+        this.lineCap = lineCap;
+        this.lineJoin = lineJoin;
+        this.fillStyle = fillStyle;
+        this.strokeStyle = strokeStyle;
+        this.lineWidth = lineWidth;
+        this.font = font;
+        this.fontPattern = fontPattern;
+        this.fontType = fontType;
+        transform = oldTransform;
+        this.g.setTransform(transform);
+    }
+
+    /** 
+     * @param {Number} a - 水平缩放比例。
+     * @param {Number} b - 水平倾斜比例。
+     * @param {Number} c - 垂直倾斜比例。
+     * @param {Number} d - 垂直缩放比例。
+     * @param {Number} e - 水平平移距离。
+     * @param {Number} f - 垂直平移距离。
+     */
+    this.transform = (a, b, c, d, e, f) => {
+        transform.scale(a, d);
+        transform.shear(b, c);
+        transform.translate(fw(e), fh(f));
+        this.g.setTransform(transform);
+    }
+
+    this.getTransform = () => transform;
+
     /**
      * 开始路径。
      */
@@ -112,16 +179,44 @@ function Canvas(g, fx, fy, fl) {
     this.bezierCurveTo = (x1, y1, x2, y2, x3, y3) => path.curveTo(fx(x1), fy(y1), fx(x2), fy(y2), fx(x3), fy(y3));
 
     /**
+     * @param {Number} x1 - 控制点 1 的 x 坐标(使用 fx 函数)。
+     * @param {Number} y1 - 控制点 1 的 y 坐标(使用 fy 函数)。
+     * @param {Number} x2 - 终点的 x 坐标(使用 fx 函数)。
+     * @param {Number} y2 - 终点的 y 坐标(使用 fy 函数)。
+     * @returns 
+     */
+    this.quadraticCurveTo = (x1, y1, x2, y2) => path.quadTo(fx(x1), fy(y1), fx(x2), fy(y2));
+
+    /**
      * 结束路径。
      */
     this.closePath = () => path.closePath();
     
     const setColor = (str) => {
-        str = str.substring(4, str.length-1);
-        let arr = str.split(",");
-        let r = parseInt(arr[0]), gr = parseInt(arr[1]), b = parseInt(arr[2]);
-        let color = new Color(r << 16 | gr << 8 | b);
-        this.g.setColor(color);
+        let color, r, gr, b;
+        try {
+            if (str.startsWith("rgb(")) {
+                str = str.substring(4, str.length-1);
+                let arr = str.split(",");
+                r = parseInt(arr[0]), gr = parseInt(arr[1]), b = parseInt(arr[2]);
+                this.g.setComposite(AlphaComposite.SrcOver.derive(1)); 
+            } else if (str.startsWith("rgba(")) {
+                str = str.substring(5, str.length-1);
+                let arr = str.split(",");
+                r = parseInt(arr[0]), gr = parseInt(arr[1]), b = parseInt(arr[2]);
+                let a = parseFloat(arr[3]);
+                this.g.setComposite(AlphaComposite.SrcOver.derive(a));
+            } else {
+                throw new Error();
+            }
+        } catch (e) {
+            print ("Canvas: invalid color string: " + str);
+            throw new Error("Canvas: invalid color string: " + str);
+        }
+
+        color = r << 16 | gr << 8 | b;
+        if (colorMap.has(color)) color = colorMap.get(color);
+        this.g.setColor(new Color(color));
     };
     
     /**
@@ -145,7 +240,7 @@ function Canvas(g, fx, fy, fl) {
             case "miter": join = BasicStroke.JOIN_MITER; break;
         }
         setColor(this.strokeStyle); 
-        this.g.setStroke(new BasicStroke(fl(this.lineWidth), cap, join)); 
+        this.g.setStroke(new BasicStroke(4 * fl(this.lineWidth), cap, join)); 
         this.g.draw(path);
     }
 
@@ -166,17 +261,25 @@ function Canvas(g, fx, fy, fl) {
      * @param {Number} w - 矩形的宽度(使用 fx 函数)。
      * @param {Number} h - 矩形的高度(使用 fy 函数)。
      */
-    this.rect = (x, y, w, h) => {setColor(this.fillStyle); this.g.fillRect(fx(x), fy(y), fx(w), fy(h));};
+    this.rect = (x, y, w, h) => {setColor(this.fillStyle); this.g.fillRect(fx(x), fy(y), fw(w), fh(h));};
     
     /**
+     * 暂时使用填充圆弧代替
      * @param {Number} x - 圆心的 x 坐标(使用 fx 函数)。
      * @param {Number} y - 圆心的 y 坐标(使用 fy 函数)。
      * @param {Number} r - 圆的半径(使用 fl 函数)。
      * @param {Number} start - 起始角度。(弧度制);
      * @param {Number} end - 终止角度。(弧度制)
      */
-    this.drawArc = (x, y, r, start, end) => {setColor(this.srokeStyle); this.setStroke(); this.g.drawArc(fx(x - r), fy(y - r), fl(2 * r), fl(2 * r), start, end);};
-    this.toString = () => "Canvas by Aphrodite281" + this.g.toString();
+    this.arc = (x, y, r, start, end) => {
+        // let arc = new Arc2D.Double();
+        setColor(this.fillStyle);
+        this.g.fillRoundRect(fx(x - r), fy(y - r), fw(2 * r), fh(2 * r), fw(2 * r), fh(2 * r));
+        // this.g.fillArc(fx(x - r), fy(y - r), fw(2 * r), fh(2 * r), 0, Math.PI);
+        // path.append(arc, true);
+    }
+
+    this.toString = () => "Canvas by Aphrodite281: " + this.g.toString();
 }
 
 /** 
@@ -187,11 +290,31 @@ function Canvas(g, fx, fy, fl) {
  * @param {Number} s - 缩放比例。
  * @param {Number} w - 图像的相对宽度。
  * @param {Number} h - 图像的相对高度。
+ * @param {Map<Number, Number> | Array<Number> | Array<Array<Number>>} colorMap - 颜色映射表。类似 {[0, 0xff00ff], [0xff0000, 0xffffff]}。
  * @returns {Canvas} - Canvas 对象。
  */
-Canvas.createWithCenterAndScale = function(g, x, y, s, w, h) {
-    let fx = (ax) => x - s * w / 2 + s * ax;
-    let fy = (ay) => y - s * h / 2 + s * ay;
+Canvas.createWithCenterAndScale = (g, x, y, s, w, h, colorMap) => {
+    let fw = (aw) => s * aw;
+    let fh = (ah) => s * ah;
+    let fx = (ax) => x - s * w / 2 + fw(ax);
+    let fy = (ay) => y - s * h / 2 + fh(ay);
     let fl = (al) => s * al;
-    return new Canvas(g, fx, fy, fl);
+    if (colorMap instanceof Array) colorMap = Canvas.transformColorMap(colorMap);
+    return new Canvas(g, fx, fy, fw, fh, fl, colorMap);
+}
+
+/**
+ * @param {Array<Number> | Array<Array<Number>>} array - 颜色映射表。类似 [0, 0xff00ff, 0xff0000, 0xffffff]。两两一组
+ * 或 [[0, 0xff00ff], [0xff0000, 0xffffff]]。
+ * @returns {Map<Number, Number>} - 颜色映射表。类似 {[0, 0xff00ff], [0xff0000, 0xffffff]}。
+ */
+Canvas.transformColorMap = (array) => {
+    let map = new Map();
+    for (let i = 0; i < array.length; i++) {
+        let k0 = array[i], k1;
+        if (k0 instanceof Array) k1 = k0[1], k0 = k0[0];
+        else k1 = array[i++];
+        map.set(k0, k1);
+    }
+    return map;
 }

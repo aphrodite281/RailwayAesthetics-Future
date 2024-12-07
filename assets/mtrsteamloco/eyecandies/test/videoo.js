@@ -2,10 +2,6 @@ importPackage (java.lang);
 importPackage (java.awt);
 importPackage (java.io);
 importPackage (java.awt.image);
-include(Resources.id("aphrodite:library/code/scrolls_screen.js"));
-include(Resources.id("aphrodite:library/code/board.js"));
-include(Resources.id("aphrodite:library/code/face.js"));
-include(Resources.id("aphrodite:library/code/color_int_base.js"));
 
 const MCU = MinecraftClient;
 const MCD = MTRClientData;
@@ -21,15 +17,6 @@ const MS = Matrices;
 const M4 = Matrix4f;
 const V3 = Vector3f;
 const RB = RawMeshBuilder;
-
-/*let ff = new File("aacc.txt");
-ff.createNewFile();
-let fw = new FileWriter(ff);
-try {
-    fw.write("Hello, world!");
-} finally {
-    fw.close();
-}*/
 
 const r = RU.id("mtrsteamloco:eyecandies/test/k.mp4");
 const t = "arar-temp/videoo/";
@@ -53,21 +40,6 @@ try {
     throw e;
 }
 
-//let pb = new ProcessBuilder("ffmpeg", "-i", t + "k.mp4", "-vf", "fps=30", "-vsync", "0", "-f", "image2", t + "%06d.png");
 let pb = new ProcessBuilder("ffmpeg", "-i", t + "k.mp4", "-frames:v", "1", t + "1.png"); //
-//ffmpeg -i assets/mtrsteamloco/v/test.mp4 -vf "fps=30" -vsync 0 -f image2 assets/mtrsteamloco/v/%06d.png
 p = () => pb.start();
 p();
-//let th = new Thread(p, "jieya-mp4");
-//th.start();
-/* let br = new BufferedReader(new InputStreamReader(p.getInputStream()));
-let er = new BufferedReader(new InputStreamReader(p.getErrorStream()));
-let line = "";
-let a = ""
-while ((line = br.readLine()) != null) {
-    a += line + "\n";
-}
-while ((line = er.readLine()) != null) {
-    a += line + "\n";
-}
-throw new Error(a);*/

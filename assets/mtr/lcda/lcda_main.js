@@ -15,6 +15,8 @@ include(Resources.id("aphrodite:library/code/map_tostring.js"));
 include(Resources.id("aphrodite:library/code/array_tostring.js"));
 include(Resources.id("mtr:lcda/icon/hc.js"));
 include(Resources.id("mtr:lcda/icon/bz.js"));
+include(Resources.id("mtr:lcda/icon/xr.js"));
+include(Resources.id("mtr:lcda/icon/zwfh.js"));
 
 const logo = Resources.readBufferedImage(Resources.id("mtr:lcda/icon/logo.png"));
 
@@ -266,11 +268,20 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                     let dataCache = MTRClientData.DATA_CACHE;
                     let plass = dataCache.requestStationIdToPlatforms(station.id);
                     for (let [id, platform] of plass) {
-                        let platformRouteDetails = dataCache.requestPlatformIdToRoutes(id);
+                        /* let platformRouteDetails = dataCache.requestPlatformIdToRoutes(id);
                         for (let platformRouteDetail of platformRouteDetails) {
                             let name = platformRouteDetail.routeName;
                             let color = platformRouteDetail.routeColor;
                             huancheng.set(TU.CP(name) + "|" + TU.NP(name), [TU.CP(name), TU.NP(name), color, getColor(color)]);
+                        } */
+                        for (let route of MTRClientData.ROUTES) {
+                            if (route.isHidden) continue;
+                            if (route.containsPlatformId(id)) {
+                                let name = route.name;
+                                let color = route.color;
+                                huancheng.set(TU.CP(name) + "|" + TU.NP(name), [TU.CP(name), TU.NP(name), color, getColor(color)]);
+                                continue;
+                            }
                         }
                     }
                     huancheng.delete(TU.CP(route.name) + "|" + TU.NP(route.name));
@@ -312,7 +323,7 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                 addDrawCall1(lambda1, lambda2);
             }
             const setComp = (g, value) => {g.setComposite(AlphaComposite.SrcOver.derive(value))};
-            const checkTime = v => v < 0 ? 0 : v;
+            // const checkTime = v => v < 0 ? 0 : v;
             const isOnRoute = () => train.isOnRoute();
 
             const fill = (g, width, x1, y1, x2, y2) => {
@@ -416,7 +427,7 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                 font = font0.deriveFont(Font.PLAIN, dy(0.09));
                 drawMiddle(g, "请小心站台间隙", font, dx(0.5), dy(0.88));
                 font = font0.deriveFont(Font.PLAIN, dy(0.04));
-                drawMiddle(g, "Pleace mind the gap", font, dx(0.5), dy(0.96));
+                drawMiddle(g, "Please mind the gap", font, dx(0.5), dy(0.96));
                 g.dispose();
 
                 return img;
@@ -487,9 +498,31 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                 font = font0.deriveFont(Font.PLAIN, dy(40));
                 drawMiddle(g, "请小心站台间隙", font, dx(220), dy(325));
                 font = font0.deriveFont(Font.PLAIN, dy(25));
-                drawMiddle(g, "Pleace mind the gap", font, dx(220), dy(360));
+                drawMiddle(g, "Please mind the gap", font, dx(220), dy(360));
 
                 g.dispose();
+                return img;
+            }
+
+            const getT3 = () => {
+                let w0 = w * 110 / 500, h0 = h * 0.75;
+                let img = new BufferedImage(w0, h0, BufferedImage.TYPE_INT_ARGB);
+                let g = img.createGraphics();
+                const dx = (ax) => w0 * ax;
+                const dy = (ay) => h0 * ay;
+                g.setColor(new Color(0xefefef));
+                let ww = h0 * 0.1;
+                g.fillRoundRect(0, 0, w0, h0, ww, ww);
+                let u = (r, g, b) => r << 16 | g << 8 | b;
+                let h1 = dy(0.7);
+                let s = h1 / 79;
+                s = Math.min(s, w0 / 132);
+                let canvas = Canvas.createWithCenterAndScale(g, w0 / 2, h1 / 2, s, 132, 79, [[u(255, 255, 0), icolor], [u(86, 255, 0), 0xffffff], [u(49, 219, 255), icolor]]);
+                zwfh(canvas);
+                let font = font0.deriveFont(Font.PLAIN, dy(0.1));
+                drawMiddle(g, "请站稳扶好", font, dx(0.5), dy(0.85));
+                font = font0.deriveFont(Font.PLAIN, dy(0.05));
+                drawMiddle(g, "Please stand firm and hold yourself steady", font, dx(0.5), dy(0.95));
                 return img;
             }
 
@@ -677,6 +710,8 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                     g.drawImage((ihuancheng.size > 0 ? getT2() : getT1()), x, y, null);
                 } else {
                     acc = -1000;
+                    x = w * (500 - 110 - 4) / 500, y = h * 0.23;
+                    g.drawImage(getT3(), x, y, null)
                 }
             }
 
@@ -868,7 +903,6 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                             g.setColor(new Color(0));
                             g.fillRect(0, 0, w, h);
                             setComp(g, smooth(1, mainAlpha));
-                            // ctx.setDebugInfo("alphaa" + isRight, mainAlpha);
                             g.drawImage(img1, 0, 0, null);
                         }
                         
@@ -880,8 +914,8 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                     ctx.setDebugInfo("LCD-Thread " + (isRight ? "Right " : "Left ") + carIndex + "  Used: ", lastFrameTime + "ms");
                     lastFrameTime = now() - startTime;
                 } catch (e) {
-                    ctx.setDebugInfo("LCD-Thread " + (isRight ? "Right " : "Left ") + carIndex + " Error At: ", now() + e.message);
-                    print("ARAF-LCD-Thread " + (isRight ? "Right " : "Left ") + carIndex + " Error At: " + now() + e.message);
+                    ctx.setDebugInfo("LCD-Thread " + (isRight ? "Right " : "Left ") + carIndex + " Error At: ", now() + "     " + e.message);
+                    print("ARAF-LCD-Thread " + (isRight ? "Right " : "Left ") + carIndex + " Error At: " + now() + "     " + e.message);
                     Thread.sleep(100);
                 }
             }

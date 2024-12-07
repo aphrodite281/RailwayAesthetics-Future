@@ -5,7 +5,6 @@
 importPackage(java.awt);
 importPackage(java.awt.geom);
 include(Resources.id("aphrodite:library/code/text_u.js"));
-include(Resources.id("aphrodite:library/code/shape_u.js"));
 
 const MCU = MinecraftClient;
 const MCD = MTRClientData;

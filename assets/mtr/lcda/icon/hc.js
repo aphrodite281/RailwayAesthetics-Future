@@ -15,7 +15,7 @@ function hc (ctx) {
     ctx.beginPath();
     ctx.fillStyle = 'rgb(255, 255, 255)';
     ctx.strokeStyle = 'rgb(0, 0, 0)';
-    ctx.lineWidth = 3;
+    ctx.lineWidth = 1;
     ctx.moveTo(48.987701, 26.458332);
     ctx.bezierCurveTo(48.987701, 32.433493, 46.614078, 38.163927, 42.389001, 42.389004);
     ctx.bezierCurveTo(38.163924, 46.614081, 32.433491, 48.987705, 26.458330, 48.987705);
