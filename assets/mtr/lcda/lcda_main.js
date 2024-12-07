@@ -343,7 +343,7 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                 g.drawString(str, x - ww / 2, y);
             }
 
-            const getT1 = () => {// 440 * 375
+            const getS1 = () => {// 440 * 375
                 let w0 = w * 110 / 500, h0 = h * 0.75;
                 const dx = (v) => w0 * v;
                 const dy = (v) => h0 * v;
@@ -433,7 +433,7 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                 return img;
             }
             
-            const getT2 = () => {
+            const getS2 = () => {
                 let w0 = w * 110 / 500, h0 = h * 0.75;
                 let img = new BufferedImage(w0, h0, BufferedImage.TYPE_INT_ARGB);
                 let g = img.createGraphics();
@@ -504,7 +504,7 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                 return img;
             }
 
-            const getT3 = () => {
+            const getD1 = () => {
                 let w0 = w * 110 / 500, h0 = h * 0.75;
                 let img = new BufferedImage(w0, h0, BufferedImage.TYPE_INT_ARGB);
                 let g = img.createGraphics();
@@ -526,6 +526,77 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                 return img;
             }
 
+            const getD2 = () => {
+                let w0 = w * 110 / 500, h0 = h * 0.75;
+                let img = new BufferedImage(w0, h0, BufferedImage.TYPE_INT_ARGB);
+                let g = img.createGraphics();
+                const dx = (ax) => w0 * ax / 440;
+                const dy = (ay) => h0 * ay / 375;
+                g.setColor(new Color(0xefefef));
+                let ww = h0 * 0.1;
+                g.fillRoundRect(0, 0, w0, h0, ww, ww);
+                let scale = dy(80) / 52, x = dx(120), y = dy(80);
+                let canvas = Canvas.createWithCenterAndScale(g, x, y, scale, 52, 52);
+                hc(canvas, g, ctx);
+                g.setColor(new Color(0xa0a0a0));
+                let font = font0.deriveFont(Font.PLAIN, dy(58));
+                drawMiddle(g, "可 换 乘", font, dx(280), dy(80));
+                font = font0.deriveFont(Font.PLAIN, dy(30));
+                drawMiddle(g, "Transfer To", font, dx(280), dy(120));
+
+                const draw = (x, y, w1, h1, color0, color1, c, n) => {
+                    g.setColor(new Color(color0));
+                    g.fillRoundRect(x, y, w1, h1, dy(10), dy(10));
+                    g.setColor(new Color(color1));
+                    let font  = font0.deriveFont(Font.PLAIN, dy(h1 * 0.5));
+                    drawMiddle(g, c, font, x + w1 / 2, y + h1 * 0.5);
+                    font = font0.deriveFont(Font.PLAIN, dy(h1 * 0.3));
+                    drawMiddle(g, n, font, x + w1 / 2, y + h1 * 0.85);
+                }
+
+                let array = [];
+                for (let [key, value] of ihuancheng) {
+                    array.push(value);
+                }
+                array.sort((a, b) => (a[0] + a[1]).localeCompare(b[0] + b[1]));
+                let y0 = dy(140), y1 = dy(280), h1 = dy(100), w1 = dx(180)
+                let jx = dx(20), jy = dy(20), col = 1, row = 1;
+                scale = 1;
+                while (row * col < array.length) {
+                    scale -= 0.05;
+                    h1 = dy(100) * scale;
+                    w1 = dx(180) * scale;
+                    jx = dx(20) * scale;
+                    jy = dy(20) * scale;
+                    col = Math.floor(dx(440) / (w1 + jx));
+                    row = Math.floor((y1 - y0) / (h1 + jy));
+                }
+                jx = (dx(440) - col * w1) / (col);
+                jy = ((y1 - y0) - row * h1) / (row);
+                col = Math.ceil(array.length / row);
+                for (let i = 0; i < array.length; i++) {
+                    let k = (row - 1) * col, a = i;
+                    let colu = col;
+                    if (a >= k) colu = array.length - (row - 1) * col;// 如果是最后一行 且有多行不一定是col列
+                    a = a % col;
+                    let rowt = Math.floor((i / col));
+                    let startx = (dx(440) - colu * w1 - (colu - 1) * jx) / 2;
+                    let x = startx + a * (w1 + jx);
+                    let starty = y0 + ((y1 - y0) - (row * h1 + (row - 1) * jy)) / 2;
+                    let y = starty + rowt * (h1 + jy);
+                    draw(x, y, w1, h1, array[i][2], array[i][3], array[i][0], array[i][1]);
+                }
+                setComp(g, 1);
+                g.setColor(Color.black);
+                font = font0.deriveFont(Font.PLAIN, dy(40));
+                drawMiddle(g, "请站稳扶好", font, dx(220), dy(325));
+                font = font0.deriveFont(Font.PLAIN, dy(25));
+                drawMiddle(g, "Please stand firm and hold yourself steady", font, dx(220), dy(360));
+
+                g.dispose();
+                return img;
+            }
+
             const backGround = (g) => {
                 let [color0, color1, cname, ename, cdest, edest, time0, time1, is, t1, t2, t3, t4, isArrive, open] = info;
                 g.setColor(new Color(0xffffff));
@@ -544,19 +615,19 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                 fill(g, ww, x, y, x, y1 - y);
 
                 g.setColor(new Color(color0));
-                x = w * 85 / 500, x1 = w * 115 / 500, y = h * 8 / 300, w1 = x1 - x, h1 = y1 - 2 * y;
-                g.fillRoundRect(x, y, w1, h1, w1 * 0.2, h1 * 0.3);
+                x = w * 82 / 500, x1 = w * 115 / 500, y = h * 8 / 300, w1 = x1 - x, h1 = y1 - 2 * y;
+                g.fillRoundRect(x, y, w1, h1, w1 * 0.2, w1 * 0.2);
                 k = h1 * 0.45;
                 font = font0.deriveFont(Font.PLAIN, k);
                 g.setFont(font);
                 g.setColor(new Color(color1));
                 wh = getWH(g, cname, font);
-                g.drawString(cname, x + (w1 - wh[0]) / 2, y + k);
-                k = h1 * 0.3;
+                g.drawString(cname, x + (w1 - wh[0]) / 2, y + h1 * 0.5);
+                k = h1 * 0.25;
                 font = font0.deriveFont(Font.PLAIN, k);
                 g.setFont(font);
                 wh = getWH(g, ename, font);
-                g.drawString(ename, x + (w1 - wh[0]) / 2, y + h1 * 0.85);
+                g.drawString(ename, x + (w1 - wh[0]) / 2, y + h1 * 0.82);
 
                 x = w * 10 / 500, w1 = h1;
                 g.drawImage(logo, x, y, w1, w1, null);
@@ -707,11 +778,11 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                     
                     g.setColor(new Color(0xe0e0e0));
                     x = w * (500 - 110 - 4) / 500, y = h * 0.23;
-                    g.drawImage((ihuancheng.size > 0 ? getT2() : getT1()), x, y, null);
+                    g.drawImage((ihuancheng.size > 0 ? getS2() : getS1()), x, y, null);
                 } else {
                     acc = -1000;
                     x = w * (500 - 110 - 4) / 500, y = h * 0.23;
-                    g.drawImage(getT3(), x, y, null)
+                    g.drawImage((ihuancheng.size > 0 ? getD2() : getD1()), x, y, null)
                 }
             }
 
