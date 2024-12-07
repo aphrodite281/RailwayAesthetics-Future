@@ -32,26 +32,31 @@ function Canvas(g, fx, fy, fw, fh, fl, colorMap, ctx) {
      * @param {Function<Number, Number>} fx - 用于转换 x 坐标的函数。
      */
     this.fx = fx;
+    fx = (...args) => this.fx(...args);
 
     /**
      * @param {Function<Number, Number>} fy - 用于转换 y 坐标的函数。
      */
     this.fy = fy;
+    fy = (...args) => this.fy(...args);
     
     /**
      * @param {Function<Number, Number>} fw - 用于转换宽度的函数。
      */
     this.fw = fw;
+    fw = (...args) => this.fw(...args);
 
     /**
      * @param {Function<Number, Number>} fh - 用于转换高度的函数。
      */
     this.fh = fh;
+    fh = (...args) => this.fh(...args);
 
     /**
      * @param {Function<Number, Number>} fl - 用于转换粗细的函数。
      */
     this.fl = fl;
+    fl = (...args) => this.fl(...args);
 
     if (colorMap == null) colorMap = new Map();
     if (!(colorMap instanceof Map)) {
