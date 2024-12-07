@@ -168,7 +168,7 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
             disposeList.push(() => {g0.dispose(); g1.dispose();});
 
             const drawCalls = [];// [旧图, [新渐变的, 新alpha]] 渐变绘制
-            let dynfun = (g) => {};// 动态绘制函数
+            const DDrawCalls = [];// [[fun, alpha, st, et, dispose], [fun, alpha, st, dispose]] 动态渐变绘制
             let mainAlpha = new Value(0, 1, 0, 1.2, 0, 0);// 主渐变alpha
             let needUpload = false;// 是否需要上传
             let lastFrameTime = 0;// 上一帧时间
@@ -179,8 +179,9 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
             // const fps = 24;// 帧率
             // const frameTime = 1000 / fps;// 帧时间
             let outAlpha = new Value(0, 1, 0, 1.5, -1, 2);// 门里的指示的透明度
-            let style = 0;// 运行时的样式组合
-            let dynST = Date.now();// 切换动画的开始时间
+            let DStyle = 0;// 运行时的样式组合
+            let DST = Date.now();// 切换动画的开始时间
+            let DLST = 0;// 切换动画上一个的开始时间
             let icolor, icolor1, icname, iename, icdest, iename1, icname1, iename2, icname2, iename3, icname3, iename4, icname4, itime0, itime1, iis, it1, it2, it3, it4, iisArrive, iopen, ihuancheng = new Map(), ixlt0;// info 数据
             const now = () => Date.now();
             const getInfo = () => {// 获取/更新信息，并通过toString方法判断是否应该更新
@@ -315,7 +316,11 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                 return [color, color1, cname, ename, cdest, edest, time0, time1, is, t1, t2, t3, t4, isArrive, open, huancheng, xlt0];
             }
 
-            const addDrawCall0 = (fun0) => {
+            /**
+             * 添加静态绘制
+             * @param {Function<Graphics2D>} fun0 绘制函数
+             */
+            const addDrawCallS = (fun0) => {
                 if (drawCalls.length == 0) {
                     let img = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
                     let g = img.createGraphics();
@@ -335,12 +340,12 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                     drawCalls[1] = [newImg, 0];
                 }
             }
-            const addDrawCall1 = (fun1) => {
-                dynfun = fun1;
-            }
-            const addDrawCall = (fun0, fun1) => {
-                addDrawCall0(fun0);
-                addDrawCall1(fun1);
+            /**
+             * 添加动态绘制
+             * @param {Function<Graphics2D, Number, Number> : Boolean} fun1 绘制函数 传入Graphics, 开始时间，结束时间 返回是否删除此绘制
+             */
+            const addDrawCallD = (fun1) => {
+                DDrawCalls.push([fun1, Date.now(), 0, false]);
             }
             const setComp = (g, value) => {g.setComposite(AlphaComposite.SrcOver.derive(value))};
             // const checkTime = v => v < 0 ? 0 : v;
@@ -935,7 +940,7 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                 try {
                     if (first) {
                         info = getInfo();
-                        addDrawCall(backGround, DA0, ctrl);
+                        addDrawCallS(backGround);
                         needUpload = true;
                         mainAlpha.set(isOnRoute() ? 1 : 0, 0);
                         first = false;
@@ -944,7 +949,7 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
 
                     if (info.toString() != getInfo().toString() && isOnRoute()) {
                         info = getInfo();
-                        addDrawCall0(backGround);
+                        addDrawCallS(backGround);
                         needUpload = true;
                     }
                     mainAlpha.update();
@@ -973,18 +978,29 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                             let g = tex.graphics;
                             setComp(g, 1);
                             g.drawImage(img0, 0, 0, null);
-                            dynfun(g);
+                            DA0(g);
+                            for (let i = 0; i < DDrawCalls.length; i++) {
+                                let [fun, st, et, dis] = DDrawCalls[i];
+                                if (dis) continue;
+                                dis = fun(g, st, et);
+                            }
                         } else {
                             let g = tex.graphics;
                             setComp(g1, 1);
                             g1.drawImage(img0, 0, 0, null);
-                            dynfun(g1);
+                            DA0(g1);
+                            for (let i = 0; i < DDrawCalls.length; i++) {
+                                let [fun, st, et, dis] = DDrawCalls[i];
+                                if (dis) continue;
+                                dis = fun(g, st, et);
+                            }
                             setComp(g, 1);
                             g.setColor(new Color(0));
                             g.fillRect(0, 0, w, h);
                             setComp(g, smooth(1, mainAlpha.get(false)));
                             g.drawImage(img1, 0, 0, null);
                         }
+                        DDrawCalls.filter(item => item[3] == false);
                         
                         tex.upload();
                         needUpload = false;
