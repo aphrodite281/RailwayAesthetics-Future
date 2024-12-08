@@ -80,22 +80,10 @@ function create(ctx, state, train) {
 let acc = Date.now();
 
 function render(ctx, state, train) {
-    //ctx.drawCarModel(model, 0, null);
-    state.lastTime = System.currentTimeMillis();
+    state.lastTime = Date.now();
     for (let entry of state.tickList) {
         entry();
     }
-    ctx.setDebugInfo("isOnRoute: ", train.isOnRoute());
-    try {
-        let plas = train.getThisRoutePlatforms();
-        let station = plas[train.getThisRoutePlatformsNextIndex()].destinationStation;
-        let dest = station.name;
-    ctx.setDebugInfo("dest", dest);
-    } catch (e) {
-        ctx.setDebugInfo("dest", e);
-    }
-    acc += Timing.delta() * 1000 * 0.6;
-    ctx.setDebugInfo("abc", train.doorTarget());
 }
 
 function dispose(ctx, state, train) {
@@ -151,12 +139,12 @@ const smooth = (k, value) => {// 平滑变化
 }*/
 
 function LCDThread(face, isRight, ctx, state, train, carIndex) {
-    const uid = "LCDThread-" + (isRight ? "Right" : "Left") + "-" + carIndex;
+    const uid = "ARAF-LCDThread-" + (isRight ? "Right" : "Left") + "-" + carIndex;
     let thread = new Thread(() => {
         const disposeList = [];
         try {
-            print("ARAF-LCD-Thread " + (isRight ? "Right" : "Left") + " Start");
-            ctx.setDebugInfo("LCD-Thread " + (isRight ? "Right " : "Left ") + carIndex + " Start", System.currentTimeMillis().toString());
+            print(uid + " Start");
+            ctx.setDebugInfo(uid + " Start", System.currentTimeMillis().toString());
 
             const font0 = fontA.deriveFont(Font.PLAIN, 45);
             const font1 = fontB.deriveFont(Font.PLAIN, 45);
@@ -328,15 +316,17 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                     }
                     huancheng.delete(TU.CP(route.name) + "|" + TU.NP(route.name));
 
-                    for (let i = -2; i < 3; i++) {
-                        try {
-                            pla = plas[ind + i];
-                            station = pla.station;
-                            ss();
-                            name = station.name;
-                            xlt0.push([TU.CP(name), TU.NP(name)]);
-                        } catch (e) {
-                            xlt0.push(undefined);
+                    if (isOnRoute()) {
+                        for (let i = -2; i < 3; i++) {
+                            try {
+                                pla = plas[ind + i];
+                                station = pla.station;
+                                ss();
+                                name = station.name;
+                                xlt0.push([TU.CP(name), TU.NP(name)]);
+                            } catch (e) {
+                                xlt0.push(undefined);
+                            }
                         }
                     }
                 } catch (e) {
@@ -918,6 +908,11 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
             DA0.id = "DA0";
             
             const DR0 = (g, st, et) => {
+                const dx = ax => ax * w / 500;
+                const dy = ay => ay * h / 50; 
+                let kf = num => Math.sqrt(num);
+                let dir = [[-1, 0], [-kf(1), -kf(1)], [0, -1], [kf(1), -kf(1)], [1, 0]];
+                let strs = ixlt0;
                 let t = now() - st;
                 t = t / 1000 * 0.5;
                 let a = 1 - smooth(1, t);
@@ -925,29 +920,27 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                     let t1 = now() - et;
                     t1 = t1 / 1000 * 0.5;
                     let a1 = smooth(1, t1);
-                    ctx.setDebugInfo(uid + "DR0", a, a1, t, t1);
                     a = Math.max(a, a1);
                 }
+                let dn = a * dx(100);
                 setComp(g, 1 - a);
-                let hsv = cu.h2v(icolor);
-                let f1 = k => {
-                    let hs = new HSV(hsv);
-                    hs.s *= k;                
-                    hs.v *= 0.9;  
-                    return cu.v2h(hs);
+                if (strs.length == 0) {
+                    g.setColor(new Color(0));
+                    drawMiddle(g, "暂无信息", font0.deriveFont(Font.PLAIN, h * 0.3), dx(220) - dn, h * 0.6);
+                    drawMiddle(g, "No Information", font0.deriveFont(Font.PLAIN, h * 0.1), dx(220) + dn, h * 0.8);
+                    return false;
                 }
-                let f2 = k => {
+                if (et != null && a == 1) return true;// 完全透明后退出
+                let hsv = cu.h2v(icolor);
+                let f = k => {
                     let hs = new HSV(hsv);
                     hs.s *= k;
                     return cu.v2h(hs);
                 }
-                // throw new Error(f1(0.6).toString(16) + ",." + f2(0.6).toString(16));
-                let strs = ixlt0;
-                let colors = [f1(0.1), f1(0.4), icolor, f2(0.4), f2(0.2)];
+                let colors = [f(0.3), f(0.6), cu.v2h(hsv), f(0.8), f(0.5)];
                 let ss = [0.5, 0.7, 1];
                 let s = [ss[0], ss[1], ss[2], ss[1], ss[0]];
-                const dx = ax => ax * w / 500;
-                const dy = ay => ay * h / 50; 
+
                 let w1 = 90, h1 = dy(22);
                 let m = 225;
                 let sx = [0, 4, 1, 3, 2];
@@ -964,16 +957,6 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                     x[is[1]] = m + tx;
                     tx += w2 / 2;
                 }
-                let kf = num => Math.sqrt(num);
-                let dir = [[-1, 0], [-kf(1), -kf(1)], [0, -1], [kf(1), -kf(1)], [1, 0]];
-                let dn = a * dx(100);
-                const getColor = (color) => {
-                    let rr = color >> 16 & 0xff;
-                    let g = color >> 8 & 0xff;
-                    let b = color & 0xff;
-                    let luminance  = 0.299 * rr + 0.587 * g + 0.114 * b;
-                    return luminance > 255 / 2 ? 0 : 0xffffff;
-                }
                 let txx = [8, 4, 0, -4, -8];
                 let sizeX = [];
                 for (let i = 0; i < 5; i++) {
@@ -987,13 +970,13 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                     g.setColor(new Color(colors[j]));
                     let r = h2 * 0.1;
                     g.fillRoundRect(x1 - w2 / 2, y1 - h2 / 2, w2, h2, r, r);
-                    g.setColor(new Color(getColor(colors[j])));
+                    g.setColor(new Color(icolor1));
                     if(i == 4) {
                         let x = x1 - w2 * 0.35, y = y1 - h2 * 0.04;
                         let font = font0.deriveFont(Font.PLAIN, h2 * 0.13);
                         drawMiddle(g, "下一站", font, x, y);
                         font = font0.deriveFont(Font.PLAIN, h2 * 0.06);
-                        y += h2 * 0.08;
+                        y += h2 * 0.1;
                         drawMiddle(g, "Next Station", font, x, y);
                         x = x1 + w1 * 0.48;
                         y = y1;
@@ -1009,16 +992,14 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                     }
                 }
                 let scale = dy(8) / 100;
-                let cs = 100 * scale;
-                y = dy (15);
-                let ys = [dy(20), 0, dy(15), 0, dy(20)];
+                let wx = 100 * scale;
+                let ys = [dy(20), 0, dy(17), 0, dy(20)];
                 for (let i = 0; i < 5; i+=2) {
-                    let xx = dx(x[i]) - sizeX[i] / 2 + cs / 2 + smooth(1, (now() / 1000 * 0.6) % 1) * (sizeX[i] - cs);
+                    let v = smooth(1, ((now() / 1000) * 0.8) % 1);
+                    let xx = dx(x[i] + txx[i]) - sizeX[i] / 2 + wx / 2 + v * (sizeX[i] - wx);
                     let canvas = Canvas.createWithCenterAndScale(g, xx, ys[i], scale, 100, 100, 1 - a, [0x00ff00, icolor]);
                     jt(canvas);
                 }
-
-                if (et != null && a == 1) return true;
                 return false;
             }
             DR0.id = "DR0";
@@ -1045,7 +1026,7 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                     need = true;
                 }
 
-                if (isArrive) {
+                if (isArrive || !isOnRoute()) {
                     DStyle = 0;
                     DTime = 0;
                     addDrawCallD(() => true);
@@ -1128,24 +1109,23 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                             if (e[3] == false) newDDC.push(e);
                         }
                         DDrawCalls = newDDC;
-                        ctx.setDebugInfo(uid, ka, DDrawCalls.length);
                         tex.upload();
                         needUpload = false;
                     }
 
                     lastFrameTime = now() - startTime;
-                    ctx.setDebugInfo("LCD-Thread " + (isRight ? "Right " : "Left ") + carIndex + "  Used: ", lastFrameTime + "ms");
+                    ctx.setDebugInfo(uid +  "  Used: ", lastFrameTime + "ms");
                     lastFrameTime = now() - startTime;
                 } catch (e) {
-                    ctx.setDebugInfo("LCD-Thread " + (isRight ? "Right " : "Left ") + carIndex + " Error At: ", now().toString(), e.message, e.stack);
-                    print("ARAF-LCD-Thread " + (isRight ? "Right " : "Left ") + carIndex + " Error At: " + now() + "     " + e.message + "      " + e.stack);
+                    ctx.setDebugInfo(uid + " Error At: ", now().toString(), e.message, e.stack);
+                    print(uid + " Error At: " + now() + "     " + e.message + "      " + e.stack);
                     Thread.sleep(100);
                 }
             }
-            print("ARAF-LCD-Thread " + (isRight ? "Right" : "Left") + " Exit");
+            print(uid + " Exit");
         } catch (e) {
-            ctx.setDebugInfo("LCD-Thread " + (isRight ? "Right " : "Left ") + carIndex + " Error At: ", System.currentTimeMillis() + e.message , e.stack);
-            print("ARAF-LCD-Thread " + (isRight ? "Right " : "Left ") + carIndex + " Error At: " + System.currentTimeMillis() + e.message + e.stack);
+            ctx.setDebugInfo(uid +  " Error At: ", System.currentTimeMillis() + e.message , e.stack);
+            print(uid + " Error At: " + System.currentTimeMillis() + e.message + e.stack);
         } finally {
             for (let fun of disposeList) {
                 fun();
