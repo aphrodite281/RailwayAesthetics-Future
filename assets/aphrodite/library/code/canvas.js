@@ -18,11 +18,14 @@ importPackage (java.awt.font);
  * @param {Graphics2D} g - 图形上下文对象。
  * @param {Function} fx - 用于转换 x 坐标的函数。
  * @param {Function} fy - 用于转换 y 坐标的函数。
+ * @param {Function} fw - 用于转换宽度的函数。
+ * @param {Function} fh - 用于转换高度的函数。
  * @param {Function} fl - 用于转换长度的函数。
- * @param {Map<Number, Number>} colorMap - 颜色映射表。类似 {[0, 0xff00ff], [0xff0000, 0xffffff]}。
+ * @param {Number | Null} alpha - 透明度。
+ * @param {Map<Number, Number> | Null} colorMap - 颜色映射表。类似 {[0, 0xff00ff], [0xff0000, 0xffffff]}。
  */
 
-function Canvas(g, fx, fy, fw, fh, fl, colorMap) {
+function Canvas(g, fx, fy, fw, fh, fl, alpha, colorMap) {
     /**
      * @param {Graphics2D} g - 图形上下文对象。
      */
@@ -58,6 +61,13 @@ function Canvas(g, fx, fy, fw, fh, fl, colorMap) {
     this.fl = fl;
     fl = (l) => this.fl(l);
 
+    if (alpha == null) alpha = 1;
+    /**
+     * @param {Number} alpha - 透明度。
+     */
+    this.alpha = alpha;
+    alpha = () => this.alpha;
+
     if (colorMap == null) colorMap = new Map();
     if (!(colorMap instanceof Map)) {
         print ("Canvas: colorMap must be a Map" + colorMap);
@@ -67,6 +77,7 @@ function Canvas(g, fx, fy, fw, fh, fl, colorMap) {
      * @param {Map<Number, Number>} colorMap - 颜色映射表。类似 {[0, 0xff00ff], [0xff0000, 0xffffff]}。
      */
     this.colorMap = colorMap;
+    colorMap = () => this.colorMap;
 
     let path = new GeneralPath();
     
@@ -204,23 +215,23 @@ function Canvas(g, fx, fy, fw, fh, fl, colorMap) {
                 str = str.substring(4, str.length-1);
                 let arr = str.split(",");
                 r = parseInt(arr[0]), gr = parseInt(arr[1]), b = parseInt(arr[2]);
-                this.g.setComposite(AlphaComposite.SrcOver.derive(1)); 
+                this.g.setComposite(AlphaComposite.SrcOver.derive(1 * alpha())); 
             } else if (str.startsWith("rgba(")) {
                 str = str.substring(5, str.length-1);
                 let arr = str.split(",");
                 r = parseInt(arr[0]), gr = parseInt(arr[1]), b = parseInt(arr[2]);
                 let a = parseFloat(arr[3]);
-                this.g.setComposite(AlphaComposite.SrcOver.derive(a));
+                this.g.setComposite(AlphaComposite.SrcOver.derive(a * alpha()));
             } else {
                 throw new Error();
             }
         } catch (e) {
-            print ("Canvas: invalid color string: " + str);
-            throw new Error("Canvas: invalid color string: " + str);
+            print ("Canvas: invalid color string: " + str + e.message);
+            throw new Error("Canvas: invalid color string: " + str + e.message);
         }
 
         color = r << 16 | gr << 8 | b;
-        if (colorMap.has(color)) color = colorMap.get(color);
+        if (colorMap().has(color)) color = colorMap().get(color);
         this.g.setColor(new Color(color));
     };
     
@@ -295,17 +306,18 @@ function Canvas(g, fx, fy, fw, fh, fl, colorMap) {
  * @param {Number} s - 缩放比例。
  * @param {Number} w - 图像的相对宽度。
  * @param {Number} h - 图像的相对高度。
- * @param {Map<Number, Number> | Array<Number> | Array<Array<Number>>} colorMap - 颜色映射表。类似 {[0, 0xff00ff], [0xff0000, 0xffffff]}。
+ * @param {Number} alpha - 透明度。
+ * @param {Map<Number, Number> | Array<Number> | Array<Array<Number>> | Null} colorMap - 颜色映射表。类似 {[0, 0xff00ff], [0xff0000, 0xffffff]}。
  * @returns {Canvas} - Canvas 对象。
  */
-Canvas.createWithCenterAndScale = (g, x, y, s, w, h, colorMap) => {
+Canvas.createWithCenterAndScale = (g, x, y, s, w, h, alpha, colorMap) => {
     let fw = (aw) => s * aw;
     let fh = (ah) => s * ah;
     let fx = (ax) => x - s * w / 2 + fw(ax);
     let fy = (ay) => y - s * h / 2 + fh(ay);
     let fl = (al) => s * al;
     if (colorMap instanceof Array) colorMap = Canvas.transformColorMap(colorMap);
-    return new Canvas(g, fx, fy, fw, fh, fl, colorMap);
+    return new Canvas(g, fx, fy, fw, fh, fl, alpha, colorMap);
 }
 
 /**
@@ -318,7 +330,7 @@ Canvas.transformColorMap = (array) => {
     for (let i = 0; i < array.length; i++) {
         let k0 = array[i], k1;
         if (k0 instanceof Array) k1 = k0[1], k0 = k0[0];
-        else k1 = array[i++];
+        else k1 = array[++i];
         map.set(k0, k1);
     }
     return map;

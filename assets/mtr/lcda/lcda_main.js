@@ -542,7 +542,7 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                 let h1 = dy(0.7);
                 let s = h1 / 79;
                 s = Math.min(s, w0 / 132);
-                let canvas = Canvas.createWithCenterAndScale(g, w0 / 2, h1 / 2, s, 132, 79, [[u(255, 255, 0), icolor], [u(86, 255, 0), 0xffffff], [u(49, 219, 255), icolor]]);
+                let canvas = Canvas.createWithCenterAndScale(g, w0 / 2, h1 / 2, s, 132, 79, 1, [[u(255, 255, 0), icolor], [u(86, 255, 0), 0xffffff], [u(49, 219, 255), icolor]]);
                 zwfh(canvas);
                 let font = font0.deriveFont(Font.PLAIN, dy(0.1));
                 drawMiddle(g, "请站稳扶好", font, dx(0.5), dy(0.85));
@@ -765,7 +765,7 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                 }
 
                 g.setColor(new Color(0));
-                x = w * 50 / 500, y = h * 0.83;
+                x = w * 45 / 500, y = h * 0.83;
                 k = h * 0.08;
                 font = font0.deriveFont(Font.PLAIN, k);
                 str = "";
@@ -889,7 +889,7 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
             const outWidth = w * 30 / 500;
             const DA0 = (g) => {
                 setComp(g, 1);
-                let x = w * 50 / 500, y = h * (0.7 - 0.4);
+                let x = w * 45 / 500, y = h * (0.7 - 0.4);
                 let v = doorValue;
                 let tx = v * w * 15 / 500;
                 g.drawImage(d[0], x + tx, y, null);
@@ -897,7 +897,7 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                 if (doorOpen == false) {
                     let ww = w * 40 / 500 * 0.7;
                     y = h * (0.7 + 0.3) / 2 - h * 0.02 - ww / 2;
-                    x = w * 50 / 500 - ww / 2;
+                    x = w * 45 / 500 - ww / 2;
                     setComp(g, 0.6);
                     g.setColor(new Color(0xff0000));
                     g.fillRoundRect(x, y, ww, ww, ww, ww);
@@ -909,7 +909,7 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                     g.fillRect(x, y, w1, h1);
                 }
                 if (v == 1) {
-                    x = w * 50 / 500 - outWidth / 2, y = h * (0.7 - 0.4);
+                    x = w * 45 / 500 - outWidth / 2, y = h * (0.7 - 0.4);
                     g.drawImage(out[0], x, y, null);
                     setComp(g, smooth(1, outAlpha.get(true)));
                     g.drawImage(out[1], x, y, null);
@@ -975,11 +975,13 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                     return luminance > 255 / 2 ? 0 : 0xffffff;
                 }
                 let txx = [8, 4, 0, -4, -8];
+                let sizeX = [];
                 for (let i = 0; i < 5; i++) {
                     let j = sx[i];
-                    if (strs[j] == undefined) continue;
                     let ss = s[j];
                     let w2 = dx(w1) * ss, h2 = h1 * (ss + 0.1);
+                    sizeX[j] = w2;
+                    if (strs[j] == undefined) continue;
                     if (i == 4) h2 = h1;
                     let x1 = dx(x[j] + txx[j]) + dn * dir[j][0], y1 = y + dn * dir[j][1];
                     g.setColor(new Color(colors[j]));
@@ -993,23 +995,30 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                         font = font0.deriveFont(Font.PLAIN, h2 * 0.06);
                         y += h2 * 0.08;
                         drawMiddle(g, "Next Station", font, x, y);
-                        x = x1 + w1 * 0.3;
+                        x = x1 + w1 * 0.48;
                         y = y1;
                         font = font0.deriveFont(Font.BOLD, h2 * 0.23);
                         drawMiddle(g, strs[j][0], font, x, y);
-                        font = font0.deriveFont(Font.BOLD, h2 * 0.18);
+                        font = font0.deriveFont(Font.BOLD, h2 * 0.12);
                         drawMiddle(g, strs[j][1], font, x, y + h2 * 0.2);
                     } else {
                         let font = font0.deriveFont(Font.BOLD, h2 * 0.25);
                         drawMiddle(g, strs[j][0], font, x1, y1);
-                        font = font0.deriveFont(Font.BOLD, h2 * 0.12);
+                        font = font0.deriveFont(Font.BOLD, h2 * 0.14);
                         drawMiddle(g, strs[j][1], font, x1, y1 + h2 * 0.2);
                     }
                 }
-                if (et != null && a == 1) {
-                    ctx.setDebugInfo(uid + "DR0", "Exit");
-                    return true;
+                let scale = dy(8) / 100;
+                let cs = 100 * scale;
+                y = dy (15);
+                let ys = [dy(20), 0, dy(15), 0, dy(20)];
+                for (let i = 0; i < 5; i+=2) {
+                    let xx = dx(x[i]) - sizeX[i] / 2 + cs / 2 + smooth(1, (now() / 1000 * 0.6) % 1) * (sizeX[i] - cs);
+                    let canvas = Canvas.createWithCenterAndScale(g, xx, ys[i], scale, 100, 100, 1 - a, [0x00ff00, icolor]);
+                    jt(canvas);
                 }
+
+                if (et != null && a == 1) return true;
                 return false;
             }
             DR0.id = "DR0";
@@ -1021,7 +1030,7 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
             const ctrl = () => {
                 let [color0, color1, cname, ename, cdest, edest, time0, time1, is, t1, t2, t3, t4, isArrive, open] = info;
                 let newOpen = open > 0 ? 1 : 0;
-                let newValue = smooth(1, newOpen * train.doorValue() * 3);
+                let newValue = smooth(1, newOpen * train.doorValue() * 3 * isArrive);
                 let need = false;
                 if (newValue < 1) {
                     outAlpha.set(0, 0);
