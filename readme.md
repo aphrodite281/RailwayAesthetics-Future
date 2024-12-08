@@ -25,17 +25,17 @@ Welcome to join our QQ group: 836291719
 
 ## 文档
 
-- #### [装饰物件的交互 EyeCandy Interactions](/RailwayAesthetics-Future/docs/etjh.html)
+- #### [装饰物件的交互 EyeCandy Interactions](https://aphrodite281.github.io/RailwayAesthetics-Future/docs/etjh.html)
 
-- #### [站牌 Stop Sign A](/RailwayAesthetics-Future/docs/stop_signa.html)
+- #### [站牌 Stop Sign A](https://aphrodite281.github.io/RailwayAesthetics-Future/docs/stop_signa.html)
 
-- #### [站牌 Stop Sign B](/RailwayAesthetics-Future/docs/stop_signb.html)
+- #### [站牌 Stop Sign B](https://aphrodite281.github.io/RailwayAesthetics-Future/docs/stop_signb.html)
 
-- #### [站牌 Stop Sign C](/RailwayAesthetics-Future/docs/stop_signc.html)
+- #### [站牌 Stop Sign C](https://aphrodite281.github.io/RailwayAesthetics-Future/docs/stop_signc.html)
   
-- #### [屏蔽门 PSD A](/RailwayAesthetics-Future/docs/psda.html)
+- #### [屏蔽门 PSD A](https://aphrodite281.github.io/RailwayAesthetics-Future/docs/psda.html)
   
-- #### [乘客资讯显示屏 PID A](/RailwayAesthetics-Future/docs/pida.html)
+- #### [乘客资讯显示屏 PID A](https://aphrodite281.github.io/RailwayAesthetics-Future/docs/pida.html)
 
-- #### [信号灯 Signal Light A](/RailwayAesthetics-Future/docs/signal_lighta.html)
+- #### [信号灯 Signal Light A](https://aphrodite281.github.io/RailwayAesthetics-Future/docs/signal_lighta.html)
 

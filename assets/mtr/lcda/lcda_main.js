@@ -14,10 +14,12 @@ include(Resources.id("aphrodite:library/code/canvas.js"));
 include(Resources.id("aphrodite:library/code/map_tostring.js"));
 include(Resources.id("aphrodite:library/code/array_tostring.js"));
 include(Resources.id("aphrodite:library/code/value.js"));
+include(Resources.id("aphrodite:library/code/color_u.js"));
 include(Resources.id("mtr:lcda/icon/hc.js"));
 include(Resources.id("mtr:lcda/icon/bz.js"));
 include(Resources.id("mtr:lcda/icon/xr.js"));
 include(Resources.id("mtr:lcda/icon/zwfh.js"));
+include(Resources.id("mtr:lcda/icon/jt.js"));
 
 const logo = Resources.readBufferedImage(Resources.id("mtr:lcda/icon/logo.png"));
 
@@ -35,6 +37,7 @@ const leftMatrices = getMatrices(true);
 const fontA = Resources.getSystemFont("Noto Sans");
 const fontB = Resources.readFont(Resources.id("aphrodite:library/font/zhdh.ttf"));
 const fontC = Resources.getSystemFont("Noto Serif");
+const cu = ColorU;
 
 function create(ctx, state, train) {
     state.running = true;
@@ -167,8 +170,9 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
             const g1 = img1.createGraphics();
             disposeList.push(() => {g0.dispose(); g1.dispose();});
 
+            const now = () => Date.now();
             const drawCalls = [];// [旧图, [新渐变的, 新alpha]] 渐变绘制
-            const DDrawCalls = [];// [[fun, alpha, st, et, dispose], [fun, alpha, st, dispose]] 动态渐变绘制
+            let DDrawCalls = [];// [[fun, alpha, st, et, dispose], [fun, alpha, st, dispose]] 动态渐变绘制
             let mainAlpha = new Value(0, 1, 0, 1.2, 0, 0);// 主渐变alpha
             let needUpload = false;// 是否需要上传
             let lastFrameTime = 0;// 上一帧时间
@@ -179,11 +183,44 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
             // const fps = 24;// 帧率
             // const frameTime = 1000 / fps;// 帧时间
             let outAlpha = new Value(0, 1, 0, 1.5, -1, 2);// 门里的指示的透明度
-            let DStyle = 0;// 运行时的样式组合
-            let DST = Date.now();// 切换动画的开始时间
-            let DLST = 0;// 切换动画上一个的开始时间
             let icolor, icolor1, icname, iename, icdest, iename1, icname1, iename2, icname2, iename3, icname3, iename4, icname4, itime0, itime1, iis, it1, it2, it3, it4, iisArrive, iopen, ihuancheng = new Map(), ixlt0;// info 数据
-            const now = () => Date.now();
+            
+            /**
+             * 添加动态绘制
+             * @param {Function<Graphics2D, Number, Number>}fun1 绘制函数 传入Graphics, 开始时间，结束时间 返回是否删除此绘制
+             */
+            const addDrawCallD = (fun1) => {
+                for (let i = 0; i < DDrawCalls.length; i++) {
+                    if (DDrawCalls[i][2] == null) DDrawCalls[i][2] = now();
+                }
+                DDrawCalls.push([fun1, Date.now(), null, false]);
+            }
+
+            /**
+             * 添加静态绘制
+             * @param {Function<Graphics2D>} fun0 绘制函数
+             */
+            const addDrawCallS = (fun0) => {
+                if (drawCalls.length == 0) {
+                    let img = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+                    let g = img.createGraphics();
+                    fun0(g);
+                    g.dispose();
+                    drawCalls[0] = img;
+                } else {
+                    let img = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+                    let g = img.createGraphics();
+                    g.drawImage(img0, 0, 0, null);
+                    drawCalls[0] = img;
+                    let newImg = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+                    let newG = newImg.createGraphics();
+                    fun0(newG);
+                    g.dispose();
+                    newG.dispose();
+                    drawCalls[1] = [newImg, 0];
+                }
+            }
+
             const getInfo = () => {// 获取/更新信息，并通过toString方法判断是否应该更新
                 let color = 0x00ffff, color1 = 0xffffff, cname = "无线路", ename = "No Route", cdest = "无线路", edest = "No Route", time0 , time1, is = true, t1 = "非运营列车  Non-operating train", t2 = "", t3 = "", t4 = "", isArrive = false, open = -1, huancheng = new Map(), xlt0 = [];
                 let date = new Date();
@@ -305,48 +342,11 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                 } catch (e) {
                     print("ARAF-LCD-getInfo Error: " + e.message);
                 }
-                if (isArrive) {
-                    style = 0;
-                } else {
-                    style = (style + 1) % 2;
-                    dynST = now();
-                }
                 color1 = getColor(color);
                 icolor = color, icolor1 = color1, icname = cname, iename = ename, icdest = cdest, idest = edest, itime0 = time0, itime1 = time1, iis = is, it1 = t1, it2 = t2, it3 = t3, it4 = t4, iisArrive = isArrive, iopen = open, ihuancheng = huancheng, ixlt0 = xlt0;
-                return [color, color1, cname, ename, cdest, edest, time0, time1, is, t1, t2, t3, t4, isArrive, open, huancheng, xlt0];
+                return [color, color1, cname, ename, cdest, edest, time0, time1, is, t1, t2, t3, t4, isArrive, open, huancheng, xlt0, DStyle];
             }
 
-            /**
-             * 添加静态绘制
-             * @param {Function<Graphics2D>} fun0 绘制函数
-             */
-            const addDrawCallS = (fun0) => {
-                if (drawCalls.length == 0) {
-                    let img = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
-                    let g = img.createGraphics();
-                    fun0(g);
-                    g.dispose();
-                    drawCalls[0] = img;
-                } else {
-                    let img = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
-                    let g = img.createGraphics();
-                    g.drawImage(img0, 0, 0, null);
-                    drawCalls[0] = img;
-                    let newImg = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
-                    let newG = newImg.createGraphics();
-                    fun0(newG);
-                    g.dispose();
-                    newG.dispose();
-                    drawCalls[1] = [newImg, 0];
-                }
-            }
-            /**
-             * 添加动态绘制
-             * @param {Function<Graphics2D, Number, Number> : Boolean} fun1 绘制函数 传入Graphics, 开始时间，结束时间 返回是否删除此绘制
-             */
-            const addDrawCallD = (fun1) => {
-                DDrawCalls.push([fun1, Date.now(), 0, false]);
-            }
             const setComp = (g, value) => {g.setComposite(AlphaComposite.SrcOver.derive(value))};
             // const checkTime = v => v < 0 ? 0 : v;
             const isOnRoute = () => train.isOnRoute();
@@ -622,7 +622,7 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                 return img;
             }
 
-            const backGround = (g) => {
+            const SGround = (g) => {
                 let [color0, color1, cname, ename, cdest, edest, time0, time1, is, t1, t2, t3, t4, isArrive, open] = info;
                 g.setColor(new Color(0xffffff));
                 g.fillRect(0, 0, w, h);
@@ -810,6 +810,7 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                     g.drawImage((ihuancheng.size > 0 ? getD2() : getD1()), x, y, null)
                 }
             }
+            SGround.id = "SGround";
 
             const d = [];
             const drawDoor = () => {
@@ -914,7 +915,109 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                     g.drawImage(out[1], x, y, null);
                 }
             }
+            DA0.id = "DA0";
             
+            const DR0 = (g, st, et) => {
+                let t = now() - st;
+                t = t / 1000 * 0.5;
+                let a = 1 - smooth(1, t);
+                if (et != null) {
+                    let t1 = now() - et;
+                    t1 = t1 / 1000 * 0.5;
+                    let a1 = smooth(1, t1);
+                    ctx.setDebugInfo(uid + "DR0", a, a1, t, t1);
+                    a = Math.max(a, a1);
+                }
+                setComp(g, 1 - a);
+                let hsv = cu.h2v(icolor);
+                let f1 = k => {
+                    let hs = new HSV(hsv);
+                    hs.s *= k;                
+                    hs.v *= 0.9;  
+                    return cu.v2h(hs);
+                }
+                let f2 = k => {
+                    let hs = new HSV(hsv);
+                    hs.s *= k;
+                    return cu.v2h(hs);
+                }
+                // throw new Error(f1(0.6).toString(16) + ",." + f2(0.6).toString(16));
+                let strs = ixlt0;
+                let colors = [f1(0.1), f1(0.4), icolor, f2(0.4), f2(0.2)];
+                let ss = [0.5, 0.7, 1];
+                let s = [ss[0], ss[1], ss[2], ss[1], ss[0]];
+                const dx = ax => ax * w / 500;
+                const dy = ay => ay * h / 50; 
+                let w1 = 90, h1 = dy(22);
+                let m = 225;
+                let sx = [0, 4, 1, 3, 2];
+                let x = [], y = dy(35);
+                x[2] = m;
+                let idx = [[1, 3], [0, 4]];
+                let tx = w1 / 2;
+                let sss = [ss[1], ss[0]];
+                for (let i = 0; i < 2; i++) {
+                    let w2 = w1 * sss[i];
+                    let is = idx[i];
+                    tx += w2 / 2;
+                    x[is[0]] = m - tx;
+                    x[is[1]] = m + tx;
+                    tx += w2 / 2;
+                }
+                let kf = num => Math.sqrt(num);
+                let dir = [[-1, 0], [-kf(1), -kf(1)], [0, -1], [kf(1), -kf(1)], [1, 0]];
+                let dn = a * dx(100);
+                const getColor = (color) => {
+                    let rr = color >> 16 & 0xff;
+                    let g = color >> 8 & 0xff;
+                    let b = color & 0xff;
+                    let luminance  = 0.299 * rr + 0.587 * g + 0.114 * b;
+                    return luminance > 255 / 2 ? 0 : 0xffffff;
+                }
+                let txx = [8, 4, 0, -4, -8];
+                for (let i = 0; i < 5; i++) {
+                    let j = sx[i];
+                    if (strs[j] == undefined) continue;
+                    let ss = s[j];
+                    let w2 = dx(w1) * ss, h2 = h1 * (ss + 0.1);
+                    if (i == 4) h2 = h1;
+                    let x1 = dx(x[j] + txx[j]) + dn * dir[j][0], y1 = y + dn * dir[j][1];
+                    g.setColor(new Color(colors[j]));
+                    let r = h2 * 0.1;
+                    g.fillRoundRect(x1 - w2 / 2, y1 - h2 / 2, w2, h2, r, r);
+                    g.setColor(new Color(getColor(colors[j])));
+                    if(i == 4) {
+                        let x = x1 - w2 * 0.35, y = y1 - h2 * 0.04;
+                        let font = font0.deriveFont(Font.PLAIN, h2 * 0.13);
+                        drawMiddle(g, "下一站", font, x, y);
+                        font = font0.deriveFont(Font.PLAIN, h2 * 0.06);
+                        y += h2 * 0.08;
+                        drawMiddle(g, "Next Station", font, x, y);
+                        x = x1 + w1 * 0.3;
+                        y = y1;
+                        font = font0.deriveFont(Font.BOLD, h2 * 0.23);
+                        drawMiddle(g, strs[j][0], font, x, y);
+                        font = font0.deriveFont(Font.BOLD, h2 * 0.18);
+                        drawMiddle(g, strs[j][1], font, x, y + h2 * 0.2);
+                    } else {
+                        let font = font0.deriveFont(Font.BOLD, h2 * 0.25);
+                        drawMiddle(g, strs[j][0], font, x1, y1);
+                        font = font0.deriveFont(Font.BOLD, h2 * 0.12);
+                        drawMiddle(g, strs[j][1], font, x1, y1 + h2 * 0.2);
+                    }
+                }
+                if (et != null && a == 1) {
+                    ctx.setDebugInfo(uid + "DR0", "Exit");
+                    return true;
+                }
+                return false;
+            }
+            DR0.id = "DR0";
+
+            let DStyle = 0;// 运行时的样式组合
+            let DS = [DR0];// 运行时的样式列表
+            let DTime = -15000;
+
             const ctrl = () => {
                 let [color0, color1, cname, ename, cdest, edest, time0, time1, is, t1, t2, t3, t4, isArrive, open] = info;
                 let newOpen = open > 0 ? 1 : 0;
@@ -932,6 +1035,17 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                     doorValue = newValue;
                     need = true;
                 }
+
+                if (isArrive) {
+                    DStyle = 0;
+                    DTime = 0;
+                    addDrawCallD(() => true);
+                } else if (DTime + 8000 < now()){
+                    DTime = now();
+                    DStyle = (DStyle + 1) % DS.length;
+                    addDrawCallD(DS[0]);
+                }
+                if (DDrawCalls.length > 0) need = true;
                 return need;
             }
 
@@ -940,7 +1054,7 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                 try {
                     if (first) {
                         info = getInfo();
-                        addDrawCallS(backGround);
+                        addDrawCallS(SGround);
                         needUpload = true;
                         mainAlpha.set(isOnRoute() ? 1 : 0, 0);
                         first = false;
@@ -949,7 +1063,7 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
 
                     if (info.toString() != getInfo().toString() && isOnRoute()) {
                         info = getInfo();
-                        addDrawCallS(backGround);
+                        addDrawCallS(SGround);
                         needUpload = true;
                     }
                     mainAlpha.update();
@@ -958,7 +1072,6 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                     if (mainAlpha.isChanged()) needUpload = true;
 
                     needUpload = needUpload || ctrl();
-                    // ctx.setDebugInfo("needUpload", needUpload);
                     if (drawCalls[1] != null) needUpload = true;
 
                     if (needUpload) {
@@ -974,7 +1087,7 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                             }
                         }
 
-                        if (mainAlpha.get(false) == 1) {
+                        if (mainAlpha.get() == 1) {
                             let g = tex.graphics;
                             setComp(g, 1);
                             g.drawImage(img0, 0, 0, null);
@@ -982,7 +1095,7 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                             for (let i = 0; i < DDrawCalls.length; i++) {
                                 let [fun, st, et, dis] = DDrawCalls[i];
                                 if (dis) continue;
-                                dis = fun(g, st, et);
+                                DDrawCalls[i][3] = fun(g, st, et);
                             }
                         } else {
                             let g = tex.graphics;
@@ -992,16 +1105,21 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                             for (let i = 0; i < DDrawCalls.length; i++) {
                                 let [fun, st, et, dis] = DDrawCalls[i];
                                 if (dis) continue;
-                                dis = fun(g, st, et);
+                                DDrawCalls[i][3] = fun(g1, st, et);
                             }
                             setComp(g, 1);
                             g.setColor(new Color(0));
                             g.fillRect(0, 0, w, h);
-                            setComp(g, smooth(1, mainAlpha.get(false)));
+                            setComp(g, smooth(1, mainAlpha.get()));
                             g.drawImage(img1, 0, 0, null);
                         }
-                        DDrawCalls.filter(item => item[3] == false);
-                        
+                        let ka = DDrawCalls.length
+                        let newDDC = [];
+                        for (let e of DDrawCalls) {
+                            if (e[3] == false) newDDC.push(e);
+                        }
+                        DDrawCalls = newDDC;
+                        ctx.setDebugInfo(uid, ka, DDrawCalls.length);
                         tex.upload();
                         needUpload = false;
                     }
@@ -1010,15 +1128,15 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                     ctx.setDebugInfo("LCD-Thread " + (isRight ? "Right " : "Left ") + carIndex + "  Used: ", lastFrameTime + "ms");
                     lastFrameTime = now() - startTime;
                 } catch (e) {
-                    ctx.setDebugInfo("LCD-Thread " + (isRight ? "Right " : "Left ") + carIndex + " Error At: ", now().toString(), e.message);
-                    print("ARAF-LCD-Thread " + (isRight ? "Right " : "Left ") + carIndex + " Error At: " + now() + "     " + e.message);
+                    ctx.setDebugInfo("LCD-Thread " + (isRight ? "Right " : "Left ") + carIndex + " Error At: ", now().toString(), e.message, e.stack);
+                    print("ARAF-LCD-Thread " + (isRight ? "Right " : "Left ") + carIndex + " Error At: " + now() + "     " + e.message + "      " + e.stack);
                     Thread.sleep(100);
                 }
             }
             print("ARAF-LCD-Thread " + (isRight ? "Right" : "Left") + " Exit");
         } catch (e) {
-            ctx.setDebugInfo("LCD-Thread " + (isRight ? "Right " : "Left ") + carIndex + " Error At: ", System.currentTimeMillis() + e.message);
-            print("ARAF-LCD-Thread " + (isRight ? "Right " : "Left ") + carIndex + " Error At: " + System.currentTimeMillis() + e.message);
+            ctx.setDebugInfo("LCD-Thread " + (isRight ? "Right " : "Left ") + carIndex + " Error At: ", System.currentTimeMillis() + e.message , e.stack);
+            print("ARAF-LCD-Thread " + (isRight ? "Right " : "Left ") + carIndex + " Error At: " + System.currentTimeMillis() + e.message + e.stack);
         } finally {
             for (let fun of disposeList) {
                 fun();
