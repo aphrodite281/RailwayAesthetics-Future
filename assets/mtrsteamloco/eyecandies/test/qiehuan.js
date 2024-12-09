@@ -5,7 +5,7 @@ importPackage (java.awt.image);
 importPackage (java.nio);
 //importPackage (Package.fabric.cn.zbx1425.sowcer.vertex); 
 
-include(Resources.id("aphrodite:library/code/face.js"));
+include(Resources.id("aphrodite:library/code/model/face.js"));
 
 const font0 = Resources.getSystemFont("Serif").deriveFont(Font.PLAIN, 80);
 const rmm = ModelManager.loadRawModel(Resources.manager(), Resources.id("mtrsteamloco:eyecandies/test/main.obj"), null);

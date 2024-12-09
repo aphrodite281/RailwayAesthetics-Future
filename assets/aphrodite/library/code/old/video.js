@@ -12,7 +12,7 @@ importPackage (java.awt);
 importPackage (java.io);
 importPackage (java.awt.image);
 
-include(Resources.id("aphrodite:library/code/text_u.js"));
+include(Resources.id("aphrodite:library/code/util/text_u.js"));
 const path = "araf-temp/";
 
 function Video(data) {

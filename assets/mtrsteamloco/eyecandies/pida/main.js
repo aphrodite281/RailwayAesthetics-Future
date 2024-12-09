@@ -1,7 +1,7 @@
 importPackage(java.awt);
 
-include(Resources.id("aphrodite:library/code/scrolls_screen.js"));
-include(Resources.id("aphrodite:library/code/text_u.js"));
+include(Resources.id("aphrodite:library/code/model/scrolls_screen.js"));
+include(Resources.id("aphrodite:library/code/util/text_u.js"));
 
 const MCU = MinecraftClient;
 const MCD = MTRClientData;

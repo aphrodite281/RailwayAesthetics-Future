@@ -3,7 +3,7 @@ importPackage (java.awt);
 importPackage (java.io);
 importPackage (java.awt.image);
 
-include(Resources.id("aphrodite:library/code/face.js"));
+include(Resources.id("aphrodite:library/code/model/face.js"));
 
 const MCU = MinecraftClient;
 const MCD = MTRClientData;

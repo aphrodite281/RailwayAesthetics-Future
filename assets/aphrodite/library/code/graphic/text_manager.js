@@ -1,14 +1,22 @@
+/** 
+ * 本类意在方便管理文字内容，实现自动处理滚动等。
+ * 
+ * @author Aphrodite281 QQ: 3435494979
+ */
+
 importPackage (java.awt);
 importPackage (java.awt.image);
 importPackage (java.awt.geom);
 importPackage (java.awt.font);
 
 /**
- * 本类意在方便管理文字内容，实现自动滚动
- * @param {Number} w 宽度
- * @param {Number} h 高度
+ * 文本经理
+ * @param {Number} w 图片宽度
+ * @param {Number} h 图片高度
+ * @param {Function<Number, Number>} fx 转换x坐标函数
+ * @param {Function<Number, Number>} fy 转换y坐标函数
  */
-function TextManager(w, h) {
+function TextManager(w, h, fx, fy) {
     const map = new Map();
     const tex0 = new BufferedImage(w, h);
     const g0 = tex0.createGraphics();
@@ -37,7 +45,7 @@ function TextManager(w, h) {
         return fm.getDescent();
     }
 
-    const smooth = (k, value) => {// 平滑变化
+    const smooth = (k, value) => {
         if (value > k) return k;
         if (k < 0) return 0;
         return (Math.cos(value / k * Math.PI + Math.PI) + 1) / 2 * k;
@@ -89,7 +97,15 @@ function TextManager(w, h) {
      */
     this.drawMiddle = (str, font, style, x, y, w, h, start, alpha, id) => {
         if (map.has(id)) map.get(id).dispose();
-        else map.set(id, new Text(str, font, style, x, y, w, h, start, alpha));
+        map.set(id, new Text(str, font, style, fx(x), fy(y), w, h, start, alpha));
+    }
+
+    /**
+     * 清空文字队列
+     */
+    this.clear = () => {
+        for (let [id, text] of map) text.dispose();
+        map.clear();
     }
 
     /**

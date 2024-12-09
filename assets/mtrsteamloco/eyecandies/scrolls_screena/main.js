@@ -1,10 +1,10 @@
 importPackage (java.lang);
 importPackage (java.awt);
 importPackage (java.awt.image);
-include(Resources.id("aphrodite:library/code/scrolls_screen.js"));
-include(Resources.id("aphrodite:library/code/board.js"));
-include(Resources.id("aphrodite:library/code/face.js"));
-include(Resources.id("aphrodite:library/code/color_int_base.js"));
+include(Resources.id("aphrodite:library/code/model/scrolls_screen.js"));
+include(Resources.id("aphrodite:library/code/model/board.js"));
+include(Resources.id("aphrodite:library/code/model/face.js"));
+include(Resources.id("aphrodite:library/code/base/color_int_base.js"));
 
 const MCU = MinecraftClient;
 const MCD = MTRClientData;

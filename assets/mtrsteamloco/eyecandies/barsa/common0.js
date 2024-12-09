@@ -1,4 +1,4 @@
-include(Resources.id("aphrodite:library/code/color_int_base.js"));
+include(Resources.id("aphrodite:library/code/base/color_int_base.js"));
 
 const colors = [["color", 0xfafafa]];
 

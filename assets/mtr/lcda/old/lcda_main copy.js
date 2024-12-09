@@ -2,8 +2,8 @@ importPackage (java.lang);
 importPackage (java.awt);
 importPackage (java.awt.image);
 
-include(Resources.id("aphrodite:library/code/face.js"));
-include(Resources.id("aphrodite:library/code/text_u.js"));
+include(Resources.id("aphrodite:library/code/model/face.js"));
+include(Resources.id("aphrodite:library/code/util/text_u.js"));
 
 const defaultScreenTextureSize = [1600 * 2, 400 * 2];
 const defaultScreenModelSize = [1600 / 2000, 400 / 2000];
