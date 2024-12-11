@@ -1,6 +1,6 @@
 include(Resources.id("aphrodite:library/code/model/face.js"));
-include(Resources.id("aphrodite:library/code/model/text_u.js"));
-include(Resources.id("aphrodite:library/code/model/color_int_base.js"));
+include(Resources.id("aphrodite:library/code/base/color_int_base.js"));
+include(Resources.id("aphrodite:library/code/util/text_u.js"));
 
 //const font0 = Resources.getSystemFont("Noto Serif");
 const font0 = Resources.readFont(Resources.id("aphrodite:library/font/hkh_sxt.ttf"));

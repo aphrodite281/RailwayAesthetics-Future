@@ -160,9 +160,10 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
             disposeList.push(() => {g0.dispose(); g1.dispose();});
 
             const now = () => Date.now();
-            let SDrawCalls = [];// [旧图, [新渐变的, 新alpha]] 渐变绘制
-            let DDrawCalls = [];// [对象1, 对象2] 动态绘制
+            const drawCalls = [];// [旧图, [新渐变的, 新alpha]] 渐变绘制
+            let DDrawCalls = [];// [[fun, alpha, st, et, dispose], [fun, alpha, st, dispose]] 动态渐变绘制
             let mainAlpha = new Value(0, 1, 0, 1.2, 0, 0);// 主渐变alpha
+            let needUpload = false;// 是否需要上传
             let lastFrameTime = 0;// 上一帧时间
             let startTime = 0;// 开始时间
             let info = [-1];// 信息
@@ -175,19 +176,38 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
             
             /**
              * 添加动态绘制
-             * @param {Object} obj 绘制对象
+             * @param {Function<Graphics2D, Number, Number>}fun1 绘制函数 传入Graphics, 开始时间，结束时间 返回是否删除此绘制
              */
-            const addDrawCallD = (obj) => {
-                for (let object of DDrawCalls) object.stop();
-                DDrawCalls.push(obj);
+            const addDrawCallD = (fun1) => {
+                for (let i = 0; i < DDrawCalls.length; i++) {
+                    if (DDrawCalls[i][2] == null) DDrawCalls[i][2] = now();
+                }
+                DDrawCalls.push([fun1, Date.now(), null, false]);
             }
 
             /**
              * 添加静态绘制
-             * @param {Object} obj 绘制对象
+             * @param {Function<Graphics2D>} fun0 绘制函数
              */
-            const addDrawCallS = (obj) => {
-                SDrawCalls.push(obj);
+            const addDrawCallS = (fun0) => {
+                if (drawCalls.length == 0) {
+                    let img = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+                    let g = img.createGraphics();
+                    fun0(g);
+                    g.dispose();
+                    drawCalls[0] = img;
+                } else {
+                    let img = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+                    let g = img.createGraphics();
+                    g.drawImage(img0, 0, 0, null);
+                    drawCalls[0] = img;
+                    let newImg = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+                    let newG = newImg.createGraphics();
+                    fun0(newG);
+                    g.dispose();
+                    newG.dispose();
+                    drawCalls[1] = [newImg, 0];
+                }
             }
 
             const getInfo = () => {// 获取/更新信息，并通过toString方法判断是否应该更新
@@ -320,6 +340,10 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
 
             const setComp = (g, value) => {g.setComposite(AlphaComposite.SrcOver.derive(value))};
             const isOnRoute = () => train.isOnRoute();
+
+            const fill = (g, width, x1, y1, x2, y2) => {
+                g.fillRoundRect(x1 - width / 2, y1 - width / 2, x2 - x1 + width, y2 - y1 + width, width, width);
+            }
             const getWH = (g, str, font) => {
                 g.setFont(font);
                 // const frc = g.getFontRenderContext();
@@ -334,8 +358,6 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                 let [ww, hh] = getWH(g, str, font);
                 g.drawString(str, x - ww / 2, y);
             }
-
-            const drawMiddle0 = drawMiddle;// 防重名
 
             function S1() {
                 let w0 = w * 110 / 500, h0 = h * 0.75;
@@ -537,15 +559,15 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                 let canvas = Canvas.createWithCenterAndScale(g, x, y, scale, 52, 52);
                 hc(canvas, g, ctx);
                 const p = Font.PLAIN;
-                drawMiddle("可 换 乘", font0, p, 0xa0a0a0, dx(280), dy(51), w0, dy(58));
-                drawMiddle("Transfer To", font0, p, 0xa0a0a0, dx(280), dy(105), w0, dy(30));
+                drawMiddle("可 换 乘", font0, p, 0xa0a0a0, dx(280), dy(51), w0, dy(58), now(), 1);
+                drawMiddle("Transfer To", font0, p, 0xa0a0a0, dx(280), dy(105), w0, dy(30), now(), 1);
 
                 const draw = (x, y, w1, h1, color0, color1, c, n) => {
                     g.setColor(new Color(color0));
                     g.fillRoundRect(x, y, w1, h1, dy(10), dy(10));
                     g.setColor(new Color(color1));
-                    drawMiddle(c, font, p, color, x + w1 / 2, y + h1 * 0.25, w1, h1 * 0.4);
-                    drawMiddle(n, font, p, color, x + w1 / 2, y + h1 * 0.8, w1, h1 * 0.25);
+                    drawMiddle(c, font, p, color, x + w1 / 2, y + h1 * 0.25, w1, h1 * 0.4, now(), 1);
+                    drawMiddle(n, font, p, color, x + w1 / 2, y + h1 * 0.8, w1, h1 * 0.25, now(), 1);
                 }
 
                 let array = [];
@@ -582,9 +604,9 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                 }
                 setComp(g, 1);
                 g.setColor(Color.black);
-                drawMiddle("请站稳扶好", font, p, 0, dx(220), dy(305), w0, dy(40));
+                drawMiddle("请站稳扶好", font, p, 0, dx(220), dy(345), w0, dy(40), now(), 1);
                 font = font0.deriveFont(Font.PLAIN, dy(25));
-                drawMiddle(g, "Please stand firm and hold yourself steady", font, p, dx(220), dy(360 - 25 / 2), w0, dy(25));
+                drawMiddle(g, "Please stand firm and hold yourself steady", font, p, dx(220), dy(360 + 25 / 2), w0, dy(25), now(), 1);
 
                 g.dispose();
                 
@@ -593,10 +615,6 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
             }
 
             function SGround() {
-                const alpha = new Value(0, 1, 0, 0.8, 1, 0);
-                const fill = (g, width, x1, y1, x2, y2) => {
-                    g.fillRoundRect(x1 - width / 2, y1 - width / 2, x2 - x1 + width, y2 - y1 + width, width, width);
-                }
                 const tex = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
                 const g = tex.createGraphics();
                 const textManager = new TextManager(w, h, x => x, y => y);
@@ -622,25 +640,50 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
 
                 g.setColor(new Color(color0));
                 x = w * 82 / 500, x1 = w * 115 / 500, y = h * 8 / 300, w1 = x1 - x, h1 = y1 - 2 * y;
-                let dy1 = (ay) => h1 * ay;
-                let dy2 = (ay) => y1 * ay;
-                g.fillRoundRect(x, y, w1, h1, w1 * 0.1, w1 * 0.1);
-                x = (x + x1) / 2;
-                drawMiddle(cname, font0, p, color1, x, y + dy1(0.25), w1, dy1(0.5));
-                drawMiddle(ename, font0, p, color1, x, y + dy1(0.65), w1, dy1(0.25));
+                const dy1 = (ay) => h1 * ay;
+                g.fillRoundRect(x, y, w1, h1, w1 * 0.2, w1 * 0.2);
+                k = h1 * 0.45;
+                font = font0.deriveFont(Font.PLAIN, k);
+                g.setFont(font);
+                g.setColor(new Color(color1));
+                wh = getWH(g, cname, font);
+                g.drawString(cname, x + (w1 - wh[0]) / 2, y + h1 * 0.5);
+                k = h1 * 0.25;
+                font = font0.deriveFont(Font.PLAIN, k);
+                g.setFont(font);
+                wh = getWH(g, ename, font);
+                g.drawString(ename, x + (w1 - wh[0]) / 2, y + h1 * 0.82);
 
                 x = w * 10 / 500, w1 = h1;
                 g.drawImage(logo, x, y, w1, w1, null);
-                x = dx(56);
-                drawMiddle("北武工艺", font0, p, 0, x, dy1(0.3), dx(100), dy1(0.6));
-                drawMiddle("HOKUBUCRAFT", font0, p, 0, x, dy1(0.7), dx(100), dy1(0.3));
+                g.setColor(new Color(0));
+                k = h1 * 0.6;
+                // font = font0.deriveFont(Font.PLAIN, k);
+                // x = w * 56 / 500, y = h1 * 0.7;
+                drawMiddle("北武工艺", font, p, 0, x, y, dx(100), dy1(0.7), now(), 1);
+                k = h1 * 0.28;
+                font = font0.deriveFont(Font.PLAIN, k);
+                y = h1 * 1.1;
+                drawMiddle(g, "HOKUBUCRAFT", font, x, y);
 
-                let color = 0x606060;
-                drawMiddle(" 终 点 站:", font, p, color, x, dy2(0.5 - 0.35 / 2), dx(100), dy2(0.35));
-                drawMiddle("Terminus", font, p, color, x, dy2(0.82 - 0.23 / 2), dx(100), dy2(0.23));
-                color = 0;
-                drawMiddle(cdest, font0, p, color, dx(385), dy2(0.5 - 0.42 / 2), dx(100), dy2(0.42));
-                drawMiddle(edest, font0, p, color, dx(385), dy(0.87 - 0.28 / 2), dx(100), dy(0.28));
+                g.setColor(new Color(0x606060));
+                k = y1 * 0.35;
+                font = font0.deriveFont(Font.PLAIN, k);
+                x = w * 340 / 500, y = y1 * 0.5;
+                drawMiddle(g, " 终 点 站:", font, x, y);
+                k = y1 * 0.23;
+                font = font0.deriveFont(Font.PLAIN, k);
+                y = y1 * 0.82;
+                drawMiddle(g, "Terminus", font, x, y);
+                g.setColor(new Color(0));
+                k = y1 * 0.42;
+                font = font0.deriveFont(Font.BOLD, k);
+                x = w * 385 / 500, y = y1 * 0.5;
+                drawMiddle(g, cdest, font, x, y);
+                k = y1 * 0.28;
+                font = font0.deriveFont(Font.PLAIN, k);
+                y = y1 * 0.87;
+                drawMiddle(g, edest, font, x, y);
 
                 g.setColor(new Color(0x606060));
                 w1 = 0;
@@ -657,26 +700,26 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                 k = y1 * 0.7;
                 font = font0.deriveFont(Font.PLAIN, k);
                 x = x1 - w1 / 2 + wh1[0] / 2, y = y1 * 0.75;
-                drawMiddle0(g, carIndex, font, x, y);
+                drawMiddle(g, carIndex, font, x, y);
                 k = y1 * 0.35;
                 font = font0.deriveFont(Font.PLAIN, k);
                 x = x1 + w1 / 2 - wh[0] / 2, y = y1 * 0.5;
-                drawMiddle0(g, "车厢", font, x, y);
+                drawMiddle(g, "车厢", font, x, y);
                 k = y1 * 0.23;
                 font = font0.deriveFont(Font.PLAIN, k);
                 y = y1 * 0.78;
-                drawMiddle0(g, "Car " + carIndex, font, x, y);
+                drawMiddle(g, "Car " + carIndex, font, x, y);
 
                 g.setColor(new Color(0));
                 x = w * (450 + 500) / 2 / 500;
                 y = y1 * 0.37;
                 k = y1 * 0.3;
                 font = font0.deriveFont(Font.PLAIN, k);
-                drawMiddle0(g, time0, font, x, y);
+                drawMiddle(g, time0, font, x, y);
                 y = y1 * 0.83;
                 k = y1 * 0.5;
                 font = font0.deriveFont(Font.PLAIN, k);
-                drawMiddle0(g, time1, font, x, y);
+                drawMiddle(g, time1, font, x, y);
 
                 g.setColor(new Color(0x606060));
                 if (is) {
@@ -732,7 +775,7 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                     case 1: str = "本侧开门"; break;
                     case 2: str = "双侧开门"; break;
                 }
-                drawMiddle0(g, str, font, x, y);
+                drawMiddle(g, str, font, x, y);
                 y = h * 0.9;
                 k = h * 0.05;
                 font = font0.deriveFont(Font.PLAIN, k);
@@ -743,44 +786,31 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                     case 1: str = "Exit This Side"; break;
                     case 2: str = "Open Both Sides"; break;
                 }
-                drawMiddle0(g, str, font, x, y);
+                drawMiddle(g, str, font, x, y);
 
-                let tp;
                 if (isArrive) {
                     g.setColor(new Color(color0));
                     str = "到达 " + t3;
                     k = h * 0.2;
                     font = font0.deriveFont(Font.BOLD, k);
                     x = w * (120 + 320) / 2 / 500, y = h * 0.6;
-                    drawMiddle0(g, str, font, x, y);
+                    drawMiddle(g, str, font, x, y);
                     str = "Arrived: " + t4;
                     k = h * 0.1;
                     font = font0.deriveFont(Font.PLAIN, k);
                     y = h * 0.75;
-                    drawMiddle0(g, str, font, x, y);
+                    drawMiddle(g, str, font, x, y);
                     
                     g.setColor(new Color(0xe0e0e0));
-                    tp = ihuancheng.size > 0 ? new S2() : new S1();
+                    x = w * (500 - 110 - 4) / 500, y = h * 0.23;
+                    g.drawImage((ihuancheng.size > 0 ? getS2() : getS1()), x, y, null);
                 } else {
                     acc = -1000;
-                    tp = ihuancheng.size > 0 ? new D2() : new D1();
+                    x = w * (500 - 110 - 4) / 500, y = h * 0.23;
+                    g.drawImage((ihuancheng.size > 0 ? getD2() : getD1()), x, y, null)
                 }
-                x = w * (500 - 110 - 4) / 500, y = h * 0.23;
-                tp.draw(g, x, y);
-                g.dispose();
-
-                this.stop = () => {if(et == null) et = now();};
-                this.draw = (g, x, y) => {
-                    g.drawImage(tex, x, y, null);
-                    textManager.commit(g, x1, y1); 
-                    tp.commit(g, x1 + x, y1 + y);
-                }
-                
-                this.alpha = () => alpha.get(true);
-                this.isFull = () => alpha.get(true) == 1;
-
-                this.dispose = () => textManager.dispose();
             }
+            SGround.id = "SGround";
 
             const d = [];
             const drawDoor = () => {
@@ -885,24 +915,32 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                     g.drawImage(out[1], x, y, null);
                 }
             }
+            DA0.id = "DA0";
             
-            function DR0() {
-                let st = now();
-                let et = null;
-                let stopped = false;
-                
-                this.stop = () => {
-                    if (et = null) et = now();
-                }
-                
-                this.isStopped = () => stopped;
-
+            const DR0 = (g, st, et) => {
                 const dx = ax => ax * w / 500;
                 const dy = ay => ay * h / 50; 
                 let kf = num => Math.sqrt(num);
-                let dir = [[-1, 0], [-1 / kf(2), 1 / kf(2)], [0, -1], [1 / kf(2), 1 / kf(2)], [1, 0]];
-                const strs = [];
-                for (let i = 0; i < ixlt0.length; i++) strs.push([ixlt0[i][0], ixlt0[i][1]]);
+                let dir = [[-1, 0], [-kf(1), -kf(1)], [0, -1], [kf(1), -kf(1)], [1, 0]];
+                let strs = ixlt0;
+                let t = now() - st;
+                t = t / 1000 * 0.5;
+                let a = 1 - smooth(1, t);
+                if (et != null) {
+                    let t1 = now() - et;
+                    t1 = t1 / 1000 * 0.5;
+                    let a1 = smooth(1, t1);
+                    a = Math.max(a, a1);
+                }
+                let dn = a * dx(100);
+                setComp(g, 1 - a);
+                if (strs.length == 0) {
+                    g.setColor(new Color(0));
+                    drawMiddle(g, "暂无信息", font0.deriveFont(Font.PLAIN, h * 0.3), dx(220) - dn, h * 0.6);
+                    drawMiddle(g, "No Information", font0.deriveFont(Font.PLAIN, h * 0.1), dx(220) + dn, h * 0.8);
+                    return false;
+                }
+                if (et != null && a == 1) return true;// 完全透明后退出
                 let hsv = cu.h2v(icolor);
                 let f = k => {
                     let hs = new HSV(hsv);
@@ -930,78 +968,51 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                     tx += w2 / 2;
                 }
                 let txx = [8, 4, 0, -4, -8];
-                const p = Font.PLAIN;
-                const b = Font.BOLD;
-                const color = icolor1;
-
-                this.draw = (g, x, y) => {
-                    const textManager = new TextManager(w, h, x => x, y => y);
-                    const drawMiddle = textManager.drawMiddle;
-                    let t = now() - st;
-                    t = t / 1000 * 0.5;
-                    let a = 1 - smooth(1, t);
-                    if (et != null) {
-                        let t1 = now() - et;
-                        t1 = t1 / 1000 * 0.5;
-                        let a1 = smooth(1, t1);
-                        a = Math.max(a, a1);
+                let sizeX = [];
+                for (let i = 0; i < 5; i++) {
+                    let j = sx[i];
+                    let ss = s[j];
+                    let w2 = dx(w1) * ss, h2 = h1 * (ss + 0.1);
+                    sizeX[j] = w2;
+                    if (strs[j] == undefined) continue;
+                    if (i == 4) h2 = h1;
+                    let x1 = dx(x[j] + txx[j]) + dn * dir[j][0], y1 = y + dn * dir[j][1];
+                    g.setColor(new Color(colors[j]));
+                    let r = h2 * 0.1;
+                    g.fillRoundRect(x1 - w2 / 2, y1 - h2 / 2, w2, h2, r, r);
+                    g.setColor(new Color(icolor1));
+                    if(i == 4) {
+                        let x = x1 - w2 * 0.35, y = y1 - h2 * 0.04;
+                        let font = font0.deriveFont(Font.PLAIN, h2 * 0.13);
+                        drawMiddle(g, "下一站", font, x, y);
+                        font = font0.deriveFont(Font.PLAIN, h2 * 0.06);
+                        y += h2 * 0.1;
+                        drawMiddle(g, "Next Station", font, x, y);
+                        x = x1 + w1 * 0.48;
+                        y = y1;
+                        font = font0.deriveFont(Font.BOLD, h2 * 0.23);
+                        drawMiddle(g, strs[j][0], font, x, y);
+                        font = font0.deriveFont(Font.BOLD, h2 * 0.12);
+                        drawMiddle(g, strs[j][1], font, x, y + h2 * 0.2);
+                    } else {
+                        let font = font0.deriveFont(Font.BOLD, h2 * 0.25);
+                        drawMiddle(g, strs[j][0], font, x1, y1);
+                        font = font0.deriveFont(Font.BOLD, h2 * 0.14);
+                        drawMiddle(g, strs[j][1], font, x1, y1 + h2 * 0.2);
                     }
-                    let dn = a * dx(100);
-                    setComp(g, 1 - a);
-                    if (et != null && a == 1) {stopped = true; return};// 完全透明后退出
-                    if (strs.length == 0) {
-                        g.setColor(new Color(0));
-                        drawMiddle0(g, "暂无信息", font0.deriveFont(Font.PLAIN, h * 0.3), dx(220) - dn, h * 0.6);
-                        drawMiddle0(g, "No Information", font0.deriveFont(Font.PLAIN, h * 0.1), dx(220) + dn, h * 0.8);
-                        return;
-                    }
-                    let sizeX = [];
-                    for (let i = 0; i < 5; i++) {
-                        let j = sx[i];
-                        let ss = s[j];
-                        let w2 = dx(w1) * ss, h2 = h1 * (ss + 0.1);
-                        sizeX[j] = w2;
-                        if (strs[j] == undefined) continue;
-                        if (i == 4) h2 = h1;
-                        let x1 = dx(x[j] + txx[j]) + dn * dir[j][0], y1 = y + dn * dir[j][1];
-                        g.setColor(new Color(colors[j]));
-                        let r = h2 * 0.1;
-                        g.fillRoundRect(x1 - w2 / 2, y1 - h2 / 2, w2, h2, r, r);
-                        if(i == 4) {
-                            let x = x1 - w2 * 0.35, y = y1 - h2 * 0.04;
-                            let font = font0.deriveFont(Font.PLAIN, h2 * 0.13);
-                            drawMiddle0(g, "下一站", font, x, y);
-                            font = font0.deriveFont(Font.PLAIN, h2 * 0.06);
-                            y += h2 * 0.1;
-                            drawMiddle0(g, "Next Station", font, x, y);
-                            x = x1 + w1 * 0.48;
-                            y = y1;
-                            drawMiddle(strs[j][0], font0, b, color, x, y - h2 * 0.23 / 2, w1 * 0.8, h2 * 0.23);
-                            drawMiddle(strs[j][1], font0, b, color, x, y - h2 * 0.23 / 2 + h2 * 0.12, w1 * 0.8, h2 * 0.12);
-                        } else {
-                            drawMiddle(strs[j][0], font0, b, color, x1, y - h2 * 0.25 / 2, w2 * 0.8, h2 * 0.25);
-                            drawMiddle(strs[j][1], font0, b, color, x1, y1 + h2 * 0.2 - h2 * 0.07, w2 * 0.8, h2 * 0.14);
-                        }
-                    }
-                    let scale = dy(8) / 100;
-                    let wx = 100 * scale;
-                    let ys = [dy(20), 0, dy(17), 0, dy(20)];
-                    for (let i = 0; i < 5; i+=2) {
-                        let v = smooth(1, ((now() / 1000) * 0.8) % 1);
-                        let xx = dx(x[i] + txx[i]) - sizeX[i] / 2 + wx / 2 + v * (sizeX[i] - wx);
-                        let canvas = Canvas.createWithCenterAndScale(g, xx, ys[i], scale, 100, 100, 1 - a, [0x00ff00, icolor]);
-                        jt(canvas);
-                    }
-                    textManager.commit(g, x, y);
-                    textManager.dispose();
                 }
+                let scale = dy(8) / 100;
+                let wx = 100 * scale;
+                let ys = [dy(20), 0, dy(17), 0, dy(20)];
+                for (let i = 0; i < 5; i+=2) {
+                    let v = smooth(1, ((now() / 1000) * 0.8) % 1);
+                    let xx = dx(x[i] + txx[i]) - sizeX[i] / 2 + wx / 2 + v * (sizeX[i] - wx);
+                    let canvas = Canvas.createWithCenterAndScale(g, xx, ys[i], scale, 100, 100, 1 - a, [0x00ff00, icolor]);
+                    jt(canvas);
+                }
+                return false;
             }
-
-            const DAir = {
-                stop: () => {},
-                isStopped: () => true,
-                draw:(g, x, y) => {}
-            }
+            DR0.id = "DR0";
 
             let DStyle = 0;// 运行时的样式组合
             let DS = [DR0];// 运行时的样式列表
@@ -1028,11 +1039,11 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                 if (isArrive || !isOnRoute()) {
                     DStyle = 0;
                     DTime = 0;
-                    addDrawCallD(DAir);
+                    addDrawCallD(() => true);
                 } else if (DTime + 8000 < now()){
                     DTime = now();
                     DStyle = (DStyle + 1) % DS.length;
-                    addDrawCallD(new DS[0]());
+                    addDrawCallD(DS[0]);
                 }
                 if (DDrawCalls.length > 0) need = true;
                 return need;
@@ -1043,7 +1054,8 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                 try {
                     if (first) {
                         info = getInfo();
-                        addDrawCallS(new SGround());
+                        addDrawCallS(SGround);
+                        needUpload = true;
                         mainAlpha.set(isOnRoute() ? 1 : 0, 0);
                         first = false;
                     }
@@ -1051,55 +1063,65 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
 
                     if (info.toString() != getInfo().toString() && isOnRoute()) {
                         info = getInfo();
-                        addDrawCallS(new SGround());
+                        addDrawCallS(SGround);
+                        needUpload = true;
                     }
                     mainAlpha.update();
                     if (mainAlpha.get() == 1 && !isOnRoute()) mainAlpha.turn(-1);
                     else if (mainAlpha.get() == 0 && isOnRoute()) mainAlpha.turn(1);
+                    if (mainAlpha.isChanged()) needUpload = true;
 
-                    g0.setComposite(AlphaComposite.CLEAR);
-                    g0.fillRect(0, 0, w, h);
-                    for (let i = 0; i < SDrawCalls.length; i++) {
-                        let obj = SDrawCalls[i];
-                        setComp(g0, obj.alpha());
-                        obj.draw(g0, 0, 0);
-                    }
-                    if (SDrawCalls[SDrawCalls.length - 1].isFull()) {
-                        for (let i = 0; i < SDrawCalls.length - 1; i++) SDrawCalls[i].dispose();
-                        SDrawCalls = [SDrawCalls[SDrawCalls.length - 1]];
-                    }
-                    if (mainAlpha.get() == 1) {
-                        let g = tex.graphics;
-                        g.setComposite(AlphaComposite.CLEAR);
-                        g.fillRect(0, 0, w, h);
-                        setComp(g, 1);
-                        g.drawImage(img0, 0, 0, null);
-                        DA0(g);
-                        for (let i = 0; i < DDrawCalls.length; i++) {
-                            let obj = DDrawCalls[i];
-                            obj.draw(g, 0, 0);
+                    needUpload = needUpload || ctrl();
+                    if (drawCalls[1] != null) needUpload = true;
+
+                    if (needUpload) {
+                        if (drawCalls[0] != null) g0.drawImage(drawCalls[0], 0, 0, null);
+                        if (drawCalls[1]!= null) {
+                            setComp(g0, 1);
+                            if (drawCalls[1] != null) {
+                                let [img, value] = drawCalls[1];
+                                setComp(g0, smooth(1, value));
+                                g0.drawImage(img, 0, 0, null);
+                                drawCalls[1][1] += lastFrameTime / 1000 * 1.2;
+                                if (drawCalls[1][1] > 1) drawCalls[0] = drawCalls.pop()[0];
+                            }
                         }
-                    } else {
-                        g1.setComposite(AlphaComposite.CLEAR);
-                        g1.fillRect(0, 0, w, h);
-                        g1.drawImage(img0, 0, 0, null);
-                        DA0(g1);
-                        for (let i = 0; i < DDrawCalls.length; i++) {
-                            let obj = DDrawCalls[i];
-                            obj.draw(g1, 0, 0);
+
+                        if (mainAlpha.get() == 1) {
+                            let g = tex.graphics;
+                            setComp(g, 1);
+                            g.drawImage(img0, 0, 0, null);
+                            DA0(g);
+                            for (let i = 0; i < DDrawCalls.length; i++) {
+                                let [fun, st, et, dis] = DDrawCalls[i];
+                                if (dis) continue;
+                                DDrawCalls[i][3] = fun(g, st, et);
+                            }
+                        } else {
+                            let g = tex.graphics;
+                            setComp(g1, 1);
+                            g1.drawImage(img0, 0, 0, null);
+                            DA0(g1);
+                            for (let i = 0; i < DDrawCalls.length; i++) {
+                                let [fun, st, et, dis] = DDrawCalls[i];
+                                if (dis) continue;
+                                DDrawCalls[i][3] = fun(g1, st, et);
+                            }
+                            setComp(g, 1);
+                            g.setColor(new Color(0));
+                            g.fillRect(0, 0, w, h);
+                            setComp(g, smooth(1, mainAlpha.get()));
+                            g.drawImage(img1, 0, 0, null);
                         }
-                        
-                        let g = tex.graphics;
-                        setComp(g, 1);
-                        g.setColor(new Color(0));
-                        g.fillRect(0, 0, w, h);
-                        setComp(g, smooth(1, mainAlpha.get()));
-                        g.drawImage(img1, 0, 0, null);
+                        let ka = DDrawCalls.length
+                        let newDDC = [];
+                        for (let e of DDrawCalls) {
+                            if (e[3] == false) newDDC.push(e);
+                        }
+                        DDrawCalls = newDDC;
+                        tex.upload();
+                        needUpload = false;
                     }
-                    let newDDC = [];
-                    for (let obj of DDrawCalls) if (!obj.isStopped()) newDDC.push(obj); else obj.dispose();
-                    DDrawCalls = newDDC;
-                    tex.upload();
 
                     lastFrameTime = now() - startTime;
                     ctx.setDebugInfo(uid +  "  Used: ", lastFrameTime + "ms");

@@ -25,7 +25,7 @@ importPackage (java.awt.font);
  * @param {Map<Number, Number> | Null} colorMap - 颜色映射表。类似 {[0, 0xff00ff], [0xff0000, 0xffffff]}。
  */
 
-function Canvas(g, fx, fy, fw, fh, fl, alpha, colorMap) {
+const Canvas = function(g, fx, fy, fw, fh, fl, alpha, colorMap) {
     /**
      * @param {Graphics2D} g - 图形上下文对象。
      */
