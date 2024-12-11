@@ -19,7 +19,7 @@ importPackage (java.awt.font);
 function TextManager(w, h, fx, fy) {
     const map = new Map();
     const list = [];
-    const tex0 = new BufferedImage(w, h);
+    const tex0 = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
     const g0 = tex0.createGraphics();
 
     const getW = (str, font) => {
@@ -35,7 +35,7 @@ function TextManager(w, h, fx, fy) {
     }
 
     const getFont = (font, style, h) => {
-        let fm = g0.getFontMetrics(font.deriveFont(Font.PLAIN,1000));
+        let fm = g0.getFontMetrics(font.deriveFont(style,1000));
         let h0 = fm.getHeight();
         let scale = 1000 / h0;
         return font.deriveFont(style, h * scale);
@@ -52,7 +52,7 @@ function TextManager(w, h, fx, fy) {
         return (Math.cos(value / k * Math.PI + Math.PI) + 1) / 2 * k;
     }
 
-    function Text(str, font, style, color, x, y, w, h, start, alpha) {
+    function Text(str, font, style, color, x, y, w, h, start) {
         if (!(color instanceof Color)) color = new Color(color);
         font = getFont(font, style, h);
         let width = getW(str, font);
@@ -63,26 +63,24 @@ function TextManager(w, h, fx, fy) {
         let tex = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
         let g = tex.createGraphics();
         g.setFont(font);
-        if (scroll) {
+        if (!scroll) {
+            g.setColor(color);
             g.drawString(str, (w - w0) / 2, h - getDescent(font)); // 居中绘制
             this.draw = () => {
-                g0.setComposite(AlphaComposite.SrcOver.derive(alpha));
-                g0.setColor(color);
-                g0.drawImage(tex, x - w, y - h, null);
+                g0.drawImage(tex, x - w / 2, y - h / 2, null);
             }
         } else {
             this.draw = () => {
-                g.setComposite(AlphaComposite.CLEAR);
+                g.setComposite(AlphaComposite.Clear);
                 g.fillRect(0, 0, w, h);
-                g.setComposite(AlphaComposite.SRC_OVER);
+                g.setComposite(AlphaComposite.SrcOver);
                 let v = ((Date.now() - start) / 1000 * 0.7) % 1;
                 v = smooth(1, v);
                 let tx = v * w;
                 g.setColor(color);
                 g.drawString(str, tx, h - getDescent(font));
                 g.drawString(str, tx - w, h - getDescent(font));
-                g0.setComposite(AlphaComposite.SrcOver.derive(alpha));
-                g0.drawImage(tex, x - w, y - h, null);
+                g0.drawImage(tex, x - w / 2, y - h / 2, null);
             }
         }
         this.dispose = () => g.dispose();
@@ -99,14 +97,12 @@ function TextManager(w, h, fx, fy) {
      * @param {Number} w 最大宽度
      * @param {Number} h 最大高度
      * @param {Number} start 开始时间
-     * @param {Number | Null} alpha 透明度
      * @param {Any | Null} id
      */
-    this.drawMiddle = (str, font, style, color, x, y, w, h, start, alpha, id) => {
-        if (alpha == null) alpha = 1;
+    this.drawMiddle = (str, font, style, color, x, y, w, h, start, id) => {
         if (start == null) start = Date.now();
-        if (id != null) if (map.has(id)) {map.get(id).dispose(); map.set(id, new Text(str, font, style, color, fx(x), fy(y), w, h, start, alpha));}
-        else list.push(new Text(str, font, style, color, fx(x), fy(y), w, h, start, alpha));
+        if (id != null) if (map.has(id)) {map.get(id).dispose(); map.set(id, new Text(str, font, style, color, fx(x), fy(y), w, h, start));}
+        else list.push(new Text(str, font, style, color, fx(x), fy(y), w, h, start));
     }
 
     this.map = () => map;
@@ -129,9 +125,9 @@ function TextManager(w, h, fx, fy) {
      * @param {Number} y y坐标
      */
     this.commit = (g, x, y) => {
-        g0.setComposite(AlphaComposite.CLEAR);
+        g0.setComposite(AlphaComposite.Clear);
         g0.fillRect(0, 0, w, h);
-        g0.setComposite(AlphaComposite.SRC_OVER);
+        g0.setComposite(AlphaComposite.SrcOver);
         for (let [id, text] of map) text.draw();
         for (let text of list) text.draw();
         g.drawImage(tex0, x, y, null);
@@ -141,9 +137,8 @@ function TextManager(w, h, fx, fy) {
      * 释放资源
      */
     this.dispose = () => {
-        g.dispose();
-        for (let [id, text] of map) {
-            text.dispose();
-        }
+        g0.dispose();
+        for (let [id, text] of map) text.dispose();
+        for (let text of list) text.dispose();
     }
 }
