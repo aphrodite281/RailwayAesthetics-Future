@@ -443,14 +443,14 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                 let canvas = Canvas.createWithCenterAndScale(g, x, y, scale, 52, 52);
                 hc(canvas, g, ctx);
                 const p = Font.PLAIN;
-                drawMiddle("可 换 乘", font0, p, 0xa0a0a0, dx(300), dy(51), dx(300), dy(58), now(), 1);
-                drawMiddle("Transfer To", font0, p, 0xa0a0a0, dx(300), dy(105), dx(300), dy(30), now(), 1);
+                drawMiddle("可 换 乘", font0, p, 0xa0a0a0, dx(280), dy(51), dx(300), dy(65));
+                drawMiddle("Transfer To", font0, p, 0xa0a0a0, dx(280), dy(105), dx(300), dy(40));
 
                 const draw = (x, y, w1, h1, color0, color1, c, n) => {
                     g.setColor(new Color(color0));
                     g.fillRoundRect(x, y, w1, h1, dy(10), dy(10));
-                    drawMiddle(c, font0, p, color1, x + w1 / 2, y + h1 * 0.25, w1, h1 * 0.4, now(), 1);
-                    drawMiddle(n, font0, p, color1, x + w1 / 2, y + h1 * 0.8, w1, h1 * 0.25, now(), 1);
+                    drawMiddle(c, font0, p, color1, x + w1 / 2, y + h1 * 0.25, w1, h1 * 0.5);
+                    drawMiddle(n, font0, p, color1, x + w1 / 2, y + h1 * 0.75, w1, h1 * 0.4);
                 }
 
                 let array = [];
@@ -491,8 +491,15 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
 
                 g.dispose();
                 
-                this.draw = (g, x, y) => g.drawImage(img, x, y, null);
-                this.commit = (g, x, y) => textManager.commit(g, x, y);
+                this.get = () => {
+                    let img2 = new BufferedImage(w0, h0, BufferedImage.TYPE_INT_ARGB);
+                    let g2 = img2.createGraphics();
+                    g2.drawImage(img, 0, 0, null);
+                    g2.drawImage(textManager.get(), 0, 0, null);
+                    return img2;
+                }
+
+                this.dispose = () => textManager.dispose();
             }
 
             function D1() {
@@ -761,21 +768,23 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                     tp = ihuancheng.size > 0 ? new D2() : new D1();
                 }
                 x = w * (500 - 110 - 4) / 500, y = h * 0.23;
-                x1 = x, y1 = y;
-                tp.draw(g, x, y);
                 g.dispose();
 
                 this.stop = () => {if(et == null) et = now();};
-                this.draw = (g, x, y) => {
-                    g.drawImage(tex, x, y, null);
-                    textManager.commit(g, x, y); 
-                    tp.commit(g, x1 + x, y1 + y);
+                this.get = () => {
+                    let img2 = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+                    let g2 = img2.createGraphics();
+                    g2.drawImage(tex, 0, 0, null);
+                    g2.drawImage(textManager.get(), 0, 0, null); 
+                    g2.drawImage(tp.get(), x, y, null);
+                    g2.dispose();
+                    return img2;
                 }
                 
                 this.alpha = () => alpha.get(true);
                 this.isFull = () => alpha.get(true) == 1;
 
-                this.dispose = () => textManager.dispose();
+                this.dispose = () => {textManager.dispose(); tp.dispose();};
             }
 
             const d = [];
@@ -1058,7 +1067,7 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                     for (let i = 0; i < SDrawCalls.length; i++) {
                         let obj = SDrawCalls[i];
                         setComp(g0, obj.alpha());
-                        obj.draw(g0, 0, 0);
+                        g0.drawImage(obj.get(), 0, 0, null)
                     }
                     if (SDrawCalls[SDrawCalls.length - 1].isFull()) {
                         for (let i = 0; i < SDrawCalls.length - 1; i++) SDrawCalls[i].dispose();
@@ -1098,7 +1107,7 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                     tex.upload();
 
                     lastFrameTime = now() - startTime;
-                    ctx.setDebugInfo(uid +  "  Used: ", lastFrameTime + "ms");
+                    ctx.setDebugInfo(uid +  "  Used: ", lastFrameTime + "ms" , (1000 / lastFrameTime).toFixed(2) + "/s");
                     lastFrameTime = now() - startTime;
                 } catch (e) {
                     ctx.setDebugInfo(uid + " Error At: ", now().toString(), e.message, e.stack);

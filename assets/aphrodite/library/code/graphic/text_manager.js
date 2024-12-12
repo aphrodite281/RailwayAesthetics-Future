@@ -9,6 +9,8 @@ importPackage (java.awt.image);
 importPackage (java.awt.geom);
 importPackage (java.awt.font);
 
+include(Resources.id("aphrodite:library/code/util/value.js"));
+
 /**
  * 文本经理
  * @param {Number} w 图片宽度
@@ -35,8 +37,7 @@ function TextManager(w, h, fx, fy) {
     }
 
     const getFont = (font, style, h) => {
-        let fm = g0.getFontMetrics(font.deriveFont(style,1000));
-        let h0 = fm.getHeight();
+        let h0 = getH(font.deriveFont(style,1000));
         let scale = 1000 / h0;
         return font.deriveFont(style, h * scale);
     }
@@ -58,28 +59,30 @@ function TextManager(w, h, fx, fy) {
         let width = getW(str, font);
         let scroll = false;
         if (width > w) scroll = true;
-        let h = getH(font);
+        h = getH(font);
         let w0 = getW(str, font);
         let tex = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
         let g = tex.createGraphics();
         g.setFont(font);
+        const descent = getDescent(font);
         if (!scroll) {
+            g.setColor(new Color(0x0a0a0a));
+            g.fillRect(0, 0, w, h);
             g.setColor(color);
-            g.drawString(str, (w - w0) / 2, h - getDescent(font)); // 居中绘制
-            this.draw = () => {
-                g0.drawImage(tex, x - w / 2, y - h / 2, null);
-            }
+            g.drawString(str, (w - w0) / 2, h - descent); // 居中绘制
+            this.draw = () => g0.drawImage(tex, x - w / 2, y - h / 2, null);
         } else {
+            let ins = h * 3; // 间隔
             this.draw = () => {
                 g.setComposite(AlphaComposite.Clear);
                 g.fillRect(0, 0, w, h);
+                g.setColor(new Color(0x0a0a0a));
+                g.fillRect(0, 0, w, h);
                 g.setComposite(AlphaComposite.SrcOver);
-                let v = ((Date.now() - start) / 1000 * 0.7) % 1;
-                v = smooth(1, v);
-                let tx = v * w;
+                let tx = ((Date.now() - start) / 1000 * h) % w0;
                 g.setColor(color);
-                g.drawString(str, tx, h - getDescent(font));
-                g.drawString(str, tx - w, h - getDescent(font));
+                g.drawString(str, -tx - ins, h - descent);
+                g.drawString(str, -tx + w0, h - descent);
                 g0.drawImage(tex, x - w / 2, y - h / 2, null);
             }
         }
@@ -100,7 +103,7 @@ function TextManager(w, h, fx, fy) {
      * @param {Any | Null} id
      */
     this.drawMiddle = (str, font, style, color, x, y, w, h, start, id) => {
-        if (start == null) start = Date.now();
+        if (start == null) start = 0;
         if (id != null) if (map.has(id)) {map.get(id).dispose(); map.set(id, new Text(str, font, style, color, fx(x), fy(y), w, h, start));}
         else list.push(new Text(str, font, style, color, fx(x), fy(y), w, h, start));
     }
@@ -115,7 +118,7 @@ function TextManager(w, h, fx, fy) {
         for (let [id, text] of map) text.dispose();
         map.clear();
         for (let text of list) text.dispose();
-        list.splice(0, list.length);
+        list = [];
     }
 
     /**
@@ -124,13 +127,13 @@ function TextManager(w, h, fx, fy) {
      * @param {Number} x x坐标
      * @param {Number} y y坐标
      */
-    this.commit = (g, x, y) => {
+    this.get = () => {
         g0.setComposite(AlphaComposite.Clear);
         g0.fillRect(0, 0, w, h);
         g0.setComposite(AlphaComposite.SrcOver);
         for (let [id, text] of map) text.draw();
         for (let text of list) text.draw();
-        g.drawImage(tex0, x, y, null);
+        return tex0;
     }
 
     /**
