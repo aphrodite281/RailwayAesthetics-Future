@@ -335,3 +335,23 @@ Canvas.transformColorMap = (array) => {
     }
     return map;
 }
+
+/**
+ * 获得位图。
+ * @param {Function<Canvas, Any>} ft - 绘制函数。
+ * @param {Number} s - 缩放比例。
+ * @param {Number} tw - 绘制函数的宽度。
+ * @param {Number} th - 绘制函数的高度。
+ * @param {Map<Number, Number> | Array<Number> | Array<Array<Number>> | Null} colorMap - 颜色映射表。类似 {[0, 0xff00ff], [0xff0000, 0xffffff]}。
+ * @returns {BufferedImage} - 位图。
+ */
+Canvas.getBitmap = (ft, s, tw, th, colorMap) => {
+    let img = new BufferedImage(tw * s, th * s, BufferedImage.TYPE_INT_ARGB);
+    let g = img.createGraphics();
+    if (colorMap instanceof Array) colorMap = Canvas.transformColorMap(colorMap);
+    if (colorMap == undefined) colorMap = new Map();
+    let canvas = Canvas.createWithCenterAndScale(g, w / 2, h / 2, s, tw, th, 1, colorMap);
+    ft(canvas);
+    g.dispose();
+    return img;
+}
