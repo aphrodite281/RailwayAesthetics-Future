@@ -722,7 +722,7 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                     if (style == 0 || iisArrive) tp.draw(g, x, y);
                 }
                 
-                this.alpha = () => smooth(1, alpha.get(true));
+                this.alpha = () => alpha.get(true);
                 this.isFull = () => alpha.get(true) == 1;
 
                 this.dispose = () => {textManager.dispose(); tp.dispose();};
@@ -1062,7 +1062,10 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                     else g = img.createGraphics();
                     g.setComposite(AlphaComposite.Clear);
                     g.fillRect(0, 0, w, h);
-                    for (let i = 0; i < SDrawCalls.length; i++) SDrawCalls[i].draw(g);
+                    for (let i = 0; i < SDrawCalls.length; i++) {
+                        let obj = SDrawCalls[i];
+                        obj.draw(g);
+                    }
                     if (SDrawCalls[SDrawCalls.length - 1].isFull()) {
                         for (let i = 0; i < SDrawCalls.length - 1; i++) SDrawCalls[i].dispose();
                         SDrawCalls = [SDrawCalls[SDrawCalls.length - 1]];
@@ -1088,12 +1091,12 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                     g.dispose();
 
                     ti("Mix");
+                    upload(img);
+                    ti("Upload");
                     let t = 1000 / 30 - (now() - startTime);
                     t = Math.max(t, 0);
                     Thread.sleep(t);
                     ti("Sleep");
-                    upload(img);
-                    ti("Upload");
 
                     lastFrameTime = now() - startTime;
                     used.push("Total: " + lastFrameTime.toString().padStart(3, '0'));
