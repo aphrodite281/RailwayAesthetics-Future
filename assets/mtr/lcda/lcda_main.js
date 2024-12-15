@@ -24,7 +24,7 @@ include(Resources.id("mtr:lcda/icon/zwfh.js"));
 include(Resources.id("mtr:lcda/icon/jt.js"));
 include(Resources.id("mtr:lcda/icon/logo.js"));
 
-const defaultScreenTextureSize = [1600 * 5 / 4, 400 * 5 / 4];
+const defaultScreenTextureSize = [1600, 400];
 const defaultScreenModelSize = [1600 / 2000, 400 / 2000];
 
 const textureSize = defaultScreenTextureSize;
@@ -155,9 +155,6 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
             const uploadManager = new UploadManager(tex);
             const upload = uploadManager.upload;
             const w = tex.width, h = tex.height;
-            const img0 = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);// 合并层
-            const g0 = img0.createGraphics();
-            disposeList.push(() => g0.dispose());
 
             const now = () => Date.now();
             let SDrawCalls = [];// [旧图, [新渐变的, 新alpha]] 渐变绘制
@@ -220,9 +217,13 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                     let luminance  = 0.299 * rr + 0.587 * g + 0.114 * b;
                     return luminance > 255 / 2 ? 0 : 0xffffff;
                 }
-                try {
+                while(1) {
                     let plas = train.getThisRoutePlatforms();
                     let ind = train.getThisRoutePlatformsNextIndex();
+                    if (plas.length == 0) break;
+                    if (plas == null) break;
+                    if (plas.length <= ind) break;
+                    if (ind < 0) break;
                     let pla = plas[ind];
                     let station = pla.destinationStation;
                     const ss = () => {
@@ -345,8 +346,7 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                             xlt1.push([TU.CP(name), TU.NP(name), huan]);
                         }
                     }
-                } catch (e) {
-                    print("ARAF-LCD-getInfo Error: " + e.message);
+                    break;
                 }
                 color1 = getColor(color);
                 icolor = color, icolor1 = color1, icname = cname, iename = ename, icdest = cdest, idest = edest, itime0 = time0, itime1 = time1, iis = is, it1 = t1, it2 = t2, it3 = t3, it4 = t4, iisArrive = isArrive, iopen = open, ihuancheng = huancheng, ixlt0 = xlt0, ixlt1 = xlt1;
@@ -927,8 +927,8 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                             drawMiddle0(g, "Next Station", font, x, y);
                             x = x1 + w1 * 0.48;
                             y = y1;
-                            drawMiddle(strs[j][0], font0, b, color, x, y - h2 * 0.25 / 2, w2 * 0.74, h2 * 0.36, 0);
-                            drawMiddle(strs[j][1], font0, b, color, x, y + h2 * 0.15, w2 * 0.75, h2 * 0.2, 0);
+                            drawMiddle(strs[j][0], font0, b, color, x, y - h2 * 0.25 / 2, w2 * 0.73, h2 * 0.36, 0);
+                            drawMiddle(strs[j][1], font0, b, color, x, y + h2 * 0.15, w2 * 0.73, h2 * 0.2, 0);
                         } else {
                             drawMiddle(strs[j][0], font0, b, color, x1, y - h2 * 0.1, w2 * 0.8, h2 * 0.35, 0);
                             drawMiddle(strs[j][1], font0, b, color, x1, y1 + h2 * 0.25 - h2 * 0.07, w2 * 0.8, h2 * 0.2, 0);
@@ -1029,7 +1029,10 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                 used.push(prompt + ": " + (now()- last).toString().padStart(2, '0'));
                 last = now();
             }
-            let lastUpdate = now();
+            let min;
+            let max;
+            let sum = 0;
+            let times = 0;
             while (state.running && state.lastTime + 60000 > now()) {
                 try {
                     last = now();
@@ -1041,15 +1044,12 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                         first = false;
                     }
                     startTime = now();
-                    if (lastUpdate + 200 < now()) {
-                        let newInfo = getInfo();
-                        if (info.toString() != newInfo.toString() && isOnRoute()) {
-                            info = newInfo;
-                            addDrawCallS(new SGround());
-                        }
-                        ctrl();
-                        lastUpdate = now();
+                    let newInfo = getInfo();
+                    if (info.toString() != newInfo.toString() && isOnRoute()) {
+                        info = newInfo;
+                        addDrawCallS(new SGround());
                     }
+                    ctrl();
 
                     mainAlpha.update();
                     if (mainAlpha.get() == 1 && !isOnRoute()) mainAlpha.turn(-1);
@@ -1088,7 +1088,7 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                     g.dispose();
 
                     ti("Mix");
-                    let t = 1000 / 30 - (now() - startTime);
+                    let t = 1000 / 40 - (now() - startTime);
                     t = Math.max(t, 0);
                     Thread.sleep(t);
                     ti("Sleep");
@@ -1098,8 +1098,16 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                     lastFrameTime = now() - startTime;
                     used.push("Total: " + lastFrameTime.toString().padStart(3, '0'));
                     used.push("Upload1: " + uploadManager.lastUsed().toString().padStart(3, '0'));
+                    let fps = 1000 / lastFrameTime;
+                    if (min == undefined) min = fps;
+                    else min = Math.min(min, fps);
+                    if (max == undefined) max = fps;
+                    else max = Math.max(max, fps);
+                    times++;
+                    sum += fps;
+                    let average = sum / times;
                     let dd = new Date();
-                    ctx.setDebugInfo(uid, dd.getMinutes().toString().padStart(2, '0') + ":" + dd.getSeconds().toString().padStart(2, '0') + "::" + dd.getMilliseconds().toString().padStart(3, '0') , used.toString() + "(ms)", (1000 / lastFrameTime).toFixed(2) + "/s", "S-Calls", SDrawCalls.length,  "D-Calls", DDrawCalls.length);
+                    ctx.setDebugInfo(uid, dd.getMinutes().toString().padStart(2, '0') + ":" + dd.getSeconds().toString().padStart(2, '0') + "::" + dd.getMilliseconds().toString().padStart(3, '0'), min.toFixed(2) + "-" + average.toFixed(2) + "-" + max.toFixed(2), fps.toFixed(2), "\n", "D-Calls:" + DDrawCalls.length, "S-Calls:" + SDrawCalls.length, "Used: " + used.toString(), "\n"); 
                 } catch (e) {
                     ctx.setDebugInfo(uid + " Error At: ", now().toString(), e.message, e.stack);
                     print(uid + " Error At: " + now() + "     " + e.message + "      " + e.stack);

@@ -24,7 +24,7 @@ include(Resources.id("mtr:lcda/icon/zwfh.js"));
 include(Resources.id("mtr:lcda/icon/jt.js"));
 include(Resources.id("mtr:lcda/icon/logo.js"));
 
-const defaultScreenTextureSize = [1600 * 5 / 4, 400 * 5 / 4];
+const defaultScreenTextureSize = [1600, 400];
 const defaultScreenModelSize = [1600 / 2000, 400 / 2000];
 
 const textureSize = defaultScreenTextureSize;
@@ -220,9 +220,13 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                     let luminance  = 0.299 * rr + 0.587 * g + 0.114 * b;
                     return luminance > 255 / 2 ? 0 : 0xffffff;
                 }
-                try {
+                while(1) {
                     let plas = train.getThisRoutePlatforms();
                     let ind = train.getThisRoutePlatformsNextIndex();
+                    if (plas.length == 0) break;
+                    if (plas == null) break;
+                    if (plas.length <= ind) break;
+                    if (ind < 0) break;
                     let pla = plas[ind];
                     let station = pla.destinationStation;
                     const ss = () => {
@@ -345,8 +349,7 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                             xlt1.push([TU.CP(name), TU.NP(name), huan]);
                         }
                     }
-                } catch (e) {
-                    print("ARAF-LCD-getInfo Error: " + e.message);
+                    break;
                 }
                 color1 = getColor(color);
                 icolor = color, icolor1 = color1, icname = cname, iename = ename, icdest = cdest, idest = edest, itime0 = time0, itime1 = time1, iis = is, it1 = t1, it2 = t2, it3 = t3, it4 = t4, iisArrive = isArrive, iopen = open, ihuancheng = huancheng, ixlt0 = xlt0, ixlt1 = xlt1;
@@ -722,7 +725,7 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                     if (style == 0 || iisArrive) tp.draw(g, x, y);
                 }
                 
-                this.alpha = () => alpha.get(true);
+                this.alpha = () => smooth(1, alpha.get(true));
                 this.isFull = () => alpha.get(true) == 1;
 
                 this.dispose = () => {textManager.dispose(); tp.dispose();};
@@ -927,8 +930,8 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                             drawMiddle0(g, "Next Station", font, x, y);
                             x = x1 + w1 * 0.48;
                             y = y1;
-                            drawMiddle(strs[j][0], font0, b, color, x, y - h2 * 0.25 / 2, w2 * 0.74, h2 * 0.36, 0);
-                            drawMiddle(strs[j][1], font0, b, color, x, y + h2 * 0.15, w2 * 0.75, h2 * 0.2, 0);
+                            drawMiddle(strs[j][0], font0, b, color, x, y - h2 * 0.25 / 2, w2 * 0.73, h2 * 0.36, 0);
+                            drawMiddle(strs[j][1], font0, b, color, x, y + h2 * 0.15, w2 * 0.73, h2 * 0.2, 0);
                         } else {
                             drawMiddle(strs[j][0], font0, b, color, x1, y - h2 * 0.1, w2 * 0.8, h2 * 0.35, 0);
                             drawMiddle(strs[j][1], font0, b, color, x1, y1 + h2 * 0.25 - h2 * 0.07, w2 * 0.8, h2 * 0.2, 0);
@@ -1029,7 +1032,10 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                 used.push(prompt + ": " + (now()- last).toString().padStart(2, '0'));
                 last = now();
             }
-            let lastUpdate = now();
+            let min;
+            let max;
+            let sum = 0;
+            let times = 0;
             while (state.running && state.lastTime + 60000 > now()) {
                 try {
                     last = now();
@@ -1041,68 +1047,80 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                         first = false;
                     }
                     startTime = now();
-                    if (lastUpdate + 200 < now()) {
-                        let newInfo = getInfo();
-                        if (info.toString() != newInfo.toString() && isOnRoute()) {
-                            info = newInfo;
-                            addDrawCallS(new SGround());
-                        }
-                        ctrl();
-                        lastUpdate = now();
+                    let newInfo = getInfo();
+                    if (info.toString() != newInfo.toString() && isOnRoute()) {
+                        info = newInfo;
+                        addDrawCallS(new SGround());
                     }
+                    ctrl();
 
                     mainAlpha.update();
                     if (mainAlpha.get() == 1 && !isOnRoute()) mainAlpha.turn(-1);
                     else if (mainAlpha.get() == 0 && isOnRoute()) mainAlpha.turn(1);
                     ti("Ctrl");
 
-                    let img = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
-                    let g;
-                    if (mainAlpha.get() != 1) g = g0;
-                    else g = img.createGraphics();
-                    g.setComposite(AlphaComposite.Clear);
-                    g.fillRect(0, 0, w, h);
-                    for (let i = 0; i < SDrawCalls.length; i++) {
-                        let obj = SDrawCalls[i];
-                        obj.draw(g);
-                    }
-                    if (SDrawCalls[SDrawCalls.length - 1].isFull()) {
-                        for (let i = 0; i < SDrawCalls.length - 1; i++) SDrawCalls[i].dispose();
-                        SDrawCalls = [SDrawCalls[SDrawCalls.length - 1]];
-                    }
-                    ti("S-Draw");
+                    let alpha = 1 - smooth(1, mainAlpha.get(true));
+                    const f = 2;//分为两块绘制
+                    let threads = [];
+                    let all = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+                    let ga = all.createGraphics();
+                    for (let i = 0; i < 2; i++) {
+                        let thre = new Thread(() => {
+                            if (alpha == 1) return;
+                            
+                            let img = new BufferedImage(w / f, h, BufferedImage.TYPE_INT_ARGB);
+                            let g = img.createGraphics();
+                            g.translate(- i * w / f, 0);
 
-                    DA0(g);
-                    ti("DA0");
+                            for (let i = 0; i < SDrawCalls.length; i++) SDrawCalls[i].draw(g);
+                            if (SDrawCalls[SDrawCalls.length - 1].isFull()) {
+                                for (let i = 0; i < SDrawCalls.length - 1; i++) SDrawCalls[i].dispose();
+                                SDrawCalls = [SDrawCalls[SDrawCalls.length - 1]];
+                            }
+        
+                            DA0(g);
+        
+                            refreshD();
+                            for (let i = 0; i < DDrawCalls.length; i++) DDrawCalls[i].draw(g);
+                            refreshD();
+        
+                            if (alpha != 0) {
+                                setComp(g, alpha);
+                                g.setColor(new Color(0));
+                                g.fillRect(0, 0, w / f, h);
+                            }
 
-                    refreshD();
-                    for (let i = 0; i < DDrawCalls.length; i++) DDrawCalls[i].draw(g);
-                    refreshD();
-                    ti("D-Draw");
-
-                    if (mainAlpha.get() != 1) {
-                        let g = img.createGraphics()
-                        setComp(g, 1);
-                        g.setColor(new Color(0));
-                        g.fillRect(0, 0, w, h);
-                        setComp(g, smooth(1, mainAlpha.get()));
-                        g.drawImage(img0, 0, 0, null);
+                            g.dispose();
+                            ga.drawImage(img, i * w / f, 0, null);
+                        }, "Draw");
+                        thre.start();
+                        threads.push(thre);
                     }
-                    g.dispose();
+                    for (let thre of threads) thre.join();
+                    ga.dispose();
+                    ti("Draw");
 
                     ti("Mix");
-                    upload(img);
-                    ti("Upload");
-                    let t = 1000 / 30 - (now() - startTime);
+                    let t = 1000 / 40 - (now() - startTime);
                     t = Math.max(t, 0);
                     Thread.sleep(t);
                     ti("Sleep");
+                    upload(all);
+                    ti("Upload");
 
                     lastFrameTime = now() - startTime;
                     used.push("Total: " + lastFrameTime.toString().padStart(3, '0'));
                     used.push("Upload1: " + uploadManager.lastUsed().toString().padStart(3, '0'));
+                    let fps = 1000 / lastFrameTime;
+                    if (min == undefined) min = fps;
+                    else min = Math.min(min, fps);
+                    if (max == undefined) max = fps;
+                    else max = Math.max(max, fps);
+                    times++;
+                    sum += fps;
+                    let average = sum / times;
                     let dd = new Date();
-                    ctx.setDebugInfo(uid, dd.getMinutes().toString().padStart(2, '0') + ":" + dd.getSeconds().toString().padStart(2, '0') + "::" + dd.getMilliseconds().toString().padStart(3, '0') , used.toString() + "(ms)", (1000 / lastFrameTime).toFixed(2) + "/s", "S-Calls", SDrawCalls.length,  "D-Calls", DDrawCalls.length);
+                    ctx.setDebugInfo(uid, dd.getMinutes().toString().padStart(2, '0') + ":" + dd.getSeconds().toString().padStart(2, '0') + "::" + dd.getMilliseconds().toString().padStart(3, '0'), min.toFixed(2) + "-" + average.toFixed(2) + "-" + max.toFixed(2), fps.toFixed(2), "\n", "D-Calls:" + DDrawCalls.length, "S-Calls:" + SDrawCalls.length, "Used: " + used.toString(), "\n"); 
                 } catch (e) {
                     ctx.setDebugInfo(uid + " Error At: ", now().toString(), e.message, e.stack);
                     print(uid + " Error At: " + now() + "     " + e.message + "      " + e.stack);

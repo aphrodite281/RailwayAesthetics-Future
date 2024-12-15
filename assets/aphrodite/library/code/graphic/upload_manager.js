@@ -13,13 +13,12 @@ function UploadManager(tex) {
     /**
      * 上传图片
      * @param {BufferedImage} img 图片
+     * @param {Number} alpha 透明度
      */
     this.upload = (img) => {
         let th = new Thread(() => {
             let start = Date.now();
-            tex.graphics.setComposite(AlphaComposite.SrcOver);
-            tex.graphics.drawImage(img, 0, 0, null);
-            tex.upload();
+            tex.upload(img);
             last = Date.now() - start;
         }, "Upload");
         th.start();
