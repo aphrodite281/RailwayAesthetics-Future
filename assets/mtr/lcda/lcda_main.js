@@ -17,15 +17,18 @@ include(Resources.id("aphrodite:library/code/graphic/color_u.js"));
 include(Resources.id("aphrodite:library/code/graphic/text_manager.js"));
 include(Resources.id("aphrodite:library/code/graphic/canvas.js"));
 include(Resources.id("aphrodite:library/code/graphic/upload_manager.js"));
-include(Resources.id("mtr:lcda/icon/hc.js"));
-include(Resources.id("mtr:lcda/icon/bz.js"));
-include(Resources.id("mtr:lcda/icon/xr.js"));
-include(Resources.id("mtr:lcda/icon/zwfh.js"));
-include(Resources.id("mtr:lcda/icon/jt.js"));
-include(Resources.id("mtr:lcda/icon/logo.js"));
+include(Resources.id("mtr:lcda/icon/hc.js")); //换乘
+include(Resources.id("mtr:lcda/icon/zd.js")); //站点
+include(Resources.id("mtr:lcda/icon/bz.js")); //爆炸
+include(Resources.id("mtr:lcda/icon/xr.js")); //小人
+include(Resources.id("mtr:lcda/icon/zwfh.js")); //站稳扶好
+include(Resources.id("mtr:lcda/icon/jt.js")); //箭头
+include(Resources.id("mtr:lcda/icon/hcjt.js")); //换成箭头
+include(Resources.id("mtr:lcda/icon/xjjt.js")); //行进箭头
+include(Resources.id("mtr:lcda/icon/logo.js")); //图标
 
-const defaultScreenTextureSize = [1600, 400];
-const defaultScreenModelSize = [1600 / 2000, 400 / 2000];
+const defaultScreenTextureSize = [1600, 350];
+const defaultScreenModelSize = [1600 / 2000, 350 / 2000];
 
 const textureSize = defaultScreenTextureSize;
 const modelSize = defaultScreenModelSize;
@@ -326,7 +329,8 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                     }
 
                     if (isOnRoute()) {
-                        for (let pla of plas) {
+                        for (let i = 0; i < plas.length; i++) {
+                            let pla = plas[i];
                             let station = pla.station;
                             let plass = dataCache.requestStationIdToPlatforms(station.id);
                             let huan = new Map();
@@ -343,7 +347,7 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                                 huan.delete(TU.CP(route.name) + "|" + TU.NP(route.name));
                             }
                             let name = station.name;
-                            xlt1.push([TU.CP(name), TU.NP(name), huan]);
+                            xlt1.push([TU.CP(name), TU.NP(name), huan, ind > i ? true : false]);
                         }
                     }
                     break;
@@ -375,89 +379,110 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
             function S1() {
                 let isArrive = iisArrive;
                 let w0 = w * 110 / 500, h0 = h * 0.75;
-                const dx = (v) => w0 * v;
-                const dy = (v) => h0 * v;
-                let ox = 0.28, oy = 0.43, sx = 0.6, sy = 0.6, wi = 1100, hi = 900;
-                const fx = (v) => dx(sx * v / wi + ox);
-                const fy = (v) => dy(sy * v / hi + oy);
                 const img = new BufferedImage(w0, h0, BufferedImage.TYPE_INT_ARGB);
                 const g = img.createGraphics();
-                let x, y, w1, h1, path, x0, y0, line, ww, font;
-                x0 = w0 * 0.6, y0 = dy(0.7);
-                g.setColor(new Color(0xefefef));
-                ww = h0 * 0.1;
-                g.fillRoundRect(0, 0, w0, h0, ww, ww);
 
-
-                let num = info[0];
-                let rr = num >> 16 & 0xff, gr = num >> 8 & 0xff, b = num & 0xff;
-                rr = (rr - 60), gr = (gr - 60), b = (b - 60);
-                rr = rr < 0 ? 0 : rr, gr = gr < 0 ? 0 : gr, b = b < 0 ? 0 : b;
-                rr = (255 - rr), gr = (255 - gr), b = (255 - b);
-                g.setColor(new Color(rr << 16 | gr << 8 | b));
-                g.fill(bz(fx, fy));
-
+                if (isArrive) {
+                    let dx = (v) => w0 * v;
+                    let dy = (v) => h0 * v;
+                    let ox = 0.28, oy = 0.43, sx = 0.6, sy = 0.6, wi = 1100, hi = 900;
+                    const fx = (v) => dx(sx * v / wi + ox);
+                    const fy = (v) => dy(sy * v / hi + oy);
+    
+                    let x, y, w1, h1, path, x0, y0, line, ww, font;
+                    x0 = w0 * 0.6, y0 = dy(0.7);
+                    g.setColor(new Color(0xefefef));
+                    ww = h0 * 0.1;
+                    g.fillRoundRect(0, 0, w0, h0, ww, ww);
+    
+    
+                    let num = info[0];
+                    let rr = num >> 16 & 0xff, gr = num >> 8 & 0xff, b = num & 0xff;
+                    rr = (rr - 60), gr = (gr - 60), b = (b - 60);
+                    rr = rr < 0 ? 0 : rr, gr = gr < 0 ? 0 : gr, b = b < 0 ? 0 : b;
+                    rr = (255 - rr), gr = (255 - gr), b = (255 - b);
+                    g.setColor(new Color(rr << 16 | gr << 8 | b));
+                    g.fill(bz(fx, fy));
+    
+                    
+                    ww = dy(0.02);
+                    g.setColor(new Color(num));
+                    g.fillRect(0, y0, dx(0.58), h0 * 0.03);
+                    g.fillRect(dx(0.6), y0, w0 * 0.45, h0 * 0.03);
+                    rr = num >> 16 & 0xff, gr = num >> 8 & 0xff, b = num & 0xff;
+                    rr = (rr - 60), gr = (gr - 60), b = (b - 60);
+                    rr = rr < 0 ? 0 : rr, gr = gr < 0 ? 0 : gr, b = b < 0 ? 0 : b;
+                    let color = rr << 16 | gr << 8 | b;
+                    g.setColor(new Color(color));
+                    g.fillRect(0, dy(0.73), dx(0.58), dy(0.02));
+                    path = new GeneralPath();
+                    path.moveTo(dx(1), dy(0.73) - 1);
+                    path.lineTo(dx(0.6), dy(0.73) - 1);
+                    path.quadTo(dx(0.6), dy(0.75), dx(0.63), dy(0.75));
+                    path.lineTo(dx(1), dy(0.75));
+                    path.lineTo(dx(1), dy(0.73) - 1);
+                    path.closePath();
+                    g.fill(path);
+                    g.draw(path);
+                    // g.fillRoundRect(dx(0.65), y0 + ww * 1.8, w0 * 0.45 + ww, h0 * 0.03, ww, ww);
+    
+                    path = new GeneralPath();
+                    y = dy(0.08), x = dx(0.5);
+                    path.moveTo(0, dy(0.08));
+                    path.lineTo(dx(0.5), dy(0.08));
+                    path.quadTo(dx(0.57), dy(0.08), dx(0.57), dy(0.18));
+                    path.lineTo(dx(0.57), y0);
+                    path.lineTo(dx(0.54), y0);
+                    path.lineTo(dx(0.54), dy(0.18));
+                    path.quadTo(dx(0.54), dy(0.11), dx(0.45), dy(0.11));
+                    path.lineTo(0, dy(0.095));
+                    path.lineTo(0, dy(0.08));
+                    path.closePath();
+    
+                    g.setColor(new Color(0x000040));
+                    g.fill(path);
+                    g.setColor(new Color(0xffffff));
+                    setComp(g, 0.8);
+                    ww = dy(0.02);
+                    g.fillRoundRect(dx(0.548), dy(0.2), dx(0.562) - dx(0.548), dy(0.49), ww, ww);
+    
+                    g.setColor(new Color(0));
+                    
+                    setComp(g, 1);
+    
+                    sx = 0.34, sy = 0.6;
+                    wi = 210, hi = 297;
+                    oy = 0.15, ox = 0.4;
+    
+                    xr(g, fx, fy);
+    
+                    let r = dy(0.08);
+                    g.fillRoundRect(dx(0.6), dy(0.22), r, r, r, r);
+    
+                    setComp(g, 1);
+                    g.setColor(Color.black);
+                    font = font0.deriveFont(Font.PLAIN, dy(0.09));
+                    drawMiddle(g, isArrive ? "请小心站台间隙" : "请站稳扶好", font, dx(0.5), dy(0.88));
+                    font = font0.deriveFont(Font.PLAIN, dy(0.04));
+                    drawMiddle(g, isArrive ? "Please mind the gap" : "Please stand firm and hold yourself steady", font, dx(0.5), dy(0.96));
+                } else {
+                    let dx = (ax) => w0 * ax;
+                    let dy = (ay) => h0 * ay;
+                    g.setColor(new Color(0xefefef));
+                    let ww = h0 * 0.1;
+                    g.fillRoundRect(0, 0, w0, h0, ww, ww);
+                    let u = (r, g, b) => r << 16 | g << 8 | b;
+                    let h1 = dy(0.7);
+                    let s = h1 / 79;
+                    s = Math.min(s, w0 / 132);
+                    let canvas = Canvas.createWithCenterAndScale(g, w0 / 2, h1 / 2, s, 132, 79, 1, [[u(255, 255, 0), icolor], [u(86, 255, 0), 0xffffff], [u(49, 219, 255), icolor]]);
+                    zwfh(canvas);
+                    let font = font0.deriveFont(Font.PLAIN, dy(0.1));
+                    drawMiddle(g, "请站稳扶好", font, dx(0.5), dy(0.85));
+                    font = font0.deriveFont(Font.PLAIN, dy(0.05));
+                    drawMiddle(g, "Please stand firm and hold yourself steady", font, dx(0.5), dy(0.95));
+                }
                 
-                ww = dy(0.02);
-                g.setColor(new Color(num));
-                g.fillRect(0, y0, dx(0.58), h0 * 0.03);
-                g.fillRect(dx(0.6), y0, w0 * 0.45, h0 * 0.03);
-                rr = num >> 16 & 0xff, gr = num >> 8 & 0xff, b = num & 0xff;
-                rr = (rr - 60), gr = (gr - 60), b = (b - 60);
-                rr = rr < 0 ? 0 : rr, gr = gr < 0 ? 0 : gr, b = b < 0 ? 0 : b;
-                let color = rr << 16 | gr << 8 | b;
-                g.setColor(new Color(color));
-                g.fillRect(0, dy(0.73), dx(0.58), dy(0.02));
-                path = new GeneralPath();
-                path.moveTo(dx(1), dy(0.73) - 1);
-                path.lineTo(dx(0.6), dy(0.73) - 1);
-                path.quadTo(dx(0.6), dy(0.75), dx(0.63), dy(0.75));
-                path.lineTo(dx(1), dy(0.75));
-                path.lineTo(dx(1), dy(0.73) - 1);
-                path.closePath();
-                g.fill(path);
-                g.draw(path);
-                // g.fillRoundRect(dx(0.65), y0 + ww * 1.8, w0 * 0.45 + ww, h0 * 0.03, ww, ww);
-
-                path = new GeneralPath();
-                y = dy(0.08), x = dx(0.5);
-                path.moveTo(0, dy(0.08));
-                path.lineTo(dx(0.5), dy(0.08));
-                path.quadTo(dx(0.57), dy(0.08), dx(0.57), dy(0.18));
-                path.lineTo(dx(0.57), y0);
-                path.lineTo(dx(0.54), y0);
-                path.lineTo(dx(0.54), dy(0.18));
-                path.quadTo(dx(0.54), dy(0.11), dx(0.45), dy(0.11));
-                path.lineTo(0, dy(0.095));
-                path.lineTo(0, dy(0.08));
-                path.closePath();
-
-                g.setColor(new Color(0x000040));
-                g.fill(path);
-                g.setColor(new Color(0xffffff));
-                setComp(g, 0.8);
-                ww = dy(0.02);
-                g.fillRoundRect(dx(0.548), dy(0.2), dx(0.562) - dx(0.548), dy(0.49), ww, ww);
-
-                g.setColor(new Color(0));
-                
-                setComp(g, 1);
-
-                sx = 0.34, sy = 0.6;
-                wi = 210, hi = 297;
-                oy = 0.15, ox = 0.4;
-
-                xr(g, fx, fy);
-
-                let r = dy(0.08);
-                g.fillRoundRect(dx(0.6), dy(0.22), r, r, r, r);
-
-                setComp(g, 1);
-                g.setColor(Color.black);
-                font = font0.deriveFont(Font.PLAIN, dy(0.09));
-                drawMiddle(g, isArrive ? "请小心站台间隙" : "请站稳扶好", font, dx(0.5), dy(0.88));
-                font = font0.deriveFont(Font.PLAIN, dy(0.04));
-                drawMiddle(g, isArrive ? "Please mind the gap" : "Please stand firm and hold yourself steady", font, dx(0.5), dy(0.96));
                 g.dispose();
 
                 this.img = () => img;
@@ -730,8 +755,9 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
             }
 
             const d = [];
+            const dWidth = w * 18 / 500 * 1.1;
             const drawDoor = () => {
-                let x0 = 0, y0 = h * 0.4, w0 = w * 20 / 500 * 1.1, h0 = h * 0.4;
+                let x0 = 0, y0 = h * 0.4, w0 = dWidth, h0 = h * 0.4;
                 let img = new BufferedImage(w0, h0, BufferedImage.TYPE_INT_ARGB);
                 let g = img.createGraphics();
                 let draw = (x, y, w1, h1, ww) => {
@@ -742,7 +768,7 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                     g.fillRoundRect(x, y, w1, h1, ww, ww);
                 }
                 let x1, y1, w1, h1, w2, h2, ww, t;
-                w1 = w * 20 / 500, h1 = h * 0.4, ww = w1 * 0.3;
+                w1 = dWidth, h1 = h * 0.4, ww = w1 * 0.3;
                 g.setColor(new Color(0x909090));
                 h2 = h1 * 0.5;
                 x1 = x0 + w1 / 2, y1 = y0 - h1 + (h1 - h2) / 2, w2 = w1 * 0.55;
@@ -773,7 +799,6 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                 }
             }
             drawDoor();
-            const dWidth = w * 20 / 500 * 1.1;
 
             const out = [];
             const drawOut = (isFill) => {
@@ -925,7 +950,7 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                             font = font0.deriveFont(Font.PLAIN, h2 * 0.06);
                             y += h2 * 0.1;
                             drawMiddle0(g, "Next Station", font, x, y);
-                            x = x1 + w1 * 0.48;
+                            x = x1 + w1 * 0.42;
                             y = y1;
                             drawMiddle(strs[j][0], font0, b, color, x, y - h2 * 0.25 / 2, w2 * 0.73, h2 * 0.36, 0);
                             drawMiddle(strs[j][1], font0, b, color, x, y + h2 * 0.15, w2 * 0.73, h2 * 0.2, 0);
@@ -956,11 +981,12 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                 const ind = train.getThisRoutePlatformsNextIndex();
                 const dx = (ax) => ax * w / 500;
                 const dy = (ay) => ay * h / 50;
-                const ins = dx(30);// 每个的间隔
                 const hex = icolor;
                 const hsv = cu.h2v(hex);
                 hsv.s *= 0.6;
                 const color = cu.v2h(hsv);
+                hsv.s *= 0.2;
+                const color1 = cu.v2h(hsv);
                 let stopped = false;
                 const st = now();
                 let et = null;
@@ -968,28 +994,90 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                 const g = img.createGraphics();
                 const textManager = new TextManager(w, h);
                 const drawMiddle = textManager.drawMiddle;
-                //let w0 = xlt1.length * ins;
-                let w0 = 10;
-                let x = dx(270) - w0 / 2;
-                g.setColor(new Color(color));
-                g.fillRect(x, dy(25), w0, dy(6));
-                for (let i = 0; i < xlt1.length; i++) {
+                const p = Font.PLAIN;
+                const b = Font.BOLD;
 
+                const l = xlt1.length;
+                let xd = dx(280);
+                let ins = (dx(440) - xd) * 2 / l;
+                ins = Math.min(ins, dy(30));
+                let wa = ins * (l - 1);
+                let x = xd + wa / 2;
+                let y0 = dy(28), h0 = dy(3);
+                for (let i = 0; i < l; i++) {
+                    let [cn, en, huan, guo] = xlt1[i];
+                    
+                    if (i != l - 1) {
+                        g.setColor(new Color(guo? color1 : color));
+                        g.fillRect(x - ins, y0 - h0 / 2, ins, h0);
+                        if (i != ind - 1) {
+                            
+                        }
+                    }
+
+                    let array = [];
+                    for (let [key, value] of huan) {
+                        array.push(value);
+                    }
+                    array.sort((a, b) => (a[0] + a[1]).localeCompare(b[0] + b[1]));
+                    let ll = array.length;
+                    if (ll != 0) {
+                        let es = "可换乘 ";
+                        let ns = "Transfer To ";
+                        let w1 = dy(3);
+                        let h1 = dy(6);
+                        let lx = x - w1 / 2;
+                        let lw = w1 / ll;
+                        for (let [cna, ena, col] of array) {
+                            es += cna + ' / ';
+                            ns += ena + ' / ';
+                            g.setClip(new Rectangle2D.Double(lx, y0, lw, y0 + h1));
+                            lx += lw;
+                            let canvas = Canvas.createWithCenterAndSize(g, x, y0 + dy(3), dy(3), dy(6), 52, 52, 1, [0x00ff00, col]);
+                            hcjt(canvas);
+                        }
+                        g.setClip(null);
+                        es = es.slice(0, -2);
+                        ns = ns.slice(0, -2);
+                        drawMiddle(es, font0, p, 0, x, y0 + dy(8), ins * 0.8, dy(3));
+                        drawMiddle(ns, font0, p, 0, x, y0 + dy(10), ins * 0.8, dy(2));
+                    }
+
+                    let canvas = Canvas.createWithCenterAndScale(g, x, y0, dy(5) / 52, 52, 52);
+                    if (ll == 0) zd(canvas);
+                    else hc(canvas);
+                    drawMiddle(cn, font0, p, 0, x, y0 - dy(8), ins * 0.8, dy(5));
+                    drawMiddle(en, font0, p, 0, x, y0 - dy(4), ins * 0.8, dy(3));
+                    x -= ins;
                 }
+                g.dispose();
 
                 this.draw = (g) => {
-                    g.drawImage(img0, 0, 0, null);
+                    let t = now() - st;
+                    t = t / 1000 * 0.8;
+                    let a = 1 - smooth(1, t);
+                    if (et != null) {
+                        let t1 = now() - et;
+                        t1 = t1 / 1000 * 0.8;
+                        let a1 = smooth(1, t1);
+                        a = Math.max(a, a1);
+                        if (a == 1) {
+                            stopped = true;
+                            return;
+                        }
+                    }
+                    setComp(g, 1 - a);
+                    g.drawImage(img, 0, 0, null);
                     textManager.draw(g, 0, 0);
                 }
 
                 this.dispose = () => {
-                    g.dispose();
+                    textManager.dispose();
                 }
 
                 this.isStopped = () => stopped;
                 this.stop = () => {
                     if (et == null) et = now();
-                    stopped = true;
                 }
                 this.toString = () => "DR1";
             }
@@ -1015,7 +1103,7 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                     DStyle = 0;
                     DTime = 0;
                     addDrawCallD();
-                } else if (DTime + 8000 < now()){
+                } else if (DTime + 16000 < now()){
                     DTime = now();
                     DStyle = (DStyle + 1) % (DS.length);
                     addDrawCallD(new DS[DStyle]());
@@ -1044,60 +1132,63 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
                         first = false;
                     }
                     startTime = now();
-                    let newInfo = getInfo();
-                    if (info.toString() != newInfo.toString() && isOnRoute()) {
-                        info = newInfo;
-                        addDrawCallS(new SGround());
-                    }
-                    ctrl();
 
                     mainAlpha.update();
                     if (mainAlpha.get() == 1 && !isOnRoute()) mainAlpha.turn(-1);
                     else if (mainAlpha.get() == 0 && isOnRoute()) mainAlpha.turn(1);
-                    ti("Ctrl");
 
-                    let img = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
-                    let g;
-                    if (mainAlpha.get() != 1) g = g0;
-                    else g = img.createGraphics();
-                    g.setComposite(AlphaComposite.Clear);
-                    g.fillRect(0, 0, w, h);
-                    for (let i = 0; i < SDrawCalls.length; i++) SDrawCalls[i].draw(g);
-                    if (SDrawCalls[SDrawCalls.length - 1].isFull()) {
-                        for (let i = 0; i < SDrawCalls.length - 1; i++) SDrawCalls[i].dispose();
-                        SDrawCalls = [SDrawCalls[SDrawCalls.length - 1]];
-                    }
-                    ti("S-Draw");
-
-                    DA0(g);
-                    ti("DA0");
-
-                    refreshD();
-                    for (let i = 0; i < DDrawCalls.length; i++) DDrawCalls[i].draw(g);
-                    refreshD();
-                    ti("D-Draw");
-
-                    if (mainAlpha.get() != 1) {
-                        let g = img.createGraphics()
-                        setComp(g, 1);
+                    if (mainAlpha.get() == 0 && !mainAlpha.isChanged()) {
+                        used.push("Skip");
+                    } else {
+                        ctrl();
+                        let newInfo = getInfo();
+                        if (info.toString() != newInfo.toString() && isOnRoute()) {
+                            info = newInfo;
+                            addDrawCallS(new SGround());
+                        }
+                        ti("Ctrl");
+                        
+                        let img = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+                        let g;
+                        g = img.createGraphics();
                         g.setColor(new Color(0));
                         g.fillRect(0, 0, w, h);
-                        setComp(g, smooth(1, mainAlpha.get()));
-                        g.drawImage(img0, 0, 0, null);
-                    }
-                    g.dispose();
+                        if (mainAlpha.get() > 0) {
+                            for (let i = 0; i < SDrawCalls.length; i++) SDrawCalls[i].draw(g);
+                            if (SDrawCalls[SDrawCalls.length - 1].isFull()) {
+                                for (let i = 0; i < SDrawCalls.length - 1; i++) SDrawCalls[i].dispose();
+                                SDrawCalls = [SDrawCalls[SDrawCalls.length - 1]];
+                            }
+                            ti("S-Draw");
+        
+                            DA0(g);
+                            ti("DA0");
+        
+                            refreshD();
+                            for (let i = 0; i < DDrawCalls.length; i++) DDrawCalls[i].draw(g);
+                            refreshD();
+                            ti("D-Draw");
+                            if (mainAlpha.get() != 1) {
+                                setComp(g, 1 - mainAlpha.get());
+                                g.setColor(new Color(0));
+                                g.fillRect(0, 0, w, h);
+                                ti("A-Mix");
+                            }
+                        }
+                        g.dispose();
 
-                    ti("Mix");
+                        tex.upload(img);
+                        ti("Upload");
+                    }
+
                     let t = 1000 / 40 - (now() - startTime);
                     t = Math.max(t, 0);
                     Thread.sleep(t);
                     ti("Sleep");
-                    upload(img);
-                    ti("Upload");
 
                     lastFrameTime = now() - startTime;
                     used.push("Total: " + lastFrameTime.toString().padStart(3, '0'));
-                    used.push("Upload1: " + uploadManager.lastUsed().toString().padStart(3, '0'));
+                    // used.push("Upload1: " + uploadManager.lastUsed().toString().padStart(3, '0'));
                     let fps = 1000 / lastFrameTime;
                     if (min == undefined) min = fps;
                     else min = Math.min(min, fps);

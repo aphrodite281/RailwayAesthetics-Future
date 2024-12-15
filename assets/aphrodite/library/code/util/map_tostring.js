@@ -1,6 +1,6 @@
 Object.defineProperty(Map.prototype, 'toString', {
     value: function() {
-        let str = '[';
+        let str = '{';
         let entries = this.entries();
         let entry = entries.next();
         while (!entry.done) {
@@ -11,7 +11,7 @@ Object.defineProperty(Map.prototype, 'toString', {
                 str += ',';
             }
         }
-        str += ']';
+        str += '}';
         return str;
     }
 });

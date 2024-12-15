@@ -150,9 +150,6 @@ function TextManager(w, h, fx, fy) {
      * @param {Number} y y坐标
      */
     this.draw = (g, x, y) => {
-        g0.setComposite(AlphaComposite.Clear);
-        g0.fillRect(0, 0, w, h);
-        g0.setComposite(AlphaComposite.SrcOver);
         for (let [id, text] of map) text.draw(g, x, y);
         for (let text of list) text.draw(g, x, y);
     }

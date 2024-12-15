@@ -21,7 +21,7 @@ importPackage (java.awt.font);
  * @param {Function} fw - 用于转换宽度的函数。
  * @param {Function} fh - 用于转换高度的函数。
  * @param {Function} fl - 用于转换长度的函数。
- * @param {Number | Null} alpha - 透明度。
+ * @param {Number | Null} alpha - 透明度。(默认为1)
  * @param {Map<Number, Number> | Null} colorMap - 颜色映射表。类似 {[0, 0xff00ff], [0xff0000, 0xffffff]}。
  */
 
@@ -299,14 +299,14 @@ function Canvas(g, fx, fy, fw, fh, fl, alpha, colorMap) {
 }
 
 /** 
- * 使用中心点和大小缩放创建 Canvas 对象。
+ * 使用中心点和缩放创建 Canvas 对象。
  * @param {Graphics2D} g - 图形上下文对象。
  * @param {Number} x - 绘制中心点的 x 坐标。
  * @param {Number} y - 绘制中心点的 y 坐标。
  * @param {Number} s - 缩放比例。
  * @param {Number} w - 图像的相对宽度。
  * @param {Number} h - 图像的相对高度。
- * @param {Number} alpha - 透明度。
+ * @param {Number | Null} alpha - 透明度。(默认为1)
  * @param {Map<Number, Number> | Array<Number> | Array<Array<Number>> | Null} colorMap - 颜色映射表。类似 {[0, 0xff00ff], [0xff0000, 0xffffff]}。
  * @returns {Canvas} - Canvas 对象。
  */
@@ -315,6 +315,29 @@ Canvas.createWithCenterAndScale = (g, x, y, s, w, h, alpha, colorMap) => {
     let fh = (ah) => s * ah;
     let fx = (ax) => x - s * w / 2 + fw(ax);
     let fy = (ay) => y - s * h / 2 + fh(ay);
+    let fl = (al) => s * al;
+    if (colorMap instanceof Array) colorMap = Canvas.transformColorMap(colorMap);
+    return new Canvas(g, fx, fy, fw, fh, fl, alpha, colorMap);
+}
+
+/** 
+ * 使用中心点和宽高创建 Canvas 对象。
+ * @param {Graphics2D} g - 图形上下文对象。
+ * @param {Number} x - 绘制中心点的 x 坐标。
+ * @param {Number} y - 绘制中心点的 y 坐标。
+ * @param {Number} w - 目标宽度。
+ * @param {Number} h - 目标高度。
+ * @param {Number} wt - 图像的相对宽度。
+ * @param {Number} ht - 图像的相对高度。
+ * @param {Number | Null} alpha - 透明度。(默认为1)
+ * @param {Map<Number, Number> | Array<Number> | Array<Array<Number>> | Null} colorMap - 颜色映射表。类似 {[0, 0xff00ff], [0xff0000, 0xffffff]}。
+ * @returns {Canvas} - Canvas 对象。
+ */
+Canvas.createWithCenterAndSize = (g, x, y, w, h, wt, ht, alpha, colorMap) => {
+    let fw = (aw) => w / wt * aw;
+    let fh = (ah) => h / ht * ah;
+    let fx = (ax) => x - w / 2 + fw(ax);
+    let fy = (ay) => y - h / 2 + fh(ay);
     let fl = (al) => s * al;
     if (colorMap instanceof Array) colorMap = Canvas.transformColorMap(colorMap);
     return new Canvas(g, fx, fy, fw, fh, fl, alpha, colorMap);
