@@ -68,11 +68,7 @@ function Canvas(g, fx, fy, fw, fh, fl, alpha, colorMap) {
     this.alpha = alpha;
     alpha = () => this.alpha;
 
-    if (colorMap == null) colorMap = new Map();
-    if (!(colorMap instanceof Map)) {
-        print ("Canvas: colorMap must be a Map" + colorMap);
-        throw new Error("Canvas: colorMap must be a Map" + colorMap);
-    }
+    colorMap = Canvas.standardizationColorMap(colorMap);
     /**
      * @param {Map<Number, Number>} colorMap - 颜色映射表。类似 {[0, 0xff00ff], [0xff0000, 0xffffff]}。
      */
@@ -316,7 +312,6 @@ Canvas.createWithCenterAndScale = (g, x, y, s, w, h, alpha, colorMap) => {
     let fx = (ax) => x - s * w / 2 + fw(ax);
     let fy = (ay) => y - s * h / 2 + fh(ay);
     let fl = (al) => s * al;
-    if (colorMap instanceof Array) colorMap = Canvas.transformColorMap(colorMap);
     return new Canvas(g, fx, fy, fw, fh, fl, alpha, colorMap);
 }
 
@@ -338,17 +333,18 @@ Canvas.createWithCenterAndSize = (g, x, y, w, h, wt, ht, alpha, colorMap) => {
     let fh = (ah) => h / ht * ah;
     let fx = (ax) => x - w / 2 + fw(ax);
     let fy = (ay) => y - h / 2 + fh(ay);
-    let fl = (al) => s * al;
-    if (colorMap instanceof Array) colorMap = Canvas.transformColorMap(colorMap);
+    let fl = (al) => fh(al);
     return new Canvas(g, fx, fy, fw, fh, fl, alpha, colorMap);
 }
 
 /**
- * @param {Array<Number> | Array<Array<Number>>} array - 颜色映射表。类似 [0, 0xff00ff, 0xff0000, 0xffffff]。两两一组
+ * @param {Array<Number> | Array<Array<Number>> | Map<Number, Number>}  src - 颜色映射表。类似 [0, 0xff00ff, 0xff0000, 0xffffff]。两两一组
  * 或 [[0, 0xff00ff], [0xff0000, 0xffffff]]。
  * @returns {Map<Number, Number>} - 颜色映射表。类似 {[0, 0xff00ff], [0xff0000, 0xffffff]}。
  */
-Canvas.transformColorMap = (array) => {
+Canvas.standardizationColorMap = (src) => {
+    if (src instanceof Map) return src;
+    if (src == undefined) return new Map();
     let map = new Map();
     for (let i = 0; i < array.length; i++) {
         let k0 = array[i], k1;
@@ -357,6 +353,59 @@ Canvas.transformColorMap = (array) => {
         map.set(k0, k1);
     }
     return map;
+}
+
+/**
+ * 可移动的 Canvas 类。
+ * @param {Graphics2D} g - 图形上下文对象。
+ * @param {Number} x - 绘制中心点的 x 坐标。
+ * @param {Number} y - 绘制中心点的 y 坐标。
+ * @param {Number} w - 目标宽度。
+ * @param {Number} h - 目标高度。
+ * @param {Number} wt - 图像的相对宽度。
+ * @param {Number} ht - 图像的相对高度。
+ * @param {Number | Null} alpha - 透明度。(默认为1)
+ * @param {Map<Number, Number> | Array<Number> | Array<Array<Number>> | Null} colorMap - 颜色映射表。类似 {[0, 0xff00ff], [0xff0000, 0xffffff]}。
+ */
+Canvas.Mobile = function(g, x, y, w, h, wt, ht, alpha, colorMap) {
+    this.x = x;
+    this.y = y;
+    this.w = w;
+    this.h = h;
+    this.wt = wt;
+    this.ht = ht;
+
+    let fw = (aw) => this.w / this.wt * aw;
+    let fh = (ah) => this.h / this.ht * ah;
+    let fx = (ax) => this.x - this.w / 2 + fw(ax);
+    let fy = (ay) => this.y - this.h / 2 + fh(ay);
+    let fl = (al) => fh(al);
+
+    Canvas.call(this, g, fx, fy, fw, fh, fl, alpha, colorMap);
+
+    /**
+     * 设置 Canvas 的参数
+     * @param {Graphics2D | Null} g - 图形上下文对象。
+     * @param {Number | Null} x - 绘制中心点的 x 坐标。
+     * @param {Number | Null} y - 绘制中心点的 y 坐标。
+     * @param {Number | Null} w - 目标宽度。
+     * @param {Number | Null} h - 目标高度。
+     * @param {Number | Null} wt - 图像的相对宽度。
+     * @param {Number | Null} ht - 图像的相对高度。
+     * @param {Map<Number, Number> | Array<Number> | Array<Array<Number>> | Null} colorMap - 颜色映射表。类似 {[0, 0xff00ff], [0xff0000, 0xffffff]}。
+     */
+    this.for = (g, x, y, w, h, wt, ht, colorMap) => {
+        if (g != null) this.g = g;
+        if (x != null) this.x = x;
+        if (y != null) this.y = y;
+        if (w != null) this.w = w;
+        if (h != null) this.h = h;
+        if (wt != null) this.wt = wt;
+        if (ht != null) this.ht = ht;
+
+        colorMap = Canvas.standardizationColorMap(colorMap);
+        this.colorMap = colorMap;
+    }
 }
 
 /**
@@ -371,8 +420,7 @@ Canvas.transformColorMap = (array) => {
 Canvas.getBitmap = (ft, s, tw, th, colorMap) => {
     let img = new BufferedImage(tw * s, th * s, BufferedImage.TYPE_INT_ARGB);
     let g = img.createGraphics();
-    if (colorMap instanceof Array) colorMap = Canvas.transformColorMap(colorMap);
-    if (colorMap == undefined) colorMap = new Map();
+    colorMap = Canvas.standardizationColorMap(colorMap);
     let canvas = Canvas.createWithCenterAndScale(g, w / 2, h / 2, s, tw, th, 1, colorMap);
     ft(canvas);
     g.dispose();

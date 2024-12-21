@@ -2,12 +2,11 @@
  * @author: Aphrodite281 QQ: 3435494979
  */
 
-importPackage(java.lang);
-importPackage(java.awt);
-importPackage(java.awt.image);
-importPackage(java.awt.geom);
-importPackage(java.awt.font);
-importPackage(java.util.concurrent);
+importPackage (java.lang);
+importPackage (java.awt);
+importPackage (java.awt.image);
+importPackage (java.awt.geom);
+importPackage (java.awt.font);
 
 include(Resources.id("aphrodite:library/code/model/face.js"));
 include(Resources.id("aphrodite:library/code/util/text_u.js"));
@@ -28,21 +27,21 @@ include(Resources.id("mtr:lcda/icon/hcjt.js")); //换成箭头
 include(Resources.id("mtr:lcda/icon/xjjt.js")); //行进箭头
 include(Resources.id("mtr:lcda/icon/logo.js")); //图标
 
-let defaultScreenTextureSize = [1600, 350];
-let defaultScreenModelSize = [1600 / 2000, 350 / 2000];
+const defaultScreenTextureSize = [1600, 350];
+const defaultScreenModelSize = [1600 / 2000, 350 / 2000];
 
-let textureSize = defaultScreenTextureSize;
-let modelSize = defaultScreenModelSize;
-let doorZPositions = [0, 5, -5, 10, -10];
-let doorPosition = [1.3, 1.9];// x、y
-let rotateX = 15 / 180 * Math.PI;// YX(Z)欧拉的X
-let rightMatrices = getMatrices(false);
-let leftMatrices = getMatrices(true);
+const textureSize = defaultScreenTextureSize;
+const modelSize = defaultScreenModelSize;
+const doorZPositions = [0, 5, -5, 10, -10];
+const doorPosition = [1.3, 1.9];// x、y
+const rotateX = 15 / 180 * Math.PI;// YX(Z)欧拉的X
+const rightMatrices = getMatrices(false);
+const leftMatrices = getMatrices(true);
 
-let fontA = Resources.getSystemFont("Noto Sans");
-let fontB = Resources.readFont(Resources.id("aphrodite:library/font/zhdh.ttf"));
-let fontC = Resources.getSystemFont("Noto Serif");
-let cu = ColorU;
+const fontA = Resources.getSystemFont("Noto Sans");
+const fontB = Resources.readFont(Resources.id("aphrodite:library/font/zhdh.ttf"));
+const fontC = Resources.getSystemFont("Noto Serif");
+const cu = ColorU;
 
 function create(ctx, state, train) {
     state.running = true;
@@ -50,7 +49,6 @@ function create(ctx, state, train) {
     let infoArray = [];
     let tickList = [];
     let disposeList = [];
-    let first = true;
     for (let i = 0; i < train.trainCars(); i++) {
         let info = {
             ctx: ctx,
@@ -67,18 +65,12 @@ function create(ctx, state, train) {
         info.matrices = leftMatrices;
         let leftFace = new Face(info);
     
-        let rightThread = new LCDThread(rightFace, true, ctx, state, train, i + 1, first);
-        first = false;
+        let rightThread = new LCDThread(rightFace, true, ctx, state, train, i + 1);
         let leftThread = new LCDThread(leftFace, false, ctx, state, train, i + 1);
 
-        let sr = () => {
-            if(!rightThread.isAlive()) rightThread.start();
-        };
-        let sl = () => {
-            if(!leftThread.isAlive()) leftThread.start();
-        };
-        sr(); sl();
-        tickList.push(() => {rightFace.tick(); leftFace.tick();});
+        let sr = () => {if(!rightThread.isAlive()) rightThread.start();};
+        let sl = () => {if(!leftThread.isAlive()) leftThread.start();};
+        tickList.push(() => {rightFace.tick(); leftFace.tick(); sr(); sl();});
         disposeList.push(() => {rightFace.close(); leftFace.close();});
         infoArray.push([rightFace, leftFace, rightThread, leftThread]);
     }
@@ -107,11 +99,11 @@ function dispose(ctx, state, train) {
 }
 
 function getMatrices(isRight) {
-    let result = [];
+    const result = [];
     let matrices = new Matrices();
-    let k = isRight? -1 : 1;
+    const k = isRight? -1 : 1;
     matrices.translate(- k * doorPosition[0], doorPosition[1], 0);
-    let execute = (translateZ) => {
+    const execute = (translateZ) => {
         matrices.translate(0, 0, translateZ);
         matrices.rotateY(k * Math.PI / 2);
         matrices.rotateX(rotateX);
@@ -129,15 +121,15 @@ function getMatrices(isRight) {
     return result;
 }
 
-let smooth = (k, value) => {// 平滑变化
+const smooth = (k, value) => {// 平滑变化
     if (value > k) return k;
     if (k < 0) return 0;
     return (Math.cos(value / k * Math.PI + Math.PI) + 1) / 2 * k;
 }
 
-/* let route0 = [];
+/* const route0 = [];
 {
-    let getColor = (color) => {
+    const getColor = (color) => {
         let rr = color >> 16 & 0xff;
         let g = color >> 8 & 0xff;
         let b = color & 0xff;
@@ -150,38 +142,34 @@ let smooth = (k, value) => {// 平滑变化
     }
 }*/
 
-function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
-    let uid = "LCDThread-" + "Car" + carIndex + '-' + (isRight ? "Right " : "Left  ");;
+function LCDThread(face, isRight, ctx, state, train, carIndex) {
+    const uid = "LCDThread-" + "Car" + carIndex + '-' + (isRight ? " Right" : " Left ");;
     let thread = new Thread(() => {
-        let disposeList = [];
+        const disposeList = [];
         try {
             print(uid + " Start");
-            ctx.setDebugInfo(uid + " Start", PlacementOrder.DOWNSIDE, Date.now().toString());
+            ctx.setDebugInfo(uid + " Start", System.currentTimeMillis().toString());
 
-            let tf = ttf;
-            let font0 = fontA.deriveFont(Font.PLAIN, 45);
-            let font1 = fontB.deriveFont(Font.PLAIN, 45);
-            let font2 = fontC.deriveFont(Font.PLAIN, 45);
+            const font0 = fontA.deriveFont(Font.PLAIN, 45);
+            const font1 = fontB.deriveFont(Font.PLAIN, 45);
+            const font2 = fontC.deriveFont(Font.PLAIN, 45);
             
-            let tex = face.texture;
-            let uploadManager = new UploadManager(tex);
-            let upload = uploadManager.upload;
-            let w = tex.width, h = tex.height;
-            disposeList.push(() => {
-                uploadManager.dispose();
-            });
+            const tex = face.texture;
+            const uploadManager = new UploadManager(tex);
+            const upload = uploadManager.upload;
+            const w = tex.width, h = tex.height;
 
-            let planPool = Executors.newScheduledThreadPool(4);
-            let plan = (fun, time) => planPool.schedule(new Runnable({run: fun}), time, TimeUnit.MILLISECONDS);
-            disposeList.push(() => planPool.shutdown());
-
-            let now = () => Date.now();
+            const now = () => Date.now();
             let SDrawCalls = [];// [旧图, [新渐变的, 新alpha]] 渐变绘制
             let DDrawCalls = [];// [对象1, 对象2] 动态绘制
             let mainAlpha = new Value(0, 1, 0, 1.2, 0, 0);// 主渐变alpha
+            let lastFrameTime = 0;// 上一帧时间
+            let startTime = 0;// 开始时间
             let info = [-1];// 信息
-            // let fps = 24;// 帧率
-            // let frameTime = 1000 / fps;// 帧时间
+            let doorValue = train.doorValue();// 本侧门值
+            let doorOpen = false;// 本侧门开关
+            // const fps = 24;// 帧率
+            // const frameTime = 1000 / fps;// 帧时间
             let outAlpha = new Value(0, 1, 0, 1.5, -1, 2);// 门里的指示的透明度
             var icolor, icolor1, icdest, icname, iename, itime0, itime1, iis, it1, it2, it3, it4, iisArrive, iopen, ihuancheng = new Map(), ixlt0 = [], ixlt1 = [];// info 数据
             let DStyle = 0;
@@ -190,7 +178,7 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
              * 添加动态绘制
              * @param {Object} obj 绘制对象
              */
-            let addDrawCallD = (obj) => {
+            const addDrawCallD = (obj) => {
                 for (let object of DDrawCalls) object.stop();
                 if (obj != undefined) DDrawCalls.push(obj);
             }
@@ -198,33 +186,24 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
             /**
              * 删除已经结束的动态绘制
              */
-            let refreshD = () => {
+            const refreshD = () => {
                 let newDDC = [];
                 for (let obj of DDrawCalls) {
-                    if (obj.isStopped(now() - 1000)) obj.dispose();
+                    if (obj.isStopped()) obj.dispose();
                     else newDDC.push(obj); 
                 }
                 DDrawCalls = newDDC;
-            }
-
-            let refreshS = () => {
-                if (SDrawCalls.length > 1) {
-                    if (SDrawCalls[SDrawCalls.length - 1].isFull()) {
-                        for (let i = 0; i < SDrawCalls.length - 1; i++) SDrawCalls[i].dispose();
-                        SDrawCalls = [SDrawCalls[SDrawCalls.length - 1]];
-                    }
-                }
             }
 
             /**
              * 添加静态绘制
              * @param {Object} obj 绘制对象
              */
-            let addDrawCallS = (obj) => {
+            const addDrawCallS = (obj) => {
                 SDrawCalls.push(obj);
             }
 
-            let getInfo = () => {// 获取/更新信息，并通过toString方法判断是否应该更新
+            const getInfo = () => {// 获取/更新信息，并通过toString方法判断是否应该更新
                 let color = 0x00ffff, color1 = 0xffffff, cname = "无线路", ename = "No Route", cdest = "无线路", edest = "No Route", time0 , time1, is = true, t1 = "非运营列车  Non-operating train", t2 = "", t3 = "", t4 = "", isArrive = false, open = -1, huancheng = new Map(), xlt0 = [], xlt1 = [];
                 let date = new Date();
                 let year = date.getFullYear();
@@ -234,7 +213,7 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
                 let minute = date.getMinutes().toString().padStart(2, '0');
                 time0 = year + "-" + month + "-" + day;
                 time1 = hour + ":" + minute;
-                let getColor = (color) => {
+                const getColor = (color) => {
                     let rr = color >> 16 & 0xff;
                     let g = color >> 8 & 0xff;
                     let b = color & 0xff;
@@ -250,7 +229,7 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
                     if (ind < 0) break;
                     let pla = plas[ind];
                     let station = pla.destinationStation;
-                    let ss = () => {
+                    const ss = () => {
                         if (station == null) station = {name: "无车站|No Station", id: 0};
                     }
                     ss();
@@ -378,37 +357,37 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
                 return [color, color1, cname, ename, cdest, edest, time0, time1, is, t1, t2, t3, t4, isArrive, open, huancheng, xlt0, DStyle, xlt1];
             }
 
-            let setComp = (g, value) => {g.setComposite(AlphaComposite.SrcOver.derive(value))};
-            let isOnRoute = () => train.isOnRoute();
-            let getWH = (g, str, font) => {
+            const setComp = (g, value) => {g.setComposite(AlphaComposite.SrcOver.derive(value))};
+            const isOnRoute = () => train.isOnRoute();
+            const getWH = (g, str, font) => {
                 g.setFont(font);
-                // let frc = g.getFontRenderContext();
+                // const frc = g.getFontRenderContext();
                 // bounds = font.getStringBounds(str, frc);
-                // let width = bounds.getWidth(), height = bounds.getHeight();
-                let fm = g.getFontMetrics(font);
-                let width = fm.stringWidth(str), height = fm.getHeight();
+                // const width = bounds.getWidth(), height = bounds.getHeight();
+                const fm = g.getFontMetrics(font);
+                const width = fm.stringWidth(str), height = fm.getHeight();
                 return [width, height];
             }
 
-            let drawMiddle = (g, str, font, x, y) => {
+            const drawMiddle = (g, str, font, x, y) => {
                 let [ww, hh] = getWH(g, str, font);
                 g.drawString(str, x - ww / 2, y);
             }
 
-            let drawMiddle0 = drawMiddle;// 防重名
+            const drawMiddle0 = drawMiddle;// 防重名
 
             function S1() {
                 let isArrive = iisArrive;
                 let w0 = w * 110 / 500, h0 = h * 0.75;
-                let img = new BufferedImage(w0, h0, BufferedImage.TYPE_INT_ARGB);
-                let g = img.createGraphics();
+                const img = new BufferedImage(w0, h0, BufferedImage.TYPE_INT_ARGB);
+                const g = img.createGraphics();
 
                 if (isArrive) {
                     let dx = (v) => w0 * v;
                     let dy = (v) => h0 * v;
                     let ox = 0.28, oy = 0.43, sx = 0.6, sy = 0.6, wi = 1100, hi = 900;
-                    let fx = (v) => dx(sx * v / wi + ox);
-                    let fy = (v) => dy(sy * v / hi + oy);
+                    const fx = (v) => dx(sx * v / wi + ox);
+                    const fy = (v) => dy(sy * v / hi + oy);
     
                     let x, y, w1, h1, path, x0, y0, line, ww, font;
                     x0 = w0 * 0.6, y0 = dy(0.7);
@@ -514,23 +493,23 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
             function S2() {
                 let isArrive = iisArrive;
                 let w0 = w * 110 / 500, h0 = h * 0.75;
-                let img = new BufferedImage(w0, h0, BufferedImage.TYPE_INT_ARGB);
-                let g = img.createGraphics();
-                let textManager = new TextManager();
-                let drawMiddle = textManager.drawMiddle;
-                let dx = (ax) => w0 * ax / 440;
-                let dy = (ay) => h0 * ay / 375;
+                const img = new BufferedImage(w0, h0, BufferedImage.TYPE_INT_ARGB);
+                const g = img.createGraphics();
+                const textManager = new TextManager(w0, h0);
+                const drawMiddle = textManager.drawMiddle;
+                const dx = (ax) => w0 * ax / 440;
+                const dy = (ay) => h0 * ay / 375;
                 g.setColor(new Color(0xefefef));
                 let ww = h0 * 0.1;
                 g.fillRoundRect(0, 0, w0, h0, ww, ww);
                 let scale = dy(80) / 52, x = dx(120), y = dy(70);
                 let canvas = Canvas.createWithCenterAndScale(g, x, y, scale, 52, 52);
                 hc(canvas, g, ctx);
-                let p = Font.PLAIN;
+                const p = Font.PLAIN;
                 drawMiddle("可 换 乘", font0, p, 0xa0a0a0, dx(280), dy(51), dx(300), dy(65));
                 drawMiddle("Transfer To", font0, p, 0xa0a0a0, dx(280), dy(105), dx(300), dy(40));
 
-                let draw = (x, y, w1, h1, color0, color1, c, n) => {
+                const draw = (x, y, w1, h1, color0, color1, c, n) => {
                     g.setColor(new Color(color0));
                     g.fillRoundRect(x, y, w1, h1, dy(10), dy(10));
                     drawMiddle(c, font0, p, color1, x + w1 / 2, y + h1 * 0.3, w1, h1 * 0.55);
@@ -575,26 +554,26 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
                 g.dispose();
                 
                 this.img = () => img;
-                this.draw = (g, x, y, time) => {
-                    textManager.draw(g, x, y, time);
+                this.draw = (g, x, y) => {
+                    textManager.draw(g, x, y);
                 }
 
-                this.dispose = () => plan(() => textManager.dispose(), 2000);
+                this.dispose = () => textManager.dispose();
             }
 
             function SGround() {
-                let start = now();
-                let fill = (g, width, x1, y1, x2, y2) => {
+                const alpha = new Value(0, 1, 0, 0.8, 1, 0);
+                const fill = (g, width, x1, y1, x2, y2) => {
                     g.fillRoundRect(x1 - width / 2, y1 - width / 2, x2 - x1 + width, y2 - y1 + width, width, width);
                 }
-                let tex = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
-                let g = tex.createGraphics();
-                let textManager = new TextManager();
-                let drawMiddle = textManager.drawMiddle;
-                let p = Font.PLAIN;
+                const tex = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+                const g = tex.createGraphics();
+                const textManager = new TextManager(w, h, x => x, y => y);
+                const drawMiddle = textManager.drawMiddle;
+                const p = Font.PLAIN;
                 let [color0, color1, cname, ename, cdest, edest, time0, time1, is, t1, t2, t3, t4, isArrive, open] = info;
-                let dx = (ax) => w * ax / 500;
-                let dy = (ay) => h * ay;
+                const dx = (ax) => w * ax / 500;
+                const dy = (ay) => h * ay;
                 g.setColor(new Color(0xffffff));
                 g.fillRect(0, 0, w, h);
                 g.setColor(new Color(0xd9d9d9));
@@ -754,37 +733,30 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
                 } else {
                     // acc = -1000;
                 }
-                let tp = ihuancheng.size > 0 ? new S2() : new S1();
+                const tp = ihuancheng.size > 0 ? new S2() : new S1();
                 x = w * (500 - 110 - 4) / 500, y = h * 0.23;
-                let style = DStyle;
-                if (style == 0) g.drawImage(tp.img(), x, y, null);
+                const style = DStyle;
+                if (style == 0 || iisArrive) g.drawImage(tp.img(), x, y, null);
                 g.dispose();
-                let disposed = false;
 
                 this.stop = () => {if(et == null) et = now();};
-                this.draw = (g, time) => {
-                    if (disposed) return;
-                    setComp(g, smooth(1, (time - start) / 1000 * 0.8));
+                this.draw = (g) => {
+                    setComp(g, smooth(1, alpha.get(true)));
                     g.drawImage(tex, 0, 0, null);
                     textManager.draw(g, 0, 0);
-                    if (style == 0) tp.draw(g, x, y);
+                    if (style == 0 || iisArrive) tp.draw(g, x, y);
                 }
                 
-                this.isFull = () => (now() - start) / 1000 * 0.8 >= 1;
+                this.alpha = () => smooth(1, alpha.get(true));
+                this.isFull = () => alpha.get(true) == 1;
 
-                this.dispose = () => {
-                    disposed = true;
-                    plan(() => {
-                        textManager.dispose(); 
-                        tp.dispose();
-                    }, 2000);
-                };
+                this.dispose = () => {textManager.dispose(); tp.dispose();};
                 this.toString = () => "SGround";
             }
 
-            let d = [];
-            let dWidth = w * 18 / 500 * 1.1;
-            let drawDoor = () => {
+            const d = [];
+            const dWidth = w * 18 / 500 * 1.1;
+            const drawDoor = () => {
                 let x0 = 0, y0 = h * 0.4, w0 = dWidth, h0 = h * 0.4;
                 let img = new BufferedImage(w0, h0, BufferedImage.TYPE_INT_ARGB);
                 let g = img.createGraphics();
@@ -828,8 +800,8 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
             }
             drawDoor();
 
-            let out = [];
-            let drawOut = (isFill) => {
+            const out = [];
+            const drawOut = (isFill) => {
                 let w0 = w * 30 / 500, h0 = h * 0.4;
                 let img = new BufferedImage(w0, h0, BufferedImage.TYPE_INT_ARGB);
                 let g = img.createGraphics();
@@ -856,17 +828,15 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
             }
             drawOut(false);
             drawOut(true);
-            let outWidth = w * 30 / 500;
-            let DA0 = (g) => {
-                let dop = iopen > 0 ? 1 : 0;
-                let dv = smooth(1, iopen * train.doorValue() * 3 * iisArrive);
+            const outWidth = w * 30 / 500;
+            const DA0 = (g) => {
                 setComp(g, 1);
                 let x = w * 45 / 500, y = h * (0.7 - 0.4);
-                let v = dv;
+                let v = doorValue;
                 let tx = v * w * 15 / 500;
                 g.drawImage(d[0], x + tx, y, null);
                 g.drawImage(d[1], x - dWidth - tx, y, null);
-                if (dop == false) {
+                if (doorOpen == false) {
                     let ww = w * 40 / 500 * 0.7;
                     y = h * (0.7 + 0.3) / 2 - h * 0.02 - ww / 2;
                     x = w * 45 / 500 - ww / 2;
@@ -899,12 +869,12 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
                 
                 this.isStopped = () => stopped;
 
-                let dx = ax => ax * w / 500;
-                let dy = ay => ay * h / 50; 
-                // let kf = num => Math.sqrt(num);
-                // let dir = [[-1, 0], [-1 / kf(2), -1 / kf(2)], [0, -1], [1 / kf(2), -1 / kf(2)], [1, 0]];
-                let dir = [[-0.5, 0], [-1.2, 0], [0, -1], [1.2, 0], [0.5, 0]];
-                let strs = ixlt0;
+                const dx = ax => ax * w / 500;
+                const dy = ay => ay * h / 50; 
+                // const kf = num => Math.sqrt(num);
+                // const dir = [[-1, 0], [-1 / kf(2), -1 / kf(2)], [0, -1], [1 / kf(2), -1 / kf(2)], [1, 0]];
+                const dir = [[-0.5, 0], [-1.2, 0], [0, -1], [1.2, 0], [0.5, 0]];
+                const strs = ixlt0;
                 let hsv = cu.h2v(icolor);
                 let f = k => {
                     let hs = new HSV(hsv);
@@ -932,22 +902,20 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
                     tx += w2 / 2;
                 }
                 let txx = [8, 4, 0, -4, -8];
-                let p = Font.PLAIN;
-                let b = Font.BOLD;
-                let color = icolor1;
+                const p = Font.PLAIN;
+                const b = Font.BOLD;
+                const color = icolor1;
 
-                let textManager = new TextManager();
-                let drawMiddle = textManager.drawMiddle;
-                let disposed = false;
+                const textManager = new TextManager(w, h);
+                const drawMiddle = textManager.drawMiddle;
 
-                this.draw = (g, time) => {
-                    if (disposed) return;
+                this.draw = (g) => {
                     textManager.clear();
-                    let t = time - st;
+                    let t = now() - st;
                     t = t / 1000 * 0.8;
                     let a = 1 - smooth(1, t);
                     if (et != null) {
-                        let t1 = time - et;
+                        let t1 = now() - et;
                         t1 = t1 / 1000 * 0.8;
                         let a1 = smooth(1, t1);
                         a = Math.max(a, a1);
@@ -995,7 +963,7 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
                     let wx = 100 * scale;
                     let ys = [dy(20), 0, dy(17), 0, dy(20)];
                     for (let i = 0; i < 5; i+=2) {
-                        let v = smooth(1, ((time / 1000) * 0.8) % 1);
+                        let v = smooth(1, ((now() / 1000) * 0.8) % 1);
                         let xx = dx(x[i] + txx[i]) - sizeX[i] / 2 + wx / 2 + v * (sizeX[i] - wx);
                         let canvas = Canvas.createWithCenterAndScale(g, xx, ys[i], scale, 100, 100, 1 - a, [0x00ff00, icolor]);
                         jt(canvas);
@@ -1004,44 +972,38 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
                     return;
                 }
 
-                this.dispose = () => {
-                    disposed = true;
-                    plan(() => {
-                        textManager.dispose();
-                    }, 2000);
-                }
+                this.dispose = () => textManager.dispose();
                 this.toString = () => "DR0";
             }
 
             function DR1() {
-                let xlt1 = ixlt1;
-                let ind = train.getThisRoutePlatformsNextIndex();
-                let dx = (ax) => ax * w / 500;
-                let dy = (ay) => ay * h / 50;
-                let hex = icolor;
-                let hsv = cu.h2v(hex);
+                const xlt1 = ixlt1;
+                const ind = train.getThisRoutePlatformsNextIndex();
+                const dx = (ax) => ax * w / 500;
+                const dy = (ay) => ay * h / 50;
+                const hex = icolor;
+                const hsv = cu.h2v(hex);
                 hsv.s *= 0.6;
-                let color = cu.v2h(hsv);
+                const color = cu.v2h(hsv);
                 hsv.s *= 0.2;
-                let color1 = cu.v2h(hsv);
+                const color1 = cu.v2h(hsv);
                 let stopped = false;
-                let st = now();
+                const st = now();
                 let et = null;
-                let img = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
-                let g = img.createGraphics();
-                let textManager = new TextManager();
-                let drawMiddle = textManager.drawMiddle;
-                let p = Font.PLAIN;
-                let b = Font.BOLD;
+                const img = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+                const g = img.createGraphics();
+                const textManager = new TextManager(w, h);
+                const drawMiddle = textManager.drawMiddle;
+                const p = Font.PLAIN;
+                const b = Font.BOLD;
 
-                let l = xlt1.length;
+                const l = xlt1.length;
                 let xd = dx(280);
                 let ins = (dx(440) - xd) * 2 / l;
                 ins = Math.min(ins, dy(30));
                 let wa = ins * (l - 1);
                 let x = xd + wa / 2;
                 let y0 = dy(28), h0 = dy(3);
-                
                 for (let i = 0; i < l; i++) {
                     let [cn, en, huan, guo] = xlt1[i];
                     
@@ -1049,7 +1011,7 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
                         g.setColor(new Color(guo? color1 : color));
                         g.fillRect(x - ins, y0 - h0 / 2, ins, h0);
                         if (i != ind - 1) {
-
+                            
                         }
                     }
 
@@ -1066,20 +1028,19 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
                         let h1 = dy(6);
                         let lx = x - w1 / 2;
                         let lw = w1 / ll;
-                        let canvas = new Canvas.Mobile(g, x, y0 + dy(3), dy(3), dy(6), 52, 52, 1);
                         for (let [cna, ena, col] of array) {
                             es += cna + ' / ';
                             ns += ena + ' / ';
-                            g.setClip(new Rectangle2D.Float(lx, y0, lw, y0 + h1));
+                            g.setClip(new Rectangle2D.Double(lx, y0, lw, y0 + h1));
                             lx += lw;
-                            canvas.colorMap = Canvas.standardizationColorMap([0x00ff00, col]);
+                            let canvas = Canvas.createWithCenterAndSize(g, x, y0 + dy(3), dy(3), dy(6), 52, 52, 1, [0x00ff00, col]);
                             hcjt(canvas);
                         }
                         g.setClip(null);
                         es = es.slice(0, -2);
                         ns = ns.slice(0, -2);
                         drawMiddle(es, font0, p, 0, x, y0 + dy(8), ins * 0.8, dy(3));
-                        drawMiddle(ns, font0, p, 0, x, y0 + dy(11), ins * 0.8, dy(2));
+                        drawMiddle(ns, font0, p, 0, x, y0 + dy(10), ins * 0.8, dy(2));
                     }
 
                     let canvas = Canvas.createWithCenterAndScale(g, x, y0, dy(5) / 52, 52, 52);
@@ -1091,15 +1052,12 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
                 }
                 g.dispose();
 
-                let disposed = false;
-
-                this.draw = (g, time) => {
-                    if (disposed) return;
-                    let t = time - st;
+                this.draw = (g) => {
+                    let t = now() - st;
                     t = t / 1000 * 0.8;
                     let a = 1 - smooth(1, t);
                     if (et != null) {
-                        let t1 = time - et;
+                        let t1 = now() - et;
                         t1 = t1 / 1000 * 0.8;
                         let a1 = smooth(1, t1);
                         a = Math.max(a, a1);
@@ -1114,10 +1072,7 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
                 }
 
                 this.dispose = () => {
-                    disposed = true;
-                    plan(() => {
-                        textManager.dispose();
-                    }, 2000);
+                    textManager.dispose();
                 }
 
                 this.isStopped = () => stopped;
@@ -1129,132 +1084,127 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
 
             let DS = [DR0, DR1];// 运行时的样式列表
             let DTime = -15000;
-            let ctrlUsed;
 
-            let ctrlPool = Executors.newScheduledThreadPool(1);
-            disposeList.push(() => ctrlPool.shutdown());
+            const ctrl = () => {
+                let newOpen = iopen > 0 ? 1 : 0;
+                let newValue = smooth(1, newOpen * train.doorValue() * 3 * iisArrive);
+                if (newValue < 1) {
+                    outAlpha.set(0, 0);
+                }else {
+                    if (outAlpha.dir() == 0) outAlpha.set(0, 1);
+                }
 
-            let ctrl = new Runnable({run: () => {
-                let start = now();
+                if (doorOpen != newOpen || doorValue != newValue) {
+                    doorOpen = newOpen;
+                    doorValue = newValue;
+                }
+
                 if (iisArrive || !isOnRoute()) {
                     DStyle = 0;
-                    DTime = -100000;
+                    DTime = 0;
                     addDrawCallD();
                 } else if (DTime + 16000 < now()){
-                    if (DTime >= 0) {
-                        DStyle = (DStyle + 1) % (DS.length);
-                    }
-                    addDrawCallD(new DS[DStyle]());
                     DTime = now();
+                    DStyle = (DStyle + 1) % (DS.length);
+                    addDrawCallD(new DS[DStyle]());
                 }
-
-                let newInfo = getInfo();
-                    if (info.toString() != newInfo.toString() && isOnRoute()) {
-                        info = newInfo;
-                        addDrawCallS(new SGround());
-                }
-
-                refreshS();
-                refreshD();
-
-                ctrlUsed = now() - start;
-            }});
-            ctrl.run();
-            ctrlPool.scheduleWithFixedDelay(ctrl, 0, 100, TimeUnit.MILLISECONDS);
-
-            let submitPool = Executors.newScheduledThreadPool(2);
-            let uoloadPool = Executors.newScheduledThreadPool(4);
-            let executor = Executors.newFixedThreadPool(10);
-            if (tf) {
-                let analysePool = Executors.newScheduledThreadPool(2);
-                let analyse = new Runnable({run: () => {
-                ctx.setDebugInfo("fps", PlacementOrder.UPSIDE, uploadManager.getAnalyse());
-                }});
-                analysePool.scheduleAtFixedRate(analyse, 0, 100, TimeUnit.MILLISECONDS);
             }
-            disposeList.push(() => submitPool.shutdown());
-            disposeList.push(() => uoloadPool.shutdown());
-            disposeList.push(() => executor.shutdown());
-            let lastStart;
-            let timeoutTimes = 0;
 
-            let draw = new Runnable({run: () => {
+            let first = true;
+            let used = [];
+            let last = now();
+            const ti = (prompt) => {
+                used.push(prompt + ": " + (now()- last).toString().padStart(2, '0'));
+                last = now();
+            }
+            let min;
+            let max;
+            let sum = 0;
+            let times = 0;
+            while (state.running && state.lastTime + 60000 > now()) {
                 try {
-                    let fps = -100;
-                    if (lastStart != undefined) fps = 1000 / (now() - lastStart);
-                    lastStart = now();
-                    let used = [];
-                    let last = now();
-                    let ti = (prompt) => {
-                        used.push(prompt + ": " + (now()- last).toString().padStart(2, '0'));
-                        last = now();
+                    last = now();
+                    used = [];
+                    if (first) {
+                        info = getInfo();
+                        addDrawCallS(new SGround());
+                        mainAlpha.set(isOnRoute() ? 1 : 0, 0);
+                        first = false;
                     }
+                    startTime = now();
 
                     mainAlpha.update();
                     if (mainAlpha.get() == 1 && !isOnRoute()) mainAlpha.turn(-1);
                     else if (mainAlpha.get() == 0 && isOnRoute()) mainAlpha.turn(1);
-                    ti("Update");
 
                     if (mainAlpha.get() == 0 && !mainAlpha.isChanged()) {
-                        ti("Skip Draw");
+                        used.push("Skip");
                     } else {
-                        let done = false;
-                        let time = now();
-                        let a = mainAlpha.get();
+                        ctrl();
+                        let newInfo = getInfo();
+                        if (info.toString() != newInfo.toString() && isOnRoute()) {
+                            info = newInfo;
+                            addDrawCallS(new SGround());
+                        }
+                        ti("Ctrl");
+                        
                         let img = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
-                        let runUpload = new Runnable({run: () => {
-                            if (done) upload(img, time);
-                            else timeoutTimes++;
-                        }});
-                        uoloadPool.schedule(runUpload, 200, TimeUnit.MILLISECONDS);// 延迟200ms执行上传
-
                         let g;
                         g = img.createGraphics();
                         g.setColor(new Color(0));
                         g.fillRect(0, 0, w, h);
-    
-                        let sdc = SDrawCalls, ddc = DDrawCalls;
-    
-                        if (a > 0) {
-
-                            for (let i = 0; i < sdc.length; i++) sdc[i].draw(g, time);
-
+                        if (mainAlpha.get() > 0) {
+                            for (let i = 0; i < SDrawCalls.length; i++) SDrawCalls[i].draw(g);
+                            if (SDrawCalls[SDrawCalls.length - 1].isFull()) {
+                                for (let i = 0; i < SDrawCalls.length - 1; i++) SDrawCalls[i].dispose();
+                                SDrawCalls = [SDrawCalls[SDrawCalls.length - 1]];
+                            }
+                            ti("S-Draw");
+        
                             DA0(g);
-
-                            for (let i = 0; i < ddc.length; i++) ddc[i].draw(g, time);
-    
-                            if (a != 1) {
-                                setComp(g, 1 - a);
+                            ti("DA0");
+        
+                            refreshD();
+                            for (let i = 0; i < DDrawCalls.length; i++) DDrawCalls[i].draw(g);
+                            refreshD();
+                            ti("D-Draw");
+                            if (mainAlpha.get() != 1) {
+                                setComp(g, 1 - mainAlpha.get());
                                 g.setColor(new Color(0));
                                 g.fillRect(0, 0, w, h);
+                                ti("A-Mix");
                             }
                         }
                         g.dispose();
-                        done = true;
-                        ti("Draw");
+
+                        upload(img, now());
+                        ti("Upload");
                     }
-                    used.push("Offside: " + uploadManager.getOffside());
+
+                    let t = 1000 / 40 - (now() - startTime);
+                    t = Math.max(t, 0);
+                    Thread.sleep(t);
+                    ti("Sleep");
+
+                    lastFrameTime = now() - startTime;
+                    used.push("Total: " + lastFrameTime.toString().padStart(3, '0'));
+                    // used.push("Upload1: " + uploadManager.lastUsed().toString().padStart(3, '0'));
+                    let fps = 1000 / lastFrameTime;
+                    if (min == undefined) min = fps;
+                    else min = Math.min(min, fps);
+                    if (max == undefined) max = fps;
+                    else max = Math.max(max, fps);
+                    times++;
+                    sum += fps;
+                    let average = sum / times;
                     let dd = new Date();
-                    let ts = dd.getMinutes().toString().padStart(2, '0') + ":" + dd.getSeconds().toString().padStart(2, '0') + "::" + dd.getMilliseconds().toString().padStart(3, '0');
-                    ctx.setDebugInfo(uid, ts, "Ctrl: " + ctrlUsed, "FPS:" + fps.toFixed(2).toString().padStart(5, '0'), "\n", 
-                    "Pools: " + ["ctrl: " + ctrlPool.getActiveCount() + "/" + ctrlPool.getPoolSize(), "submit: " + submitPool.getActiveCount() + "/" + submitPool.getPoolSize(), "upload: " + uoloadPool.getActiveCount() + "/" + uoloadPool.getPoolSize(), "executor: " + executor.getActiveCount() + "/" + executor.getPoolSize()].toString(), "Timeout: " + timeoutTimes, "\n",
-                    "D-Calls:" + DDrawCalls.toString(), "S-Calls:" + SDrawCalls.toString(), "Used: " + used.toString()); 
+                    ctx.setDebugInfo(uid, dd.getMinutes().toString().padStart(2, '0') + ":" + dd.getSeconds().toString().padStart(2, '0') + "::" + dd.getMilliseconds().toString().padStart(3, '0'), min.toFixed(2) + "-" + average.toFixed(2) + "-" + max.toFixed(2), fps.toFixed(2), "\n", "D-Calls:" + DDrawCalls.length, "S-Calls:" + SDrawCalls.length, "Used: " + used.toString(), "\n"); 
                 } catch (e) {
                     ctx.setDebugInfo(uid + " Error At: ", now().toString(), e.message, e.stack);
-                    print(uid + " Error At: " + now().toString() + "     " + e.message + "      " + e.stack);
+                    print(uid + " Error At: " + now() + "     " + e.message + "      " + e.stack);
                     Thread.sleep(1000);
                 }
-            }});
-
-
-            let submit = new Runnable({run: () => executor.submit(draw)});
-            submitPool.scheduleAtFixedRate(submit, 0, 1000 / 40, TimeUnit.MILLISECONDS);
-
-            while (state.running && state.lastTime + 60000 > now()) {
-                thread.sleep(1000);
             }
-            ctx.setDebugInfo(uid + "Exit", true);
-
             print(uid + " Exit");
         } catch (e) {
             ctx.setDebugInfo(uid +  " Error At: ", System.currentTimeMillis() + e.message , e.stack);
