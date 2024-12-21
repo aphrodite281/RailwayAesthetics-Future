@@ -516,7 +516,7 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
                 let w0 = w * 110 / 500, h0 = h * 0.75;
                 let img = new BufferedImage(w0, h0, BufferedImage.TYPE_INT_ARGB);
                 let g = img.createGraphics();
-                let textManager = new TextManager();
+                let textManager = new TextManager.Buffered();
                 let drawMiddle = textManager.drawMiddle;
                 let dx = (ax) => w0 * ax / 440;
                 let dy = (ay) => h0 * ay / 375;
@@ -589,7 +589,7 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
                 }
                 let tex = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
                 let g = tex.createGraphics();
-                let textManager = new TextManager();
+                let textManager = new TextManager.Buffered();
                 let drawMiddle = textManager.drawMiddle;
                 let p = Font.PLAIN;
                 let [color0, color1, cname, ename, cdest, edest, time0, time1, is, t1, t2, t3, t4, isArrive, open] = info;
@@ -936,7 +936,7 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
                 let b = Font.BOLD;
                 let color = icolor1;
 
-                let textManager = new TextManager();
+                let textManager = new TextManager.Buffered();
                 let drawMiddle = textManager.drawMiddle;
                 let disposed = false;
 
@@ -1029,7 +1029,7 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
                 let et = null;
                 let img = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
                 let g = img.createGraphics();
-                let textManager = new TextManager();
+                let textManager = new TextManager.Buffered();
                 let drawMiddle = textManager.drawMiddle;
                 let p = Font.PLAIN;
                 let b = Font.BOLD;

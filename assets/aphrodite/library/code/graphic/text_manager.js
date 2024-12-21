@@ -15,6 +15,9 @@ include(Resources.id("aphrodite:library/code/util/value.js"));
  * 文本经理
  */
 const TextManager = {
+    /**
+     * 使用 Clip 方式控制文本区域
+     */
     Clip: function () {
         let map = new Map();
         let list = [];
@@ -154,6 +157,9 @@ const TextManager = {
             g0.dispose();
         }
     },
+    /**
+     * 使用 BufferedImage 方式控制文本区域
+     */
     Buffered: function () {
         let map = new Map();
         let list = [];
