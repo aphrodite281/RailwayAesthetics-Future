@@ -1275,7 +1275,7 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
 
 
             let submit = new Runnable({run: () => executor.submit(draw)});
-            submitPool.scheduleAtFixedRate(submit, 0, 1000 / 40, TimeUnit.MILLISECONDS);
+            submitPool.scheduleAtFixedRate(submit, 0, 1000 / 20, TimeUnit.MILLISECONDS);
 
             while (state.running && state.lastTime + 60000 > now()) {
                 if (tf) {
