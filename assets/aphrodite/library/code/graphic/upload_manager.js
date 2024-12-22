@@ -51,26 +51,22 @@ function UploadManager(tex, tmax, tmin, tavg, tf, ty) {
         else {
             times++;
             let ins = Date.now() - last;
-            if (max == undefined) max = ins;
-            else max = Math.max(max, ins);
-            if (min == undefined) min = ins;
-            else min = Math.min(min, ins);
-            if (avg == undefined) avg = ins;
-            else avg = (avg * (times - 1) + ins) / times;
             last = Date.now();
             history.push([last, ins]);
             let ne = [];
-            let nmax, nmin;
+            let nmax, nmin, sum = 0;
             for (let el of history) {
                 if (Date.now() - el[0] <= 5000) ne.push(el);   
                 if (nmax == undefined) nmax = el[1];
                 else nmax = Math.max(nmax, el[1]);
                 if (nmin == undefined) nmin = el[1];
                 else nmin = Math.min(nmin, el[1]);
+                sum += el[1];
             }
             max = nmax;
             min = nmin;
             history = ne;
+            avg = sum / history.length;
         }
     }
 

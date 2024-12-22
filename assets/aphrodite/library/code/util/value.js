@@ -26,6 +26,7 @@ function Value(min, max, now, speed, direction, loop) {
                     if (now > max) now = max;
                     if (now < min) now = min;
                     dir = 0;
+                    break;
                 }
                 case 1:{
                     if (now > max) now = now - max + min;

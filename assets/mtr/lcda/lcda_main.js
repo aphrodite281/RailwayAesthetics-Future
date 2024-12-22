@@ -202,8 +202,7 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
             let refreshD = () => {
                 let newDDC = [];
                 for (let obj of DDrawCalls) {
-                    if (obj.isStopped(now() - 1000)) obj.dispose();
-                    else newDDC.push(obj); 
+                    if (!obj.isStopped()) newDDC.push(obj); 
                 }
                 DDrawCalls = newDDC;
             }
@@ -691,10 +690,10 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
                 g.setColor(new Color(0x606060));
                 if (is) {
                     x = w * (120 + 320) / 2 / 500;
-                    y = y1 * 0.7;
+                    y = y1 * 0.5;
                     k = y1 * 0.5;
                     font = font0.deriveFont(Font.PLAIN, k);
-                    drawMiddle0(g, t1, font, x, y);
+                    drawMiddle(t1, font, p, 0x606060, x, y, dx(200), y1 * 0.7, 0);
                 } else {
                     x = w * 145 / 500, y = y1 * 0.5;
                     k = y1 * 0.35;
@@ -958,10 +957,8 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
                 let color = icolor1;
                 let color0 = icolor;
 
-                let disposed = false;
-
                 this.draw = (g, time) => {
-                    if (disposed) return;
+                    if (stopped) return;
                     let t = time - st;
                     t = t / 1000 * 0.8;
                     let a = 1 - smooth(1, t);
@@ -1027,10 +1024,7 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
 
                 this.isFresh = () => isSame([strs, ixlt0, color, icolor1, icolor, color0]);
 
-                this.dispose = () => {
-                    disposed = true;
-                }
-                this.toString = () => "DR0";
+                this.toString = () => "DR0" + ((et != null) ? "r" : "s");
             }
 
             function DR1() {
@@ -1127,10 +1121,8 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
                 }
                 g.dispose();
 
-                let disposed = false;
-
                 this.draw = (g, time) => {
-                    if (disposed) return;
+                    if (stopped) return;
                     let t = time - st;
                     t = t / 1000 * 0.8;
                     let a = 1 - smooth(1, t);
@@ -1166,20 +1158,16 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
                     }
                 }
 
-                this.dispose = () => {
-                    disposed = true;
-                    plan(() => {
-                        textManager.dispose();
-                    }, 2000);
-                }
-
                 this.isFresh = () => isSame([xlt1, ixlt1, ind, iindex, hex, icolor, color11, icolor1]);
 
                 this.isStopped = () => stopped;
                 this.stop = () => {
                     if (et == null) et = now();
+                    plan(() => {
+                        textManager.dispose();
+                    }, 2000);
                 }
-                this.toString = () => "DR1";
+                this.toString = () => "DR1" + ((et != null) ? "r" : "s");
             }
 
             let DS = [DR0, DR1];// 运行时的样式列表
@@ -1226,6 +1214,9 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
     
                     refreshS();
                     refreshD();
+
+                    if (mainAlpha.get() == 1 && !isOnRoute()) mainAlpha.turn(-1);
+                    else if (mainAlpha.get() == 0 && isOnRoute()) mainAlpha.turn(1);
     
                     ctrlUsed = now() - start;
                 } catch (e) {
@@ -1258,8 +1249,6 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
                     }
 
                     mainAlpha.update();
-                    if (mainAlpha.get() == 1 && !isOnRoute()) mainAlpha.turn(-1);
-                    else if (mainAlpha.get() == 0 && isOnRoute()) mainAlpha.turn(1);
                     ti("Update");
 
                     if (needUpload) {
@@ -1303,7 +1292,6 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
                             }
                         }
                         g.dispose();
-                        //done = true;
                         ti("Draw");
 
                         needUpload = true;
@@ -1316,7 +1304,7 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
                     ctx.setDebugInfo(uid, ts, "Ctrl: " + ctrlUsed, "FPS:" + fps.toFixed(2).toString().padStart(5, '0'), "\n", 
                     "Pools: " + ["ctrl: " + ctrlPool.getActiveCount() + "/" + ctrlPool.getPoolSize(), "submit: " + submitPool.getActiveCount() + "/" + submitPool.getPoolSize()].toString(), "\n",
                     "D-Calls:" + DDrawCalls.toString(), "S-Calls:" + SDrawCalls.toString(), "Used: " + used.toString(), "DStyle: " + DStyle, "\n", 
-                    "Arrive: " + iisArrive, "OnRoute: " + isOnRoute(), "Alpha: " + mainAlpha.dir() + " " + mainAlpha.get().toFixed(2).toString().padStart(5, '0')); // , "upload: " + uoloadPool.getActiveCount() + "/" + uoloadPool.getPoolSize(), "executor: " + executor.getActiveCount() + "/" + executor.getPoolSize() , "Timeout: " + timeoutTimes
+                    "Arrive: " + iisArrive, "OnRoute: " + isOnRoute(), "Alpha: " + mainAlpha.dir() + " " +  mainAlpha.speed()+ " " + mainAlpha.get().toFixed(2).toString().padStart(5, '0')); // , "upload: " + uoloadPool.getActiveCount() + "/" + uoloadPool.getPoolSize(), "executor: " + executor.getActiveCount() + "/" + executor.getPoolSize() , "Timeout: " + timeoutTimes
                 } catch (e) {
                     ctx.setDebugInfo(uid + " Error At: ", now().toString(), e.message, e.stack);
                     print(uid + " Error At: " + now().toString() + "     " + e.message + "      " + e.stack);
