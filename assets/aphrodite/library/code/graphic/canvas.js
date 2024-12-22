@@ -346,10 +346,10 @@ Canvas.standardizationColorMap = (src) => {
     if (src instanceof Map) return src;
     if (src == undefined) return new Map();
     let map = new Map();
-    for (let i = 0; i < array.length; i++) {
-        let k0 = array[i], k1;
+    for (let i = 0; i < src.length; i++) {
+        let k0 = src[i], k1;
         if (k0 instanceof Array) k1 = k0[1], k0 = k0[0];
-        else k1 = array[++i];
+        else k1 = src[++i];
         map.set(k0, k1);
     }
     return map;

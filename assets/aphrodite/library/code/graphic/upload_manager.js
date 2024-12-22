@@ -74,7 +74,8 @@ function UploadManager(tex) {
         g.setStroke(new BasicStroke(3));
         if (arr.length <= 5 || last == undefined || avg == undefined || min == undefined || max == undefined) {
             g.dispose();
-            return img;
+            anaTex.upload(img);
+            return anaTex;
         }
 
         const f = (x) => 1000 / x;
@@ -99,6 +100,7 @@ function UploadManager(tex) {
         for (let i = 2; i < arr.length; i++) {
             let b = arr[arr.length - i];
             let nx = fx(b[0]), ny = fy1(b[1]);
+            ny = Math.min(ny, 200);
             try {g.drawLine(x, y, nx, ny);} catch (e) {}
             x = nx;
             y = ny;

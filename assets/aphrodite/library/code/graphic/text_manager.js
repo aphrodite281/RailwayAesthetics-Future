@@ -18,7 +18,9 @@ const TextManager = {
     /**
      * 使用 Clip 方式控制文本区域
      */
-    Clip: function () {
+    Clip: function (w, h, fx, fy) {
+        if (fx == undefined) fx = x => x;
+        if (fy == undefined) fy = y => y;
         let map = new Map();
         let list = [];
         const zero = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
@@ -95,10 +97,12 @@ const TextManager = {
                     tx = 0;
                     g.setColor(color);
                     g.drawString(str, xi + x - w / 2 - tx - ins, yi + y + h / 2 - descent);
-                    g.drawString(str, xi + x - w / 2 - tx -ins + width, yi + y + h / 2 - descent);
+                    g.drawString(str, xi + x - w / 2 - tx + width, yi + y + h / 2 - descent);
                     g.setClip(null);
                 }
             }
+
+            this.dispose = () => {};
         }
 
         /**
@@ -120,9 +124,9 @@ const TextManager = {
             if (mode == undefined) mode = 1;
             if (id != undefined) {
                 if (map.has(id)) map.get(id).dispose();
-                map.set(id, new Text(str, font, style, color, x, y, w, h, mode, start));
+                map.set(id, new Text(str, font, style, color, fx(x), fy(y), w, h, mode, start));
             } else {
-                list.push(new Text(str, font, style, color, x, y, w, h, mode, start));
+                list.push(new Text(str, font, style, color, fx(x), fy(y), w, h, mode, start));
             }
         }
 
@@ -160,11 +164,13 @@ const TextManager = {
     /**
      * 使用 BufferedImage 方式控制文本区域
      */
-    Buffered: function () {
+    Buffered: function (w, h, fx, fy) {
+        if (fx == undefined) fx = x => x;
+        if (fy == undefined) fy = y => y;
         let map = new Map();
         let list = [];
-        const tex0 = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
-        const g0 = tex0.createGraphics();
+        const zero = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
+        const g0 = zero.createGraphics();
 
         const getW = (str, font) => {
             const fm = g0.getFontMetrics(font);
@@ -188,17 +194,17 @@ const TextManager = {
         }
 
 
-
         const setComp = (g, value) => {g.setComposite(AlphaComposite.SrcOver.derive(value))};
-        const layout = (g, x, y, w, h) => {
+
+        const layout = (g, w, h) => {
             // return;
             setComp(g, 0.1);
             g.setColor(Color.BLUE);
-            g.fillRect(x - w / 2, y - h / 2, w, h);
+            g.fillRect(0, 0, w, h);
             setComp(g, 0.8);
             g.setStroke(new BasicStroke(2));
             g.setColor(Color.BLACK);
-            g.drawRect(x - w / 2, y - h / 2, w, h);
+            g.drawRect(0, 0, w, h);
         }
 
         function Text(str, font, style, color, x, y, w, h, mode, start) {
@@ -214,9 +220,6 @@ const TextManager = {
             let scroll = false;
             if (width > w) scroll = true;
             h = getH(font);
-            let tex = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
-            let g = tex.createGraphics();
-            g.setFont(font);
             switch (mode) {
                 case 0: var d = getDescent(font); break;
                 case 1: var d = getDescent(font) / 2; break;
@@ -224,23 +227,33 @@ const TextManager = {
             const descent = d;
             const y0 = h - descent;
             if (!scroll) {
+                let tex = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+                let g = tex.createGraphics();
+                g.setFont(font);
                 layout(g, w, h);
                 g.setColor(color);
                 g.drawString(str, (w - width) / 2, y0); // 居中绘制
                 this.draw = (gi, xi, yi) => gi.drawImage(tex, xi + x - w / 2, yi + y - h / 2, null);
+                g.dispose();
             } else {
+                let last = Date.now();
                 const ins = h * 2; // 间隔
                 this.draw = (gi, xi, yi) => {
-                    g.setComposite(AlphaComposite.Clear);
-                    g.fillRect(0, 0, w, h);
+                    let tex = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+                    let g = tex.createGraphics();
+                    g.setFont(font);
                     layout(g, w, h);
                     g.setComposite(AlphaComposite.SrcOver);
-                    let tx = ((Date.now() - start) / 1000 * h) % (width + ins);
+                    let tx = ((Date.now() - start) / 1000 * 2 * h) % (width + ins);
+                    if (last > Date.now()) throw new Error("Time error");
+                    last = Date.now();
                     g.setColor(color);
                     g.drawString(str, -tx - ins, y0);
                     g.drawString(str, -tx + width, y0);
                     gi.drawImage(tex, xi + x - w / 2, yi + y - h / 2, null);
                 }
+            }
+            this.dispose = () => {
             }
         }
 
@@ -263,9 +276,9 @@ const TextManager = {
             if (mode == undefined) mode = 1;
             if (id != undefined) {
                 if (map.has(id)) map.get(id).dispose();
-                map.set(id, new Text(str, font, style, color, x, y, w, h, mode, start));
+                map.set(id, new Text(str, font, style, color, fx(x), fy(y), w, h, mode, start));
             } else {
-                list.push(new Text(str, font, style, color, x, y, w, h, mode, start));
+                list.push(new Text(str, font, style, color, fx(x), fy(y), w, h, mode, start));
             }
         }
 
@@ -288,9 +301,6 @@ const TextManager = {
          * @param {Number | Null} time 时间
          */
         this.draw = (g, x, y) => {
-            g0.setComposite(AlphaComposite.Clear);
-            g0.fillRect(0, 0, w, h);
-            g0.setComposite(AlphaComposite.SrcOver);
             for (let [id, text] of map) text.draw(g, x, y);
             for (let text of list) text.draw(g, x, y);
         }

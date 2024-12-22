@@ -87,7 +87,7 @@ function create(ctx, state, train) {
     state.disposeList = disposeList;
 }
 
-// let model = ModelManager.uploadVertArrays(ModelManager.loadRawModel(Resources.manager(), Resources.id("mtrsteamloco:eyecandies/test/main.obj"), null));
+let model = ModelManager.uploadVertArrays(ModelManager.loadRawModel(Resources.manager(), Resources.id("mtrsteamloco:eyecandies/test/main.obj"), null));
 
 let acc = Date.now();
 
@@ -96,6 +96,7 @@ function render(ctx, state, train) {
     for (let entry of state.tickList) {
         entry();
     }
+    ctx.setDebugInfo("mc", model.getClass());
 }
 
 function dispose(ctx, state, train) {
@@ -516,7 +517,7 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
                 let w0 = w * 110 / 500, h0 = h * 0.75;
                 let img = new BufferedImage(w0, h0, BufferedImage.TYPE_INT_ARGB);
                 let g = img.createGraphics();
-                let textManager = new TextManager.Buffered();
+                let textManager = new TextManager.Buffered(w0, h0);
                 let drawMiddle = textManager.drawMiddle;
                 let dx = (ax) => w0 * ax / 440;
                 let dy = (ay) => h0 * ay / 375;
@@ -589,7 +590,7 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
                 }
                 let tex = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
                 let g = tex.createGraphics();
-                let textManager = new TextManager.Buffered();
+                let textManager = new TextManager.Buffered(w, h);
                 let drawMiddle = textManager.drawMiddle;
                 let p = Font.PLAIN;
                 let [color0, color1, cname, ename, cdest, edest, time0, time1, is, t1, t2, t3, t4, isArrive, open] = info;
@@ -936,13 +937,10 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
                 let b = Font.BOLD;
                 let color = icolor1;
 
-                let textManager = new TextManager.Buffered();
-                let drawMiddle = textManager.drawMiddle;
                 let disposed = false;
 
                 this.draw = (g, time) => {
                     if (disposed) return;
-                    textManager.clear();
                     let t = time - st;
                     t = t / 1000 * 0.8;
                     let a = 1 - smooth(1, t);
@@ -962,6 +960,8 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
                         textManager.draw(g, 0, 0);
                         return;
                     }
+                    let textManager = new TextManager.Buffered(w, h);
+                    let drawMiddle = textManager.drawMiddle;
                     let sizeX = [];
                     for (let i = 0; i < 5; i++) {
                         let j = sx[i];
@@ -1001,14 +1001,12 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
                         jt(canvas);
                     }
                     textManager.draw(g, 0, 0);
+                    textManager.dispose();
                     return;
                 }
 
                 this.dispose = () => {
                     disposed = true;
-                    plan(() => {
-                        textManager.dispose();
-                    }, 2000);
                 }
                 this.toString = () => "DR0";
             }
@@ -1019,6 +1017,7 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
                 let dx = (ax) => ax * w / 500;
                 let dy = (ay) => ay * h / 50;
                 let hex = icolor;
+                let color11 = icolor1;
                 let hsv = cu.h2v(hex);
                 hsv.s *= 0.6;
                 let color = cu.v2h(hsv);
@@ -1029,7 +1028,7 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
                 let et = null;
                 let img = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
                 let g = img.createGraphics();
-                let textManager = new TextManager.Buffered();
+                let textManager = new TextManager.Buffered(w, h);
                 let drawMiddle = textManager.drawMiddle;
                 let p = Font.PLAIN;
                 let b = Font.BOLD;
@@ -1039,17 +1038,31 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
                 let ins = (dx(440) - xd) * 2 / l;
                 ins = Math.min(ins, dy(30));
                 let wa = ins * (l - 1);
-                let x = xd + wa / 2;
-                let y0 = dy(28), h0 = dy(3);
+                let x = xd - wa / 2;
+                let y0 = dy(28), h0 = dy(4);
+                let rx;
+                let newcm = () => new Canvas.Mobile(g, x, y0, h0 * 2 / 3, h0 * 2 / 3, 52, 52, 1, [0x00ff00, color11]);
+                let cm = newcm();
+                let kw = 0.9;
+                let jnum = (ins - dy(7)) / (cm.w * kw);
+                jnum *= 0.6;
+                jnum = Math.ceil(jnum);
+                let aw = (jnum - 1) * cm.w * kw;
                 
                 for (let i = 0; i < l; i++) {
                     let [cn, en, huan, guo] = xlt1[i];
-                    
                     if (i != l - 1) {
                         g.setColor(new Color(guo? color1 : color));
-                        g.fillRect(x - ins, y0 - h0 / 2, ins, h0);
-                        if (i != ind - 1) {
-
+                        g.fillRect(x, y0 - h0 / 2, ins, h0);
+                        
+                        if (i == ind - 1) {
+                            rx = x;
+                        } else {
+                            cm.x = x + (ins - aw) / 2;
+                            for (let i = 0; i < jnum; i++) {
+                                xjjt(cm);
+                                cm.x += cm.w * kw;
+                            } 
                         }
                     }
 
@@ -1087,7 +1100,7 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
                     else hc(canvas);
                     drawMiddle(cn, font0, p, 0, x, y0 - dy(8), ins * 0.8, dy(5));
                     drawMiddle(en, font0, p, 0, x, y0 - dy(4), ins * 0.8, dy(3));
-                    x -= ins;
+                    x += ins;
                 }
                 g.dispose();
 
@@ -1109,8 +1122,25 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
                         }
                     }
                     setComp(g, 1 - a);
+                    if (xlt1.length == 0) {
+                        g.setColor(new Color(0));
+                        let dn = a * dy(20);
+                        drawMiddle0(g, "暂无信息", font0.deriveFont(Font.PLAIN, h * 0.3), dx(220), h * 0.6 - dn);
+                        drawMiddle0(g, "No Information", font0.deriveFont(Font.PLAIN, h * 0.1), dx(220), h * 0.8 + dn);
+                        textManager.draw(g, 0, 0);
+                        return;
+                    }
                     g.drawImage(img, 0, 0, null);
                     textManager.draw(g, 0, 0);
+                    let ta = ((now() - st) / 1000) % 1;
+                    ta = smooth(1, ta);
+                    ta = ta * (ins - aw - dy(7));
+                    let x = rx + dy(4) + ta;
+                    let cm = new Canvas.Mobile(g, x, y0, h0 * 2 / 3, h0 * 2 / 3, 52, 52, 1 - a, [0x00ff00, color11]);
+                    for (let i = 0; i < jnum; i++) {
+                        xjjt(cm);
+                        cm.x += cm.w * kw;
+                    }
                 }
 
                 this.dispose = () => {
@@ -1135,29 +1165,33 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
             disposeList.push(() => ctrlPool.shutdown());
 
             let ctrl = new Runnable({run: () => {
-                let start = now();
-                if (iisArrive || !isOnRoute()) {
-                    DStyle = 0;
-                    DTime = -100000;
-                    addDrawCallD();
-                } else if (DTime + 16000 < now()){
-                    if (DTime >= 0) {
-                        DStyle = (DStyle + 1) % (DS.length);
+                try {
+                    let start = now();
+                    if (iisArrive || !isOnRoute()) {
+                        DStyle = 0;
+                        DTime = -100000;
+                        addDrawCallD();
+                    } else if (DTime + 5000 < now()){
+                        if (DTime >= 0) {
+                            DStyle = (DStyle + 1) % (DS.length);
+                        }
+                        addDrawCallD(new DS[DStyle]());
+                        DTime = now();
                     }
-                    addDrawCallD(new DS[DStyle]());
-                    DTime = now();
+    
+                    let newInfo = getInfo();
+                        if (info.toString() != newInfo.toString() && isOnRoute()) {
+                            info = newInfo;
+                            addDrawCallS(new SGround());
+                    }
+    
+                    refreshS();
+                    refreshD();
+    
+                    ctrlUsed = now() - start;
+                } catch (e) {
+                    ctx.setDebugInfo("Error", e.message, e.stack);
                 }
-
-                let newInfo = getInfo();
-                    if (info.toString() != newInfo.toString() && isOnRoute()) {
-                        info = newInfo;
-                        addDrawCallS(new SGround());
-                }
-
-                refreshS();
-                refreshD();
-
-                ctrlUsed = now() - start;
             }});
             ctrl.run();
             ctrlPool.scheduleWithFixedDelay(ctrl, 0, 100, TimeUnit.MILLISECONDS);
@@ -1165,13 +1199,6 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
             let submitPool = Executors.newScheduledThreadPool(2);
             let uoloadPool = Executors.newScheduledThreadPool(4);
             let executor = Executors.newFixedThreadPool(10);
-            if (tf) {
-                let analysePool = Executors.newScheduledThreadPool(2);
-                let analyse = new Runnable({run: () => {
-                ctx.setDebugInfo("fps", PlacementOrder.UPSIDE, uploadManager.getAnalyse());
-                }});
-                analysePool.scheduleAtFixedRate(analyse, 0, 100, TimeUnit.MILLISECONDS);
-            }
             disposeList.push(() => submitPool.shutdown());
             disposeList.push(() => uoloadPool.shutdown());
             disposeList.push(() => executor.shutdown());
@@ -1206,7 +1233,7 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
                             if (done) upload(img, time);
                             else timeoutTimes++;
                         }});
-                        uoloadPool.schedule(runUpload, 200, TimeUnit.MILLISECONDS);// 延迟200ms执行上传
+                        uoloadPool.schedule(runUpload, 400, TimeUnit.MILLISECONDS);// 延迟1000ms执行上传
 
                         let g;
                         g = img.createGraphics();
@@ -1238,7 +1265,7 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
                     let ts = dd.getMinutes().toString().padStart(2, '0') + ":" + dd.getSeconds().toString().padStart(2, '0') + "::" + dd.getMilliseconds().toString().padStart(3, '0');
                     ctx.setDebugInfo(uid, ts, "Ctrl: " + ctrlUsed, "FPS:" + fps.toFixed(2).toString().padStart(5, '0'), "\n", 
                     "Pools: " + ["ctrl: " + ctrlPool.getActiveCount() + "/" + ctrlPool.getPoolSize(), "submit: " + submitPool.getActiveCount() + "/" + submitPool.getPoolSize(), "upload: " + uoloadPool.getActiveCount() + "/" + uoloadPool.getPoolSize(), "executor: " + executor.getActiveCount() + "/" + executor.getPoolSize()].toString(), "Timeout: " + timeoutTimes, "\n",
-                    "D-Calls:" + DDrawCalls.toString(), "S-Calls:" + SDrawCalls.toString(), "Used: " + used.toString()); 
+                    "D-Calls:" + DDrawCalls.toString(), "S-Calls:" + SDrawCalls.toString(), "Used: " + used.toString(), "DStyle: " + DStyle); 
                 } catch (e) {
                     ctx.setDebugInfo(uid + " Error At: ", now().toString(), e.message, e.stack);
                     print(uid + " Error At: " + now().toString() + "     " + e.message + "      " + e.stack);
@@ -1251,7 +1278,11 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
             submitPool.scheduleAtFixedRate(submit, 0, 1000 / 40, TimeUnit.MILLISECONDS);
 
             while (state.running && state.lastTime + 60000 > now()) {
-                thread.sleep(1000);
+                if (tf) {
+                    ctx.setDebugInfo(uid + "fps", PlacementOrder.UPSIDE, uploadManager.getAnalyse());
+                } else {
+                    Thread.sleep(1000);
+                }
             }
             ctx.setDebugInfo(uid + "Exit", true);
 

@@ -26,7 +26,7 @@
      showgrid="true"
      inkscape:zoom="3.2747755"
      inkscape:cx="160.6217"
-     inkscape:cy="115.27508"
+     inkscape:cy="115.58044"
      inkscape:window-width="1920"
      inkscape:window-height="1173"
      inkscape:window-x="-9"
@@ -56,8 +56,8 @@
      id="layer1">
     <path
        style="fill:#00ff00;stroke-width:0.235479"
-       d="m 25.135416,0 h 7.9375 l -5.291666,26.458332 5.291666,26.458331 h -7.9375 L 19.84375,26.458332 25.135416,0"
+       d="m 33.072916,0 11.90625,26.458332 -11.90625,26.458331 H 10.583333 L 22.489583,26.458332 10.583333,0"
        id="path1"
-       sodipodi:nodetypes="ccccccc" />
+       sodipodi:nodetypes="cccccc" />
   </g>
 </svg>
