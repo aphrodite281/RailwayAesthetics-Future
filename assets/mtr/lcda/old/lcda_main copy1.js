@@ -176,7 +176,7 @@ function LCDThread(face, isRight, ctx, state, train, carIndex) {
             
             /**
              * 添加动态绘制
-             * @param {Function<Graphics2D, Number, Number>}fun1 绘制函数 传入Graphics, 开始时间，结束时间 返回是否删除此绘制
+             * @param {Function<Graphics2D, number, number>}fun1 绘制函数 传入Graphics, 开始时间，结束时间 返回是否删除此绘制
              */
             const addDrawCallD = (fun1) => {
                 for (let i = 0; i < DDrawCalls.length; i++) {

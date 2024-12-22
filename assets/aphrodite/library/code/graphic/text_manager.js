@@ -109,14 +109,14 @@ const TextManager = {
          * 添加文字到队列
          * @param {String} str 文字内容
          * @param {Font} font 字体
-         * @param {Number} style 字体样式
-         * @param {Number | Color} color HEX颜色
-         * @param {Number} x x坐标
-         * @param {Number} y y坐标
-         * @param {Number} w 最大宽度
-         * @param {Number} h 最大高度
-         * @param {Number} mode 高度算法 0:Height, 1: Ascent 默认为1
-         * @param {Number} start 开始时间
+         * @param {number} style 字体样式
+         * @param {number | Color} color HEX颜色
+         * @param {number} x x坐标
+         * @param {number} y y坐标
+         * @param {number} w 最大宽度
+         * @param {number} h 最大高度
+         * @param {number} mode 高度算法 0:Height, 1: Ascent 默认为1
+         * @param {number} start 开始时间
          * @param {Any | Null} id
          */
         this.drawMiddle = (str, font, style, color, x, y, w, h, mode, start, id) => {
@@ -144,9 +144,9 @@ const TextManager = {
         /**
          * 绘制文字队列
          * @param {Graphics2D} g 画笔
-         * @param {Number} x x坐标
-         * @param {Number} y y坐标
-         * @param {Number | Null} time 时间
+         * @param {number} x x坐标
+         * @param {number} y y坐标
+         * @param {number | Null} time 时间
          */
         this.draw = (g, x, y, time) => {
             if (time == undefined) time = Date.now();
@@ -261,14 +261,14 @@ const TextManager = {
          * 添加文字到队列
          * @param {String} str 文字内容
          * @param {Font} font 字体
-         * @param {Number} style 字体样式
-         * @param {Number | Color} color HEX颜色
-         * @param {Number} x x坐标
-         * @param {Number} y y坐标
-         * @param {Number} w 最大宽度
-         * @param {Number} h 最大高度
-         * @param {Number} mode 高度算法 0:Height, 1: Ascent 默认为1
-         * @param {Number} start 开始时间
+         * @param {number} style 字体样式
+         * @param {number | Color} color HEX颜色
+         * @param {number} x x坐标
+         * @param {number} y y坐标
+         * @param {number} w 最大宽度
+         * @param {number} h 最大高度
+         * @param {number} mode 高度算法 0:Height, 1: Ascent 默认为1
+         * @param {number} start 开始时间
          * @param {Any | Null} id
          */
         this.drawMiddle = (str, font, style, color, x, y, w, h, mode, start, id) => {
@@ -296,9 +296,9 @@ const TextManager = {
         /**
          * 绘制文字队列
          * @param {Graphics2D} g 画笔
-         * @param {Number} x x坐标
-         * @param {Number} y y坐标
-         * @param {Number | Null} time 时间
+         * @param {number} x x坐标
+         * @param {number} y y坐标
+         * @param {number | Null} time 时间
          */
         this.draw = (g, x, y) => {
             for (let [id, text] of map) text.draw(g, x, y);

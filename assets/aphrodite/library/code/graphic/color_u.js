@@ -30,7 +30,7 @@ const ColorU = {
     
     /**
      * 将十六进制颜色换为 RGB 数组
-     * @param {Number} hex 十六进制颜色
+     * @param {number} hex 十六进制颜色
      * @returns {RGB} RGB 数组
      */
     h2r: (hex) => {
@@ -43,7 +43,7 @@ const ColorU = {
     /**
      * 将 RGB 对象转换为十六进制颜色
      * @param {RGB} rgb RGB 对象
-     * @returns {Number} 十六进制颜色
+     * @returns {number} 十六进制颜色
      */
     r2h: (rgb) => {
         let r = rgb.r, g = rgb.g, b = rgb.b;
@@ -111,13 +111,13 @@ const ColorU = {
 /**
  * 将 HSV 对象转换为十六进制颜色
  * @param {HSV} hsv HSV 对象 
- * @returns  {Number} 十六进制颜色 
+ * @returns  {number} 十六进制颜色 
  */
 ColorU.v2h = (hsv) => ColorU.r2h(ColorU.v2r(hsv));
 
 /**
  * 将十六进制颜色转换为 HSV 对象
- * @param {Number} hex 十六进制颜色 
+ * @param {number} hex 十六进制颜色 
  * @returns {HSV} HSV 对象 
  */
 ColorU.h2v = (hex) => ColorU.r2v(ColorU.h2r(hex));

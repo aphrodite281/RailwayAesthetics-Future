@@ -21,8 +21,8 @@ importPackage (java.awt.font);
  * @param {Function} fw - 用于转换宽度的函数。
  * @param {Function} fh - 用于转换高度的函数。
  * @param {Function} fl - 用于转换长度的函数。
- * @param {Number | Null} alpha - 透明度。(默认为1)
- * @param {Map<Number, Number> | Null} colorMap - 颜色映射表。类似 {[0, 0xff00ff], [0xff0000, 0xffffff]}。
+ * @param {number | Null} alpha - 透明度。(默认为1)
+ * @param {Map<number, number> | Null} colorMap - 颜色映射表。类似 {[0, 0xff00ff], [0xff0000, 0xffffff]}。
  */
 
 function Canvas(g, fx, fy, fw, fh, fl, alpha, colorMap) {
@@ -32,45 +32,45 @@ function Canvas(g, fx, fy, fw, fh, fl, alpha, colorMap) {
     this.g = g;
     
     /**
-     * @param {Function<Number, Number>} fx - 用于转换 x 坐标的函数。
+     * @param {Function<number, number>} fx - 用于转换 x 坐标的函数。
      */
     this.fx = fx;
     fx = (x) => this.fx(x);
 
     /**
-     * @param {Function<Number, Number>} fy - 用于转换 y 坐标的函数。
+     * @param {Function<number, number>} fy - 用于转换 y 坐标的函数。
      */
     this.fy = fy;
     fy = (y) => this.fy(y);
     
     /**
-     * @param {Function<Number, Number>} fw - 用于转换宽度的函数。
+     * @param {Function<number, number>} fw - 用于转换宽度的函数。
      */
     this.fw = fw;
     fw = (w) => this.fw(w);
 
     /**
-     * @param {Function<Number, Number>} fh - 用于转换高度的函数。
+     * @param {Function<number, number>} fh - 用于转换高度的函数。
      */
     this.fh = fh;
     fh = (h) => this.fh(h);
 
     /**
-     * @param {Function<Number, Number>} fl - 用于转换粗细的函数。
+     * @param {Function<number, number>} fl - 用于转换粗细的函数。
      */
     this.fl = fl;
     fl = (l) => this.fl(l);
 
     if (alpha == null) alpha = 1;
     /**
-     * @param {Number} alpha - 透明度。
+     * @param {number} alpha - 透明度。
      */
     this.alpha = alpha;
     alpha = () => this.alpha;
 
     colorMap = Canvas.standardizationColorMap(colorMap);
     /**
-     * @param {Map<Number, Number>} colorMap - 颜色映射表。类似 {[0, 0xff00ff], [0xff0000, 0xffffff]}。
+     * @param {Map<number, number>} colorMap - 颜色映射表。类似 {[0, 0xff00ff], [0xff0000, 0xffffff]}。
      */
     this.colorMap = colorMap;
     colorMap = () => this.colorMap;
@@ -88,7 +88,7 @@ function Canvas(g, fx, fy, fw, fh, fl, alpha, colorMap) {
     this.strokeStyle = "rgb(0, 0, 0)";
     
     /**
-     * @param {Number} lineWidth - 描边宽度。
+     * @param {number} lineWidth - 描边宽度。
      */
     this.lineWidth = 1;
 
@@ -108,7 +108,7 @@ function Canvas(g, fx, fy, fw, fh, fl, alpha, colorMap) {
     this.fontType = Resources.getSystemFont("Noto Sans");
 
     /**
-     * @param {Number} fontPattern - 字体样式。如 Font.PLAIN、Font.BOLD、Font.ITALIC。
+     * @param {number} fontPattern - 字体样式。如 Font.PLAIN、Font.BOLD、Font.ITALIC。
      */
     this.fontPattern = Font.PLAIN;
 
@@ -147,12 +147,12 @@ function Canvas(g, fx, fy, fw, fh, fl, alpha, colorMap) {
     }
 
     /** 
-     * @param {Number} a - 水平缩放比例。
-     * @param {Number} b - 水平倾斜比例。
-     * @param {Number} c - 垂直倾斜比例。
-     * @param {Number} d - 垂直缩放比例。
-     * @param {Number} e - 水平平移距离。
-     * @param {Number} f - 垂直平移距离。
+     * @param {number} a - 水平缩放比例。
+     * @param {number} b - 水平倾斜比例。
+     * @param {number} c - 垂直倾斜比例。
+     * @param {number} d - 垂直缩放比例。
+     * @param {number} e - 水平平移距离。
+     * @param {number} f - 垂直平移距离。
      */
     this.transform = (a, b, c, d, e, f) => {
         transform.scale(a, d);
@@ -169,32 +169,32 @@ function Canvas(g, fx, fy, fw, fh, fl, alpha, colorMap) {
     this.beginPath = () => path = new GeneralPath();
 
     /**
-     * @param {Number} x - x 坐标(使用 fx 函数)。
-     * @param {Number} y - y 坐标(使用 fy 函数)。
+     * @param {number} x - x 坐标(使用 fx 函数)。
+     * @param {number} y - y 坐标(使用 fy 函数)。
      */
     this.moveTo = (x, y) => path.moveTo(fx(x), fy(y));
 
     /**
-     * @param {Number} x - 终点的 x 坐标(使用 fx 函数)。
-     * @param {Number} y - 终点的 y 坐标(使用 fy 函数)。
+     * @param {number} x - 终点的 x 坐标(使用 fx 函数)。
+     * @param {number} y - 终点的 y 坐标(使用 fy 函数)。
      */
     this.lineTo = (x, y) => path.lineTo(fx(x), fy(y));
 
     /**
-     * @param {Number} x1 - 控制点 1 的 x 坐标(使用 fx 函数)。
-     * @param {Number} y1 - 控制点 1 的 y 坐标(使用 fy 函数)。
-     * @param {Number} x2 - 控制点 2 的 x 坐标(使用 fx 函数)。
-     * @param {Number} y2 - 控制点 2 的 y 坐标(使用 fy 函数)。
-     * @param {Number} x3 - 终点的 x 坐标(使用 fx 函数)。
-     * @param {Number} y3 - 终点的 y 坐标(使用 fy 函数)。
+     * @param {number} x1 - 控制点 1 的 x 坐标(使用 fx 函数)。
+     * @param {number} y1 - 控制点 1 的 y 坐标(使用 fy 函数)。
+     * @param {number} x2 - 控制点 2 的 x 坐标(使用 fx 函数)。
+     * @param {number} y2 - 控制点 2 的 y 坐标(使用 fy 函数)。
+     * @param {number} x3 - 终点的 x 坐标(使用 fx 函数)。
+     * @param {number} y3 - 终点的 y 坐标(使用 fy 函数)。
      */
     this.bezierCurveTo = (x1, y1, x2, y2, x3, y3) => path.curveTo(fx(x1), fy(y1), fx(x2), fy(y2), fx(x3), fy(y3));
 
     /**
-     * @param {Number} x1 - 控制点 1 的 x 坐标(使用 fx 函数)。
-     * @param {Number} y1 - 控制点 1 的 y 坐标(使用 fy 函数)。
-     * @param {Number} x2 - 终点的 x 坐标(使用 fx 函数)。
-     * @param {Number} y2 - 终点的 y 坐标(使用 fy 函数)。
+     * @param {number} x1 - 控制点 1 的 x 坐标(使用 fx 函数)。
+     * @param {number} y1 - 控制点 1 的 y 坐标(使用 fy 函数)。
+     * @param {number} x2 - 终点的 x 坐标(使用 fx 函数)。
+     * @param {number} y2 - 终点的 y 坐标(使用 fy 函数)。
      * @returns 
      */
     this.quadraticCurveTo = (x1, y1, x2, y2) => path.quadTo(fx(x1), fy(y1), fx(x2), fy(y2));
@@ -258,8 +258,8 @@ function Canvas(g, fx, fy, fw, fh, fl, alpha, colorMap) {
 
     /**
      * @param {String} text - 要绘制的文本。
-     * @param {Number} x - 文本左上角的 x 坐标(使用 fx 函数)。
-     * @param {Number} y - 文本左上角的 y 坐标(使用 fy 函数)。
+     * @param {number} x - 文本左上角的 x 坐标(使用 fx 函数)。
+     * @param {number} y - 文本左上角的 y 坐标(使用 fy 函数)。
      */
     this.fillText = (text, x, y) => {
         this.g.setFont(this.font.deriveFont(this.fontPattern, fl(this.font)));
@@ -268,20 +268,20 @@ function Canvas(g, fx, fy, fw, fh, fl, alpha, colorMap) {
     }
 
     /**
-     * @param {Number} x - 矩形左上角的 x 坐标(使用 fx 函数)。
-     * @param {Number} y - 矩形左上角的 y 坐标(使用 fy 函数)。
-     * @param {Number} w - 矩形的宽度(使用 fx 函数)。
-     * @param {Number} h - 矩形的高度(使用 fy 函数)。
+     * @param {number} x - 矩形左上角的 x 坐标(使用 fx 函数)。
+     * @param {number} y - 矩形左上角的 y 坐标(使用 fy 函数)。
+     * @param {number} w - 矩形的宽度(使用 fx 函数)。
+     * @param {number} h - 矩形的高度(使用 fy 函数)。
      */
     this.rect = (x, y, w, h) => {setColor(this.fillStyle); this.g.fillRect(fx(x), fy(y), fw(w), fh(h));};
     
     /**
      * 暂时使用填充圆弧代替
-     * @param {Number} x - 圆心的 x 坐标(使用 fx 函数)。
-     * @param {Number} y - 圆心的 y 坐标(使用 fy 函数)。
-     * @param {Number} r - 圆的半径(使用 fl 函数)。
-     * @param {Number} start - 起始角度。(弧度制);
-     * @param {Number} end - 终止角度。(弧度制)
+     * @param {number} x - 圆心的 x 坐标(使用 fx 函数)。
+     * @param {number} y - 圆心的 y 坐标(使用 fy 函数)。
+     * @param {number} r - 圆的半径(使用 fl 函数)。
+     * @param {number} start - 起始角度。(弧度制);
+     * @param {number} end - 终止角度。(弧度制)
      */
     this.arc = (x, y, r, start, end) => {
         // let arc = new Arc2D.Double();
@@ -297,13 +297,13 @@ function Canvas(g, fx, fy, fw, fh, fl, alpha, colorMap) {
 /** 
  * 使用中心点和缩放创建 Canvas 对象。
  * @param {Graphics2D} g - 图形上下文对象。
- * @param {Number} x - 绘制中心点的 x 坐标。
- * @param {Number} y - 绘制中心点的 y 坐标。
- * @param {Number} s - 缩放比例。
- * @param {Number} w - 图像的相对宽度。
- * @param {Number} h - 图像的相对高度。
- * @param {Number | Null} alpha - 透明度。(默认为1)
- * @param {Map<Number, Number> | Array<Number> | Array<Array<Number>> | Null} colorMap - 颜色映射表。类似 {[0, 0xff00ff], [0xff0000, 0xffffff]}。
+ * @param {number} x - 绘制中心点的 x 坐标。
+ * @param {number} y - 绘制中心点的 y 坐标。
+ * @param {number} s - 缩放比例。
+ * @param {number} w - 图像的相对宽度。
+ * @param {number} h - 图像的相对高度。
+ * @param {number | Null} alpha - 透明度。(默认为1)
+ * @param {Map<number, number> | Array<number> | Array<Array<number>> | Null} colorMap - 颜色映射表。类似 {[0, 0xff00ff], [0xff0000, 0xffffff]}。
  * @returns {Canvas} - Canvas 对象。
  */
 Canvas.createWithCenterAndScale = (g, x, y, s, w, h, alpha, colorMap) => {
@@ -318,14 +318,14 @@ Canvas.createWithCenterAndScale = (g, x, y, s, w, h, alpha, colorMap) => {
 /** 
  * 使用中心点和宽高创建 Canvas 对象。
  * @param {Graphics2D} g - 图形上下文对象。
- * @param {Number} x - 绘制中心点的 x 坐标。
- * @param {Number} y - 绘制中心点的 y 坐标。
- * @param {Number} w - 目标宽度。
- * @param {Number} h - 目标高度。
- * @param {Number} wt - 图像的相对宽度。
- * @param {Number} ht - 图像的相对高度。
- * @param {Number | Null} alpha - 透明度。(默认为1)
- * @param {Map<Number, Number> | Array<Number> | Array<Array<Number>> | Null} colorMap - 颜色映射表。类似 {[0, 0xff00ff], [0xff0000, 0xffffff]}。
+ * @param {number} x - 绘制中心点的 x 坐标。
+ * @param {number} y - 绘制中心点的 y 坐标。
+ * @param {number} w - 目标宽度。
+ * @param {number} h - 目标高度。
+ * @param {number} wt - 图像的相对宽度。
+ * @param {number} ht - 图像的相对高度。
+ * @param {number | Null} alpha - 透明度。(默认为1)
+ * @param {Map<number, number> | Array<number> | Array<Array<number>> | Null} colorMap - 颜色映射表。类似 {[0, 0xff00ff], [0xff0000, 0xffffff]}。
  * @returns {Canvas} - Canvas 对象。
  */
 Canvas.createWithCenterAndSize = (g, x, y, w, h, wt, ht, alpha, colorMap) => {
@@ -338,9 +338,9 @@ Canvas.createWithCenterAndSize = (g, x, y, w, h, wt, ht, alpha, colorMap) => {
 }
 
 /**
- * @param {Array<Number> | Array<Array<Number>> | Map<Number, Number>}  src - 颜色映射表。类似 [0, 0xff00ff, 0xff0000, 0xffffff]。两两一组
+ * @param {Array<number> | Array<Array<number>> | Map<number, number>}  src - 颜色映射表。类似 [0, 0xff00ff, 0xff0000, 0xffffff]。两两一组
  * 或 [[0, 0xff00ff], [0xff0000, 0xffffff]]。
- * @returns {Map<Number, Number>} - 颜色映射表。类似 {[0, 0xff00ff], [0xff0000, 0xffffff]}。
+ * @returns {Map<number, number>} - 颜色映射表。类似 {[0, 0xff00ff], [0xff0000, 0xffffff]}。
  */
 Canvas.standardizationColorMap = (src) => {
     if (src instanceof Map) return src;
@@ -358,14 +358,14 @@ Canvas.standardizationColorMap = (src) => {
 /**
  * 可移动的 Canvas 类。
  * @param {Graphics2D} g - 图形上下文对象。
- * @param {Number} x - 绘制中心点的 x 坐标。
- * @param {Number} y - 绘制中心点的 y 坐标。
- * @param {Number} w - 目标宽度。
- * @param {Number} h - 目标高度。
- * @param {Number} wt - 图像的相对宽度。
- * @param {Number} ht - 图像的相对高度。
- * @param {Number | Null} alpha - 透明度。(默认为1)
- * @param {Map<Number, Number> | Array<Number> | Array<Array<Number>> | Null} colorMap - 颜色映射表。类似 {[0, 0xff00ff], [0xff0000, 0xffffff]}。
+ * @param {number} x - 绘制中心点的 x 坐标。
+ * @param {number} y - 绘制中心点的 y 坐标。
+ * @param {number} w - 目标宽度。
+ * @param {number} h - 目标高度。
+ * @param {number} wt - 图像的相对宽度。
+ * @param {number} ht - 图像的相对高度。
+ * @param {number | Null} alpha - 透明度。(默认为1)
+ * @param {Map<number, number> | Array<number> | Array<Array<number>> | Null} colorMap - 颜色映射表。类似 {[0, 0xff00ff], [0xff0000, 0xffffff]}。
  */
 Canvas.Mobile = function(g, x, y, w, h, wt, ht, alpha, colorMap) {
     this.x = x;
@@ -386,13 +386,13 @@ Canvas.Mobile = function(g, x, y, w, h, wt, ht, alpha, colorMap) {
     /**
      * 设置 Canvas 的参数
      * @param {Graphics2D | Null} g - 图形上下文对象。
-     * @param {Number | Null} x - 绘制中心点的 x 坐标。
-     * @param {Number | Null} y - 绘制中心点的 y 坐标。
-     * @param {Number | Null} w - 目标宽度。
-     * @param {Number | Null} h - 目标高度。
-     * @param {Number | Null} wt - 图像的相对宽度。
-     * @param {Number | Null} ht - 图像的相对高度。
-     * @param {Map<Number, Number> | Array<Number> | Array<Array<Number>> | Null} colorMap - 颜色映射表。类似 {[0, 0xff00ff], [0xff0000, 0xffffff]}。
+     * @param {number | Null} x - 绘制中心点的 x 坐标。
+     * @param {number | Null} y - 绘制中心点的 y 坐标。
+     * @param {number | Null} w - 目标宽度。
+     * @param {number | Null} h - 目标高度。
+     * @param {number | Null} wt - 图像的相对宽度。
+     * @param {number | Null} ht - 图像的相对高度。
+     * @param {Map<number, number> | Array<number> | Array<Array<number>> | Null} colorMap - 颜色映射表。类似 {[0, 0xff00ff], [0xff0000, 0xffffff]}。
      */
     this.for = (g, x, y, w, h, wt, ht, colorMap) => {
         if (g != null) this.g = g;
@@ -411,10 +411,10 @@ Canvas.Mobile = function(g, x, y, w, h, wt, ht, alpha, colorMap) {
 /**
  * 获得位图。
  * @param {Function<Canvas, Any>} ft - 绘制函数。
- * @param {Number} s - 缩放比例。
- * @param {Number} tw - 绘制函数的宽度。
- * @param {Number} th - 绘制函数的高度。
- * @param {Map<Number, Number> | Array<Number> | Array<Array<Number>> | Null} colorMap - 颜色映射表。类似 {[0, 0xff00ff], [0xff0000, 0xffffff]}。
+ * @param {number} s - 缩放比例。
+ * @param {number} tw - 绘制函数的宽度。
+ * @param {number} th - 绘制函数的高度。
+ * @param {Map<number, number> | Array<number> | Array<Array<number>> | Null} colorMap - 颜色映射表。类似 {[0, 0xff00ff], [0xff0000, 0xffffff]}。
  * @returns {BufferedImage} - 位图。
  */
 Canvas.getBitmap = (ft, s, tw, th, colorMap) => {

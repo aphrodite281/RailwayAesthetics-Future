@@ -1,12 +1,12 @@
 /**
  * 本类意在方便实现定速增长相关功能。
  * 
- * @param {Number} min 最小值
- * @param {Number} max 最大值
- * @param {Number} now 当前值
- * @param {Number} speed 速度(/s)
- * @param {Number} direction 增长方向(正数为正增长，负数为负增长)绝对值大小与速度乘积为实际增长速度
- * @param {Number} loop 循环模式(0:不循环， 1:单向循环 2:双向循环)
+ * @param {number} min 最小值
+ * @param {number} max 最大值
+ * @param {number} now 当前值
+ * @param {number} speed 速度(/s)
+ * @param {number} direction 增长方向(正数为正增长，负数为负增长)绝对值大小与速度乘积为实际增长速度
+ * @param {number} loop 循环模式(0:不循环， 1:单向循环 2:双向循环)
  */
 function Value(min, max, now, speed, direction, loop) {
     let last = Date.now();
@@ -47,7 +47,7 @@ function Value(min, max, now, speed, direction, loop) {
     /**
      * 获得当前值
      * @param {Boolean} update 是否一并更新 
-     * @returns {Number} 当前值
+     * @returns {number} 当前值
      */
     this.get = (update) => {
         if (update) updatew();
@@ -56,19 +56,19 @@ function Value(min, max, now, speed, direction, loop) {
 
     /**
      * 转向（设置增长方向）
-     * @param {Number} direction 增长方向(正数为正增长，负数为负增长)绝对值大小与速度乘积为实际增长速度
+     * @param {number} direction 增长方向(正数为正增长，负数为负增长)绝对值大小与速度乘积为实际增长速度
      */
     this.turn = (direction) => dir = direction;
     
     /**
-     * @returns {Number} 增长方向
+     * @returns {number} 增长方向
      */
     this.dir = () => dir;
     
     /**
      * 设置当前值
-     * @param {Number} value 新的当前值
-     * @param {Number} direction 新的增长方向(正数为正增长，负数为负增长)绝对值大小与速度乘积为实际增长速度
+     * @param {number} value 新的当前值
+     * @param {number} direction 新的增长方向(正数为正增长，负数为负增长)绝对值大小与速度乘积为实际增长速度
      */
     this.set = (value, direction) => {now = value; dir = direction; last = Date.now();};
 
@@ -89,7 +89,7 @@ function Value(min, max, now, speed, direction, loop) {
 
     /**
      * 设置速度并返回更新后的速度
-     * @param {Number | Null} newSpeed 新的速度(/s) null 代表不改变速度
+     * @param {number | Null} newSpeed 新的速度(/s) null 代表不改变速度
      */
     this.speed = (newSpeed) => {
         if (newSpeed != null) speed = newSpeed;
