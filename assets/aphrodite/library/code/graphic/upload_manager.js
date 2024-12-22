@@ -91,12 +91,6 @@ function UploadManager(tex, tmax, tmin, tavg, tf, ty) {
         if (arr.length <= 5 || last == undefined || avg == undefined || min == undefined || max == undefined) {
             ma = 0, mi = 0, av = 0;
         } else {
-            let c = false;
-            if (ma > tmax) {
-                c = true;
-                ma = tmax;
-            }
-    
             g.setColor(Color.WHITE);
             let a = arr[arr.length - 1];
             let now = Date.now();
@@ -112,6 +106,12 @@ function UploadManager(tex, tmax, tmin, tavg, tf, ty) {
                 x = nx;
                 y = ny;
             }
+        }
+
+        let c = false;
+        if (ma > tmax) {
+            c = true;
+            ma = tmax;
         }
 
         g.setColor(Color.YELLOW);

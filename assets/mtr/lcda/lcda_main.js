@@ -1316,7 +1316,7 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
                     ctx.setDebugInfo(uid, ts, "Ctrl: " + ctrlUsed, "FPS:" + fps.toFixed(2).toString().padStart(5, '0'), "\n", 
                     "Pools: " + ["ctrl: " + ctrlPool.getActiveCount() + "/" + ctrlPool.getPoolSize(), "submit: " + submitPool.getActiveCount() + "/" + submitPool.getPoolSize()].toString(), "\n",
                     "D-Calls:" + DDrawCalls.toString(), "S-Calls:" + SDrawCalls.toString(), "Used: " + used.toString(), "DStyle: " + DStyle, "\n", 
-                    "Arrive: " + iisArrive, "OnRoute: " + isOnRoute(), "Alpha: " + mainAlpha.get().toFixed(2).toString().padStart(5, '0')); // , "upload: " + uoloadPool.getActiveCount() + "/" + uoloadPool.getPoolSize(), "executor: " + executor.getActiveCount() + "/" + executor.getPoolSize() , "Timeout: " + timeoutTimes
+                    "Arrive: " + iisArrive, "OnRoute: " + isOnRoute(), "Alpha: " + mainAlpha.dir() + " " + mainAlpha.get().toFixed(2).toString().padStart(5, '0')); // , "upload: " + uoloadPool.getActiveCount() + "/" + uoloadPool.getPoolSize(), "executor: " + executor.getActiveCount() + "/" + executor.getPoolSize() , "Timeout: " + timeoutTimes
                 } catch (e) {
                     ctx.setDebugInfo(uid + " Error At: ", now().toString(), e.message, e.stack);
                     print(uid + " Error At: " + now().toString() + "     " + e.message + "      " + e.stack);
@@ -1350,4 +1350,5 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
 
     this.isAlive = () => thread.isAlive();
     this.start = () => thread.start();
+    this.toString = () => "ARAF-LCD-Thread On Train " + ctx.hashCode() + " " + carIndex + " " + (isRight? "Right" : "Left");
 }
