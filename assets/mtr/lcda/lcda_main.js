@@ -71,14 +71,7 @@ function create(ctx, state, train) {
         first = false;
         let leftThread = new LCDThread(leftFace, false, ctx, state, train, i + 1);
 
-        let sr = () => {
-            if(!rightThread.isAlive()) rightThread.start();
-        };
-        let sl = () => {
-            if(!leftThread.isAlive()) leftThread.start();
-        };
-        sr(); sl();
-        tickList.push(() => {rightFace.tick(); leftFace.tick();});
+        tickList.push(() => {rightFace.tick(); leftFace.tick(); rightThread.reStart(), leftThread.reStart()});
         disposeList.push(() => {rightFace.close(); leftFace.close();});
         infoArray.push([rightFace, leftFace, rightThread, leftThread]);
     }
@@ -687,7 +680,11 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
                 font = font0.deriveFont(Font.PLAIN, k);
                 drawMiddle0(g, time1, font, x, y);
 
+                let w2 = 0;
+                let nw = false;
                 g.setColor(new Color(0x606060));
+                let xk = dx(240), yk = dy2(0.5), wk = dx(150), hk = dy2(0.8);
+                let k0, k1;
                 if (is) {
                     x = w * (120 + 320) / 2 / 500;
                     y = y1 * 0.5;
@@ -695,39 +692,34 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
                     font = font0.deriveFont(Font.PLAIN, k);
                     drawMiddle(t1, font, p, 0x606060, x, y, dx(200), y1 * 0.7, 0);
                 } else {
-                    x = w * 145 / 500, y = y1 * 0.5;
-                    k = y1 * 0.35;
-                    font = font0.deriveFont(Font.PLAIN, k);
-                    drawMiddle0(g, t1, font, x, y);
-                    y = y1 * 0.85;
-                    k = y1 * 0.25;
-                    font = font0.deriveFont(Font.PLAIN, k);
-                    drawMiddle0(g, t2, font, x, y);
-                    
-                    g.setColor(new Color(0));
-                    k = y1 * 0.6;
-                    w1 = 0;
-                    font = font0.deriveFont(Font.BOLD, k);
+                    drawMiddle(t1, font, p, 0x606060, dx(140), dy2(0.3), dx(40), dy2(0.5));
+                    drawMiddle(t2, font, p, 0x606060, dx(140), dy2(0.7), dx(40), dy2(0.3));
+                    k0 = y1 * 0.6;
+                    font = font0.deriveFont(Font.BOLD, k0);
                     wh = getWH(g, t3, font);
-                    w1 += wh[0];
-                    k = y1 * 0.4;
-                    font = font0.deriveFont(Font.BOLD, k);
+                    w2 += wh[0];
+                    k1 = y1 * 0.4;
+                    font = font0.deriveFont(Font.BOLD, k1);
                     wh1 = getWH(g, t4, font);
-                    w1 += wh1[0];
-                    x1 = w * 10 / 500;
-                    w1 += x1;
-                    x = w * 250 / 500 - w1 / 2;
-                    y = y1 * 0.73;
-                    k = y1 * 0.6;
-                    font = font0.deriveFont(Font.BOLD, k);
-                    g.setFont(font);
-                    g.drawString(t3, x, y);
-                    k = y1 * 0.4;
-                    x = x + wh[0] + x1;
-                    k = y1 * 0.3;
-                    font = font0.deriveFont(Font.BOLD, k);
-                    g.setFont(font);
-                    g.drawString(t4, x, y);
+                    w2 += wh1[0];
+                    w2 += dx(10);
+                    if (w2 <= wk) {
+                        let img = new BufferedImage(wk, hk, BufferedImage.TYPE_INT_ARGB);
+                        let gk = img.createGraphics();
+                        TextManager.Buffered.layout(gk, wk, hk);
+                        gk.setColor(new Color(0));
+                        let x = (wk - w2) / 2;
+                        let y = hk * 0.85;
+                        gk.setFont(font0.deriveFont(Font.PLAIN, k0));
+                        gk.drawString(t3, x, y);
+                        x = x + wh[0] + dx(10);
+                        gk.setFont(font0.deriveFont(Font.PLAIN, k1));
+                        gk.drawString(t4, x, y);
+                        gk.dispose();
+                        g.drawImage(img, xk - wk / 2, yk - hk / 2, null);
+                    } else {
+                        nw = true;
+                    }
                 }
 
                 g.setColor(new Color(0));
@@ -757,17 +749,11 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
                 if (isArrive) {
                     g.setColor(new Color(color0));
                     str = "到达 " + t3;
-                    k = h * 0.2;
-                    font = font0.deriveFont(Font.BOLD, k);
-                    x = w * (120 + 320) / 2 / 500, y = h * 0.6;
-                    drawMiddle0(g, str, font, x, y);
+                    x = w * (120 + 320) / 2 / 500;
+                    drawMiddle(str, font, p, color0, x, dy(0.5), dx(250), dy(0.3));
                     str = "Arrived: " + t4;
-                    k = h * 0.1;
-                    font = font0.deriveFont(Font.PLAIN, k);
-                    y = h * 0.75;
-                    drawMiddle0(g, str, font, x, y);
-                    
-                    g.setColor(new Color(0xe0e0e0));
+                    drawMiddle(str, font, p, color0, x, dy(0.75), dx(250), dy(0.1));
+                   //  g.setColor(new Color(0xe0e0e0));
                     
                 } else {
                     // acc = -1000;
@@ -786,6 +772,31 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
                     g.drawImage(tex, 0, 0, null);
                     textManager.draw(g, 0, 0);
                     if (style == 0) tp.draw(g, x, y);
+                    if (nw) {
+                        let img = new BufferedImage(wk, hk, BufferedImage.TYPE_INT_ARGB);
+                        let gk = img.createGraphics();
+                        gk.setColor(new Color(0));
+                        TextManager.Buffered.layout(gk, wk, hk);
+                        let ins = hk * 2;
+                        let xs = -1 * (now() / 1000 * 2 * hk) % (w2 + ins);
+                        let x = xs;
+                        let y = hk * 0.85;
+                        gk.setFont(font0.deriveFont(Font.PLAIN, k0));
+                        gk.drawString(t3, x, y);
+                        x = x + wh[0] + dx(10);
+                        gk.setFont(font0.deriveFont(Font.PLAIN, k1));
+                        gk.drawString(t4, x, y);
+
+                        x = xs + w2 + ins;
+                        gk.setFont(font0.deriveFont(Font.PLAIN, k0));
+                        gk.drawString(t3, x, y);
+                        x = x + wh[0] + dx(10);
+                        gk.setFont(font0.deriveFont(Font.PLAIN, k1));
+                        gk.drawString(t4, x, y);
+
+                        gk.dispose();
+                        g.drawImage(img, xk - wk / 2, yk - hk / 2, null);
+                    }
                 }
                 
                 this.isFull = () => (now() - start) / 1000 * 0.8 >= 1;
@@ -1214,9 +1225,6 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
     
                     refreshS();
                     refreshD();
-
-                    if (mainAlpha.get() == 1 && !isOnRoute()) mainAlpha.turn(-1);
-                    else if (mainAlpha.get() == 0 && isOnRoute()) mainAlpha.turn(1);
     
                     ctrlUsed = now() - start;
                 } catch (e) {
@@ -1248,6 +1256,8 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
                         last = now();
                     }
 
+                    if (mainAlpha.get() == 1 && !isOnRoute()) mainAlpha.turn(-1);
+                    else if (mainAlpha.get() == 0 && isOnRoute()) mainAlpha.turn(1);
                     mainAlpha.update();
                     ti("Update");
 
@@ -1257,7 +1267,6 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
                     }
                     ti("Upload");
                     if (mainAlpha.get() == 0 && !mainAlpha.isChanged()) {
-                        needUpload = false;
                         ti("Skip Draw");
                     } else {
                         // let done = false;
@@ -1302,8 +1311,8 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
                     let dd = new Date();
                     let ts = dd.getMinutes().toString().padStart(2, '0') + ":" + dd.getSeconds().toString().padStart(2, '0') + "::" + dd.getMilliseconds().toString().padStart(3, '0');
                     ctx.setDebugInfo(uid, ts, "Ctrl: " + ctrlUsed, "FPS:" + fps.toFixed(2).toString().padStart(5, '0'), "\n", 
-                    "Pools: " + ["ctrl: " + ctrlPool.getActiveCount() + "/" + ctrlPool.getPoolSize(), "submit: " + submitPool.getActiveCount() + "/" + submitPool.getPoolSize()].toString(), "\n",
-                    "D-Calls:" + DDrawCalls.toString(), "S-Calls:" + SDrawCalls.toString(), "Used: " + used.toString(), "DStyle: " + DStyle, "\n", 
+                    "Pools: " + ["ctrl: " + ctrlPool.getActiveCount() + "/" + ctrlPool.getPoolSize(), "submit: " + submitPool.getActiveCount() + "/" + submitPool.getPoolSize()].toString(), "D-Calls:" + DDrawCalls.toString(), "S-Calls:" + SDrawCalls.toString(), "\n", 
+                    "Used: " + used.toString(), "DStyle: " + DStyle, "\n", 
                     "Arrive: " + iisArrive, "OnRoute: " + isOnRoute(), "Alpha: " + mainAlpha.dir() + " " +  mainAlpha.speed()+ " " + mainAlpha.get().toFixed(2).toString().padStart(5, '0')); // , "upload: " + uoloadPool.getActiveCount() + "/" + uoloadPool.getPoolSize(), "executor: " + executor.getActiveCount() + "/" + executor.getPoolSize() , "Timeout: " + timeoutTimes
                 } catch (e) {
                     ctx.setDebugInfo(uid + " Error At: ", now().toString(), e.message, e.stack);
@@ -1316,7 +1325,7 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
             //let submit = new Runnable({run: () => executor.submit(draw)});
             submitPool.scheduleAtFixedRate(draw, 1000, 1000 / 20, TimeUnit.MILLISECONDS);
 
-            while (state.running && state.lastTime + 500 > now()) {
+            while (state.running && state.lastTime + 60000 > now()) {
                 if (tf) {
                     ctx.setDebugInfo(uid + "fps", PlacementOrder.UPSIDE, uploadManager.getAnalyse());
                 } else {
@@ -1337,6 +1346,8 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
     } , "ARAF-LCD-Thread On Train " + ctx.hashCode() + " " + carIndex + " " + (isRight? "Right" : "Left"));
 
     this.isAlive = () => thread.isAlive();
-    this.start = () => thread.start();
+    this.reStart = () => {
+        if (!thread.isAlive()) try {thread.start();} catch (e) {}
+    }
     this.toString = () => "ARAF-LCD-Thread On Train " + ctx.hashCode() + " " + carIndex + " " + (isRight? "Right" : "Left");
 }

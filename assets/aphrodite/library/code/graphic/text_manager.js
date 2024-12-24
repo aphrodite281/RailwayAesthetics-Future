@@ -49,17 +49,9 @@ const TextManager = {
 
 
 
-        const setComp = (g, value) => {g.setComposite(AlphaComposite.SrcOver.derive(value))};
-        const layout = (g, x, y, w, h) => {
-            // return;
-            setComp(g, 0.1);
-            g.setColor(Color.BLUE);
-            g.fillRect(x - w / 2, y - h / 2, w, h);
-            setComp(g, 0.8);
-            g.setStroke(new BasicStroke(2));
-            g.setColor(Color.BLACK);
-            g.drawRect(x - w / 2, y - h / 2, w, h);
-        }
+        const setComp = TextManager.setComp;
+
+        const layout = TextManager.Clip.layout;
 
         function Text(str, font, style, color, x, y, w, h, mode, start) {
             switch (mode) {
@@ -194,18 +186,9 @@ const TextManager = {
         }
 
 
-        const setComp = (g, value) => {g.setComposite(AlphaComposite.SrcOver.derive(value))};
+        const setComp = TextManager.setComp;
 
-        const layout = (g, w, h) => {
-            // return;
-            setComp(g, 0.1);
-            g.setColor(Color.BLUE);
-            g.fillRect(0, 0, w, h);
-            setComp(g, 0.8);
-            g.setStroke(new BasicStroke(2));
-            g.setColor(Color.BLACK);
-            g.drawRect(0, 0, w, h);
-        }
+        const layout = TextManager.Buffered.layout;
 
         function Text(str, font, style, color, x, y, w, h, mode, start) {
             switch (mode) {
@@ -314,4 +297,39 @@ const TextManager = {
             for (let text of list) text.dispose();
         }
     }
+}
+
+TextManager.setComp = (g, value) => {
+    let oc = g.getComposite();  
+    let ov = 1;
+    if (oc instanceof AlphaComposite) ov = oc.getAlpha();
+    g.setComposite(AlphaComposite.SrcOver.derive(value * ov));
+};
+
+TextManager.Clip.layout = layout = (g, x, y, w, h) => {
+    return;
+    const setComp = TextManager.setComp;
+    g = g.create();
+    setComp(g, 0.1);
+    g.setColor(Color.BLUE);
+    g.fillRect(x - w / 2, y - h / 2, w, h);
+    setComp(g, 0.8);
+    g.setStroke(new BasicStroke(2));
+    g.setColor(Color.BLACK);
+    g.drawRect(x - w / 2, y - h / 2, w, h);
+    g.dispose();
+}
+
+TextManager.Buffered.layout = layout = (g, w, h) => {
+    return;
+    const setComp = TextManager.setComp;
+    g = g.create();
+    setComp(g, 0.1);
+    g.setColor(Color.BLUE);
+    g.fillRect(0, 0, w, h);
+    setComp(g, 0.8);
+    g.setStroke(new BasicStroke(2));
+    g.setColor(Color.BLACK);
+    g.drawRect(0, 0, w, h);
+    g.dispose();
 }

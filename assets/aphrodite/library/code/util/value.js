@@ -25,7 +25,6 @@ function Value(min, max, now, speed, direction, loop) {
                 case 0:{
                     if (now > max) now = max;
                     if (now < min) now = min;
-                    dir = 0;
                     break;
                 }
                 case 1:{
@@ -86,7 +85,7 @@ function Value(min, max, now, speed, direction, loop) {
     /**
      * 更新当前值
      */
-    this.update = () => updatew();
+    this.update = updatew;
 
     /**
      * 设置速度并返回更新后的速度
