@@ -96,7 +96,7 @@ function Face(data) {
             throw new Error("无效的模型数据" + data.model + this);
         }
     }
-
+    this.closed = false;
     
     this.tick = (matrices) => {
         if(!this.display) {
@@ -133,5 +133,6 @@ function Face(data) {
             this.model.close();
         }
         this.texture.close();
+        this.closed = true;
     }
 }

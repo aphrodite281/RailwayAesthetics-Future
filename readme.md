@@ -1,13 +1,12 @@
-# Aphrodite's Railway Aesthetics - Future
+# Railway Aesthetics - Future
 
+欢迎来到铁路美学-未来！
+这是一个Minecraft资源包，它依赖于 `ANTE` 与 `MTR` mod。
+Welcome to Railway Aesthetics - Future!
+This is a Minecraft resource pack that depends on `ANTE` and `MTR` mod.
 
-欢迎来到Aphrodite的铁路美学-未来！
-这是一个Minecraft资源包，它依赖于 `NTE` 与 `MTR` mod。
-Welcome to Aphrodite's Railway Aesthetics - Future!
-This is a Minecraft resource pack that depends on `NTE` and `MTR` mod.
-
-当前版本: V0.24.1102 适配 `NTE 0.5.4`
-Previous version: V0.24.1102 `NTE 0.5.4` compatible
+当前版本: V1.0.0 适配 `ANTE 1.0.0`
+Previous version: V1.0.0 `NTE 1.0.0` compatible
 
 欢迎加入我们的 QQ 群: 836291719
 Welcome to join our QQ group: 836291719
@@ -38,4 +37,3 @@ Welcome to join our QQ group: 836291719
 - #### [乘客资讯显示屏 PID A](https://aphrodite281.github.io/RailwayAesthetics-Future/docs/pida.html)
 
 - #### [信号灯 Signal Light A](https://aphrodite281.github.io/RailwayAesthetics-Future/docs/signal_lighta.html)
-

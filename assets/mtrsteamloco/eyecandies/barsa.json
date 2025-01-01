@@ -1,6 +1,5 @@
 {
     "barsa1": {
-        "mod_version": "0.5.4",
         "name": "铁栏杆 A-中部",
         "scriptFiles": ["mtrsteamloco:eyecandies/barsa/main0.js"],
         "shape": "0, 0, 7, 16, 26, 9",
@@ -8,7 +7,6 @@
         "noCollision": false
     },
     "barsa2": {
-        "mod_version": "0.5.4",
         "name": "铁栏杆 A-右端",
         "scriptFiles": ["mtrsteamloco:eyecandies/barsa/main1.js"],
         "shape": "0, 0, 7, 16, 26, 9",
@@ -16,7 +14,6 @@
         "noCollision": false
     },
     "barsa3": {
-        "mod_version": "0.5.4",
         "name": "铁栏杆 A-左端",
         "scriptFiles": ["mtrsteamloco:eyecandies/barsa/main2.js"],
         "shape": "0, 0, 7, 16, 26, 9",
@@ -24,7 +21,6 @@
         "noCollision": false
     },
     "barsa4": {
-        "mod_version": "0.5.4",
         "name": "铁栏杆 A-单个",
         "scriptFiles": ["mtrsteamloco:eyecandies/barsa/main3.js"],
         "shape": "0, 0, 7, 16, 26, 9",

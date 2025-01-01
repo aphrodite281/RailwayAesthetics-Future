@@ -307,7 +307,7 @@ TextManager.setComp = (g, value) => {
 };
 
 TextManager.Clip.layout = layout = (g, x, y, w, h) => {
-    return;
+    // return;
     const setComp = TextManager.setComp;
     g = g.create();
     setComp(g, 0.1);
@@ -321,7 +321,7 @@ TextManager.Clip.layout = layout = (g, x, y, w, h) => {
 }
 
 TextManager.Buffered.layout = layout = (g, w, h) => {
-    return;
+    // return;
     const setComp = TextManager.setComp;
     g = g.create();
     setComp(g, 0.1);

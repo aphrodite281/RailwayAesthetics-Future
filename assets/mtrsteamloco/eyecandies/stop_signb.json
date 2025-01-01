@@ -1,6 +1,5 @@
 {
     "stop_signb": {
-        "mod_version": "0.5.4",
         "name": "站牌 B 自定义文本",
         "scriptFiles": ["mtrsteamloco:eyecandies/stop_signb/main.js"]
     }

@@ -1,7 +1,6 @@
 {
     "ssaa": {
-        "scriptFiles": ["mtrsteamloco:eyecandies/scrolls_screena/main.js"],
-        "mod_version": "0.5.4",
+        "scriptFiles": ["mtrsteamloco:eyecandies/scrolls_screena/scrolls_screena_main.js"],
         "name": "滚动屏幕 A"
     }
 }

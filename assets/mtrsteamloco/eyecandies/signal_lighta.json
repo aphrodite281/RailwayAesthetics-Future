@@ -1,20 +1,16 @@
 {
     "signal_lighta_3l": {
-        "mod_version": "0.5.4",
         "name": "信号灯 A 3灯",
         "scriptFiles": ["mtrsteamloco:eyecandies/signal_lighta/main_3.js"],
         "shape": "4, 0, 4, 12, 16, 12",
         "noCollision": false,
-        "noMove": false,
         "lightLevel": 7
     },
     "signal_lighta_2l": {
-        "mod_version": "0.5.4",
         "name": "信号灯 A 2灯",
         "scriptFiles": ["mtrsteamloco:eyecandies/signal_lighta/main_2.js"],
         "shape": "4, 0, 4, 12, 12, 12",
         "noCollision": false,
-        "noMove": false,
         "lightLevel": 7
     }
 }
