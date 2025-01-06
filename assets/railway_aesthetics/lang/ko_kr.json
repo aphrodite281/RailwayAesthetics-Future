@@ -1,0 +1,18 @@
+{
+    "obj.raf.test": "테스트",
+    "obj.raf.stop_sign_a": "정류장 A",
+    "obj.raf.stop_sign_b": "정류장 B",
+    "obj.raf.stop_sign_c": "정류장 C",
+    "obj.raf.barsa1": "철제 난간 A - 중부",
+    "obj.raf.barsa2": "철제 난간 A - 오른쪽 끝",
+    "obj.raf.barsa3": "철제 난간 A - 왼쪽 끝",
+    "obj.raf.barsa4": "철제 난간 A - 단일",
+    "obj.raf.pida": "승객 정보 디스플레이 A",
+    "obj.raf.psda1": "스크린도어 A - 중앙",
+    "obj.raf.psda2l": "스크린도어 A-끝(왼쪽)",
+    "obj.raf.psda2r": "스크린도어 A - 끝 (오른쪽)",
+    "obj.raf.psda3": "스크린도어 A-끝(양면)",
+    "obj.raf.ssaa": "스크롤 스크린 A",
+    "obj.raf.signal_lighta_3l": "신호등 A 3등",
+    "obj.raf.signal_lighta_2l": "신호등 A 2등"
+}

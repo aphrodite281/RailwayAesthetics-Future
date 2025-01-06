@@ -1,0 +1,18 @@
+{
+    "obj.raf.test": "Испытания",
+    "obj.raf.stop_sign_a": "Станция А",
+    "obj.raf.stop_sign_b": "Станция Б",
+    "obj.raf.stop_sign_c": "Станция C",
+    "obj.raf.barsa1": "Железные перила А - середина",
+    "obj.raf.barsa2": "Железные перила А - правый конец",
+    "obj.raf.barsa3": "Железные перила А - левый конец",
+    "obj.raf.barsa4": "Железные перила А - отдельные",
+    "obj.raf.pida": "Дисплей информации о пассажирах А",
+    "obj.raf.psda1": "Защитные двери A - Central",
+    "obj.raf.psda2l": "Защитная дверь A - торец (слева)",
+    "obj.raf.psda2r": "Защитная дверь A - торец (справа)",
+    "obj.raf.psda3": "Защитная дверь A - торцевая часть (с обеих сторон)",
+    "obj.raf.ssaa": "Прокрутить экран A",
+    "obj.raf.signal_lighta_3l": "Светильник А 3",
+    "obj.raf.signal_lighta_2l": "Светильник А 2"
+}

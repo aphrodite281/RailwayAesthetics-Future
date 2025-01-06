@@ -1,0 +1,18 @@
+{
+    "obj.raf.test": "Test",
+    "obj.raf.stop_sign_a": "Station a",
+    "obj.raf.stop_sign_b": "Station B",
+    "obj.raf.stop_sign_c": "Station C",
+    "obj.raf.barsa1": "Rail de fer a - Central",
+    "obj.raf.barsa2": "Rail en fer a - extrémité droite",
+    "obj.raf.barsa3": "Rail en fer a - extrémité gauche",
+    "obj.raf.barsa4": "Rail en fer a - individuel",
+    "obj.raf.pida": "Affichage des informations passagers a",
+    "obj.raf.psda1": "Porte blindée a - centrale",
+    "obj.raf.psda2l": "Porte blindée a - extrémité (gauche)",
+    "obj.raf.psda2r": "Porte blindée a - extrémité (droite)",
+    "obj.raf.psda3": "Porte blindée a - extrémités (des deux côtés)",
+    "obj.raf.ssaa": "Screen de défilement a",
+    "obj.raf.signal_lighta_3l": "Lampe de signalisation a 3 lampes",
+    "obj.raf.signal_lighta_2l": "Lampe de signalisation a 2 lampes"
+}

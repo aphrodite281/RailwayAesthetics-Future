@@ -1,0 +1,18 @@
+{
+    "obj.raf.test": "prova",
+    "obj.raf.stop_sign_a": "Segno di stazione A",
+    "obj.raf.stop_sign_b": "Segno della stazione B",
+    "obj.raf.stop_sign_c": "Segnale C della stazione",
+    "obj.raf.barsa1": "Ringhiera di ferro A - Centrale",
+    "obj.raf.barsa2": "Ringhiera in ferro A - estremità destra",
+    "obj.raf.barsa3": "Ringhiera in ferro A - estremità sinistra",
+    "obj.raf.barsa4": "Ringhiera in ferro A - singola",
+    "obj.raf.pida": "Schermo di visualizzazione delle informazioni sui passeggeri A",
+    "obj.raf.psda1": "Porta parapetti della piattaforma A - Centrale",
+    "obj.raf.psda2l": "Porta schermo A-end (lato sinistro)",
+    "obj.raf.psda2r": "Porta schermo A-end (lato destro)",
+    "obj.raf.psda3": "Porta schermata A-end (entrambi i lati)",
+    "obj.raf.ssaa": "Schermo rotante A",
+    "obj.raf.signal_lighta_3l": "Luce di segnalazione A 3 luci",
+    "obj.raf.signal_lighta_2l": "Luce di segnalazione A 2 luci"
+}

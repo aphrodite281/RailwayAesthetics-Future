@@ -1,16 +1,16 @@
 {
     "signal_lighta_3l": {
-        "name": "信号灯 A 3灯",
+        "name": "obj.raf.signal_lighta_3l",
         "scriptFiles": ["mtrsteamloco:eyecandies/signal_lighta/main_3.js"],
         "shape": "4, 0, 4, 12, 16, 12",
-        "noCollision": false,
+        "hasCollision": true,
         "lightLevel": 7
     },
     "signal_lighta_2l": {
-        "name": "信号灯 A 2灯",
+        "name": "obj.raf.signal_lighta_2l",
         "scriptFiles": ["mtrsteamloco:eyecandies/signal_lighta/main_2.js"],
         "shape": "4, 0, 4, 12, 12, 12",
-        "noCollision": false,
+        "hasCollision": true,
         "lightLevel": 7
     }
 }

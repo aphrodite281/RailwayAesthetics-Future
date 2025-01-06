@@ -1,6 +1,6 @@
 {
     "stop_signc": {
-        "name": "站牌 C",
+        "name": "obj.raf.stop_sign_c",
         "scriptFiles": ["mtrsteamloco:eyecandies/stop_signc/main.js"]
     }
 }

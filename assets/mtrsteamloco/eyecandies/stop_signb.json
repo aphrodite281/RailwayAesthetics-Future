@@ -1,6 +1,6 @@
 {
     "stop_signb": {
-        "name": "站牌 B 自定义文本",
+        "name": "obj.raf.stop_sign_b",
         "scriptFiles": ["mtrsteamloco:eyecandies/stop_signb/main.js"]
     }
 }

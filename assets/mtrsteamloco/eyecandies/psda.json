@@ -1,20 +1,20 @@
 {
     "psda1": {
-        "name": "屏蔽门 A-中部",
+        "name": "obj.raf.psda1",
         "scriptFiles": ["mtrsteamloco:eyecandies/psda/main1.js"]
     },
     "psda2l": {
-        "name": "屏蔽门 A-端部(左侧)",
+        "name": "obj.raf.psda2l",
         "scriptFiles": ["mtrsteamloco:eyecandies/psda/main2l.js"],
         "lightLevel": 8
     },
     "psda2r": {
-        "name": "屏蔽门 A-端部(右侧)",
+        "name": "obj.raf.psda2r",
         "scriptFiles": ["mtrsteamloco:eyecandies/psda/main2r.js"],
         "lightLevel": 8
     },
     "psda3": {
-        "name": "屏蔽门 A-端部(两侧)",
+        "name": "obj.raf.psda3",
         "scriptFiles": ["mtrsteamloco:eyecandies/psda/main3.js"],
         "lightLevel": 8
     }

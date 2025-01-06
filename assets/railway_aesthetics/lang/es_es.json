@@ -1,0 +1,18 @@
+{
+    "obj.raf.test": "Prueba",
+    "obj.raf.stop_sign_a": "Señal de parada a",
+    "obj.raf.stop_sign_b": "Señal de parada B",
+    "obj.raf.stop_sign_c": "Señal de parada C",
+    "obj.raf.barsa1": "Barandilla de hierro a - Centro",
+    "obj.raf.barsa2": "Barandilla de hierro a - extremo derecho",
+    "obj.raf.barsa3": "Barandilla de hierro a - extremo izquierdo",
+    "obj.raf.barsa4": "Barandilla de hierro a - individual",
+    "obj.raf.pida": "Pantalla de información de pasajeros a",
+    "obj.raf.psda1": "Puerta blindada - Centro",
+    "obj.raf.psda2l": "Puerta blindada - extremo a (izquierda)",
+    "obj.raf.psda2r": "Puerta blindada - extremo a (derecha)",
+    "obj.raf.psda3": "Puerta blindada - extremo (ambos lados)",
+    "obj.raf.ssaa": "Pantalla de desplazamiento a",
+    "obj.raf.signal_lighta_3l": "Semáforo a 3 luces",
+    "obj.raf.signal_lighta_2l": "Semáforo a 2 luces"
+}

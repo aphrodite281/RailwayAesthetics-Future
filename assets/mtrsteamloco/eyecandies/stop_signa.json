@@ -1,6 +1,6 @@
 {
     "stop_signa": {
-        "name": "站牌 A 跟随站台名称",
+        "name": "obj.raf.stop_sign_a",
         "scriptFiles": ["mtrsteamloco:eyecandies/stop_signa/main.js"]
     }
 }

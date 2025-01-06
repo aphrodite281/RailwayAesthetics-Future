@@ -1,4 +1,5 @@
 importPackage(java.nio);
+importPackage(java.util);
 
 let model = ModelManager.loadRawModel(Resources.manager(), Resources.idr("face.obj"), null);// 法线 -z
 model = ModelManager.uploadVertArrays(model);
@@ -7,7 +8,14 @@ function create(ctx, state, entity) {
     state.num = 0;
 }
 
-function beClicked(ctx, state, entity, player) {// player: WapperedEntity 包装了 Entity(Player) 为js提供一些基本的方法和属性
+let t = ComponentUtil.translatable;
+let g = ComponentUtil.getString;
+
+function render(ctx, state, entity) {
+    ctx.setDebugInfo(g(t("text.raf.qssnn")), ClientConfig.get("qssnn"));
+}
+
+function beClicked1(ctx, state, entity, player) {// player: WapperedEntity 包装了 Entity(Player) 为js提供一些基本的方法和属性
     let p = player.getPosition();
     p.add(0, 1.5, 0);// 假定头在脚底往上1.5m
     ctx.setDebugInfo("Clicked on ", "shift: " + player.isShiftKeyDown(), "look angle: " + player.getLookAngle(), "from: " + p,"time: " + Date.now(), p);
@@ -49,3 +57,9 @@ function beClicked(ctx, state, entity, player) {// player: WapperedEntity 包装
     // 即 function -> lambda表达式(java) -> DrawCall对象
     state.num++;
 }
+
+ClientConfig.register("qssnn", t("text.raf.qssnn"), true, str => str, str => {
+    let stri = str + "";
+    if (stri == "true" || stri == "false") return Optional.empty();
+    else return Optional.of(t("gui.mtrsteamloco.error.invalid_value"));
+}, str => {});

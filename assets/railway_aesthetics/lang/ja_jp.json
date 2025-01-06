@@ -1,0 +1,18 @@
+{
+    "obj.raf.test": "テスト",
+    "obj.raf.stop_sign_a": "スタンドA",
+    "obj.raf.stop_sign_b": "スタンドB",
+    "obj.raf.stop_sign_c": "立札C",
+    "obj.raf.barsa1": "鉄柵A-中部",
+    "obj.raf.barsa2": "鉄柵A-右端",
+    "obj.raf.barsa3": "鉄柵A-左端",
+    "obj.raf.barsa4": "鉄手すりA-単一",
+    "obj.raf.pida": "乗客情報ディスプレイA",
+    "obj.raf.psda1": "遮蔽ドアA-中央部",
+    "obj.raf.psda2l": "シールドドアA−端部（左側）",
+    "obj.raf.psda2r": "シールドドアA−端部（右側）",
+    "obj.raf.psda3": "シールドドアA−端部（両側）",
+    "obj.raf.ssaa": "スクロール画面A",
+    "obj.raf.signal_lighta_3l": "信号A 3ランプ",
+    "obj.raf.signal_lighta_2l": "信号A 2ランプ"
+}

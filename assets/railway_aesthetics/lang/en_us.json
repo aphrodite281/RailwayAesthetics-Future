@@ -1,0 +1,18 @@
+{
+    "obj.raf.test": "test",
+    "obj.raf.stop_sign_a": "Station Sign A",
+    "obj.raf.stop_sign_b": "Station Sign B",
+    "obj.raf.stop_sign_c": "Station Sign C",
+    "obj.raf.barsa1": "Iron railing A - Central",
+    "obj.raf.barsa2": "Iron railing A - Right end",
+    "obj.raf.barsa3": "Iron railing A - Left end",
+    "obj.raf.barsa4": "Iron railing A - single",
+    "obj.raf.pida": "Passenger Information Display Screen A",
+    "obj.raf.psda1": "Platform screen door A - Central",
+    "obj.raf.psda2l": "Screen door A-end (left side)",
+    "obj.raf.psda2r": "Screen door A-end (right side)",
+    "obj.raf.psda3": "Screen door A-end (both sides)",
+    "obj.raf.ssaa": "Rolling Screen A",
+    "obj.raf.signal_lighta_3l": "Signal light A 3 lights",
+    "obj.raf.signal_lighta_2l": "Signal light A 2 lights"
+}

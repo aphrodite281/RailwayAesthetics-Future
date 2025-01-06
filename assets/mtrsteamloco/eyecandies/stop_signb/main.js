@@ -101,6 +101,7 @@ function neww(ctx, str, scale, color){
         texture: size,
         model: {
             size: [size[0]/100 * scale, size[1]/100 * scale],
+            uvSize: [1, 1],
             renderType: "exteriortranslucent"
         }
     });

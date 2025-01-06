@@ -1,6 +1,6 @@
 {
     "ssaa": {
-        "scriptFiles": ["mtrsteamloco:eyecandies/scrolls_screena/scrolls_screena_main.js"],
-        "name": "滚动屏幕 A"
+        "name": "obj.raf.ssaa",
+        "scriptFiles": ["mtrsteamloco:eyecandies/scrolls_screena/scrolls_screena_main.js"]
     }
 }

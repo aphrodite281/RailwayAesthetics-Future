@@ -1,0 +1,18 @@
+{
+    "obj.raf.test": "Prüfung",
+    "obj.raf.stop_sign_a": "Bahnhofszeichen A",
+    "obj.raf.stop_sign_b": "Bahnhofsschild B",
+    "obj.raf.stop_sign_c": "Bahnhofszeichen C",
+    "obj.raf.barsa1": "Eisengeländer A ­Zentral",
+    "obj.raf.barsa2": "Eisengeländer A bis Rechtes Ende",
+    "obj.raf.barsa3": "Eisengeländer A–Linkes Ende",
+    "obj.raf.barsa4": "Eisengeländer A",
+    "obj.raf.pida": "Passagierinformationsanzeige A",
+    "obj.raf.psda1": "Bahnsteigtür A bis Zentral",
+    "obj.raf.psda2l": "Schirmtür A-Ende (linke Seite)",
+    "obj.raf.psda2r": "Schiebetür A-Ende (rechte Seite)",
+    "obj.raf.psda3": "Siebtür A-Ende (beidseitig)",
+    "obj.raf.ssaa": "Rollsieb A",
+    "obj.raf.signal_lighta_3l": "Signalleuchte A 3",
+    "obj.raf.signal_lighta_2l": "Signalleuchte A 2"
+}

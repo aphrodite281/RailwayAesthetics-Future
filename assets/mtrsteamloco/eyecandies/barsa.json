@@ -1,30 +1,30 @@
 {
     "barsa1": {
-        "name": "铁栏杆 A-中部",
+        "name": "obj.raf.barsa1",
         "scriptFiles": ["mtrsteamloco:eyecandies/barsa/main0.js"],
         "shape": "0, 0, 7, 16, 26, 9",
         "noMove": false,
-        "noCollision": false
+        "hasCollision": true
     },
     "barsa2": {
-        "name": "铁栏杆 A-右端",
+        "name": "obj.raf.barsa2",
         "scriptFiles": ["mtrsteamloco:eyecandies/barsa/main1.js"],
         "shape": "0, 0, 7, 16, 26, 9",
         "noMove": false,
-        "noCollision": false
+        "hasCollision": true
     },
     "barsa3": {
-        "name": "铁栏杆 A-左端",
+        "name": "obj.raf.barsa3",
         "scriptFiles": ["mtrsteamloco:eyecandies/barsa/main2.js"],
         "shape": "0, 0, 7, 16, 26, 9",
         "noMove": false,
-        "noCollision": false
+        "hasCollision": true
     },
     "barsa4": {
-        "name": "铁栏杆 A-单个",
+        "name": "obj.raf.barsa4",
         "scriptFiles": ["mtrsteamloco:eyecandies/barsa/main3.js"],
         "shape": "0, 0, 7, 16, 26, 9",
         "noMove": false,
-        "noCollision": false
+        "hasCollision": true
     }
 }

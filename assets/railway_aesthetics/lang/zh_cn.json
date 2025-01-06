@@ -1,0 +1,18 @@
+{
+    "obj.raf.test": "测试",
+    "obj.raf.stop_sign_a": "站牌A",
+    "obj.raf.stop_sign_b": "站牌B",
+    "obj.raf.stop_sign_c": "站牌C",
+    "obj.raf.barsa1": "铁栏杆 A-中部",
+    "obj.raf.barsa2": "铁栏杆 A-右端",
+    "obj.raf.barsa3": "铁栏杆 A-左端",
+    "obj.raf.barsa4": "铁栏杆 A-单个",
+    "obj.raf.pida": "乘客资讯显示屏 A",
+    "obj.raf.psda1": "屏蔽门 A-中部",
+    "obj.raf.psda2l": "屏蔽门 A-端部(左侧)",
+    "obj.raf.psda2r": "屏蔽门 A-端部(右侧)",
+    "obj.raf.psda3": "屏蔽门 A-端部(两侧)",
+    "obj.raf.ssaa": "滚动屏幕 A",
+    "obj.raf.signal_lighta_3l": "信号灯 A 3灯",
+    "obj.raf.signal_lighta_2l": "信号灯 A 2灯"
+}

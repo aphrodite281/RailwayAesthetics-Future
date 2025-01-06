@@ -1,6 +1,6 @@
 {
     "pida": {
-        "name": "乘客资讯显示屏 A",
+        "name": "obj.raf.pida",
         "scriptFiles": ["mtrsteamloco:eyecandies/pida/main.js"],
         "lightLevel": 7
     }
