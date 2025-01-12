@@ -108,7 +108,6 @@ function Face(data) {
         }else{
             this.model.replaceAllTexture(this.path);
         }
-
     
         let temp = matrices == undefined ? new Matrices() : matrices;
         temp.pushPose();

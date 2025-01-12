@@ -14,5 +14,15 @@
     "obj.raf.psda3": "스크린도어 A-끝(양면)",
     "obj.raf.ssaa": "스크롤 스크린 A",
     "obj.raf.signal_lighta_3l": "신호등 A 3등",
-    "obj.raf.signal_lighta_2l": "신호등 A 2등"
+    "obj.raf.signal_lighta_2l": "신호등 A 2등",
+    "error.raf.invalid_value": "잘못된 값",
+    "error.raf.invalid_color": "잘못된 색상",
+    "error.raf.invalid_scale": "잘못된 배율 조정",
+    "error.raf.invalid_text": "잘못된 문자",
+    "error.raf.invalid_font": "잘못된 글꼴",
+    "name.raf.color": "색상",
+    "name.raf.scale": "줌",
+    "name.raf.text": "문자",
+    "name.raf.font": "글꼴",
+    "tip.raf.change_font": "변경 사항을 적용하기 위해 리소스 패키지 다시 로드"
 }

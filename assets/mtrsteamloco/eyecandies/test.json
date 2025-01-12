@@ -3,7 +3,6 @@
         "name": "obj.raf.test",
         "scriptFiles": ["mtrsteamloco:eyecandies/test/ticket_barrier.js"],
         "isTicketBarrier": false,
-        "isEntrance": false,
-        "shape": "0, 0, 0, 16, 24, 0"
+        "isEntrance": false
     }
 }

@@ -14,5 +14,15 @@
     "obj.raf.psda3": "Защитная дверь A - торцевая часть (с обеих сторон)",
     "obj.raf.ssaa": "Прокрутить экран A",
     "obj.raf.signal_lighta_3l": "Светильник А 3",
-    "obj.raf.signal_lighta_2l": "Светильник А 2"
+    "obj.raf.signal_lighta_2l": "Светильник А 2",
+    "error.raf.invalid_value": "Неверное значение",
+    "error.raf.invalid_color": "Неверный цвет",
+    "error.raf.invalid_scale": "Неверный масштаб",
+    "error.raf.invalid_text": "Неверный текст",
+    "error.raf.invalid_font": "Неверный шрифт",
+    "name.raf.color": "Цвет",
+    "name.raf.scale": "Масштаб",
+    "name.raf.text": "Текст",
+    "name.raf.font": "Шрифт",
+    "tip.raf.change_font": "Перезагрузить пакет для внесения изменений"
 }

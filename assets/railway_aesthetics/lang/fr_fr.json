@@ -14,5 +14,15 @@
     "obj.raf.psda3": "Porte blindée a - extrémités (des deux côtés)",
     "obj.raf.ssaa": "Screen de défilement a",
     "obj.raf.signal_lighta_3l": "Lampe de signalisation a 3 lampes",
-    "obj.raf.signal_lighta_2l": "Lampe de signalisation a 2 lampes"
+    "obj.raf.signal_lighta_2l": "Lampe de signalisation a 2 lampes",
+    "error.raf.invalid_value": "Valeur invalide",
+    "error.raf.invalid_color": "Couleur invalide",
+    "error.raf.invalid_scale": "Zoom invalide",
+    "error.raf.invalid_text": "Mots invalides",
+    "error.raf.invalid_font": "Polices invalides",
+    "name.raf.color": "Couleur",
+    "name.raf.scale": "Zoom",
+    "name.raf.text": "Le texte",
+    "name.raf.font": "Les polices",
+    "tip.raf.change_font": "Surcharge du package de ressources pour appliquer les modifications"
 }

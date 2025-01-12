@@ -14,5 +14,15 @@
     "obj.raf.psda3": "Puerta blindada - extremo (ambos lados)",
     "obj.raf.ssaa": "Pantalla de desplazamiento a",
     "obj.raf.signal_lighta_3l": "Semáforo a 3 luces",
-    "obj.raf.signal_lighta_2l": "Semáforo a 2 luces"
+    "obj.raf.signal_lighta_2l": "Semáforo a 2 luces",
+    "error.raf.invalid_value": "Valor no válido",
+    "error.raf.invalid_color": "Color no válido",
+    "error.raf.invalid_scale": "Zoom no válido",
+    "error.raf.invalid_text": "Texto inválido",
+    "error.raf.invalid_font": "Fuente no válida",
+    "name.raf.color": "Color",
+    "name.raf.scale": "Zoom",
+    "name.raf.text": "Texto",
+    "name.raf.font": "Fuente",
+    "tip.raf.change_font": "Sobrecargar el paquete de recursos para aplicar cambios"
 }

@@ -14,5 +14,15 @@
     "obj.raf.psda3": "Porta schermata A-end (entrambi i lati)",
     "obj.raf.ssaa": "Schermo rotante A",
     "obj.raf.signal_lighta_3l": "Luce di segnalazione A 3 luci",
-    "obj.raf.signal_lighta_2l": "Luce di segnalazione A 2 luci"
+    "obj.raf.signal_lighta_2l": "Luce di segnalazione A 2 luci",
+    "error.raf.invalid_value": "Valore non valido",
+    "error.raf.invalid_color": "Colore non valido",
+    "error.raf.invalid_scale": "Scalamento non valido",
+    "error.raf.invalid_text": "Testo non valido",
+    "error.raf.invalid_font": "Carattere non valido",
+    "name.raf.color": "colore",
+    "name.raf.scale": "zoom",
+    "name.raf.text": "parole scritte",
+    "name.raf.font": "carattere tipografico",
+    "tip.raf.change_font": "Ricarica il pacchetto risorse per applicare le modifiche"
 }

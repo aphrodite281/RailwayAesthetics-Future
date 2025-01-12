@@ -14,5 +14,15 @@
     "obj.raf.psda3": "Porta de ecrã A (ambos os lados)",
     "obj.raf.ssaa": "Ecrã Rolante A",
     "obj.raf.signal_lighta_3l": "Sinal luminoso A 3 luzes",
-    "obj.raf.signal_lighta_2l": "Sinal luminoso A 2 luzes"
+    "obj.raf.signal_lighta_2l": "Sinal luminoso A 2 luzes",
+    "error.raf.invalid_value": "Valor inválido",
+    "error.raf.invalid_color": "Cor inválida",
+    "error.raf.invalid_scale": "Escala inválida",
+    "error.raf.invalid_text": "Texto inválido",
+    "error.raf.invalid_font": "Tipo de letra inválido",
+    "name.raf.color": "cor",
+    "name.raf.scale": "zoom",
+    "name.raf.text": "palavras escritas",
+    "name.raf.font": "tipo de letra",
+    "tip.raf.change_font": "Recarregar o pacote de recursos para aplicar as alterações"
 }

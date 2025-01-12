@@ -14,5 +14,15 @@
     "obj.raf.psda3": "屏蔽门 A-端部(两侧)",
     "obj.raf.ssaa": "滚动屏幕 A",
     "obj.raf.signal_lighta_3l": "信号灯 A 3灯",
-    "obj.raf.signal_lighta_2l": "信号灯 A 2灯"
+    "obj.raf.signal_lighta_2l": "信号灯 A 2灯",
+    "error.raf.invalid_value": "无效的值",
+    "error.raf.invalid_color": "无效的颜色",
+    "error.raf.invalid_scale": "无效的缩放",
+    "error.raf.invalid_text": "无效的文字",
+    "error.raf.invalid_font": "无效的字体",
+    "name.raf.color": "颜色",
+    "name.raf.scale": "缩放",
+    "name.raf.text": "文字",
+    "name.raf.font": "字体",
+    "tip.raf.change_font": "重载资源包以应用更改"
 }

@@ -14,5 +14,15 @@
     "obj.raf.psda3": "Screen door A-end (both sides)",
     "obj.raf.ssaa": "Rolling Screen A",
     "obj.raf.signal_lighta_3l": "Signal light A 3 lights",
-    "obj.raf.signal_lighta_2l": "Signal light A 2 lights"
+    "obj.raf.signal_lighta_2l": "Signal light A 2 lights",
+    "error.raf.invalid_value": "Invalid value",
+    "error.raf.invalid_color": "Invalid color",
+    "error.raf.invalid_scale": "Invalid scaling",
+    "error.raf.invalid_text": "Invalid text",
+    "error.raf.invalid_font": "Invalid font",
+    "name.raf.color": "colour",
+    "name.raf.scale": "zoom",
+    "name.raf.text": "written words",
+    "name.raf.font": "typeface",
+    "tip.raf.change_font": "Reload resource package to apply changes"
 }

@@ -14,5 +14,15 @@
     "obj.raf.psda3": "シールドドアA−端部（両側）",
     "obj.raf.ssaa": "スクロール画面A",
     "obj.raf.signal_lighta_3l": "信号A 3ランプ",
-    "obj.raf.signal_lighta_2l": "信号A 2ランプ"
+    "obj.raf.signal_lighta_2l": "信号A 2ランプ",
+    "error.raf.invalid_value": "無効な値",
+    "error.raf.invalid_color": "無効な色",
+    "error.raf.invalid_scale": "無効なスケール",
+    "error.raf.invalid_text": "無効なテキスト",
+    "error.raf.invalid_font": "無効なフォント",
+    "name.raf.color": "カラー",
+    "name.raf.scale": "ズーム",
+    "name.raf.text": "テキスト",
+    "name.raf.font": "フォント",
+    "tip.raf.change_font": "リソースバンドルを再ロードして変更を適用"
 }

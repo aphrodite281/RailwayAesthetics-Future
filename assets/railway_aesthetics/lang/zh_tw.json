@@ -14,5 +14,15 @@
     "obj.raf.psda3": "遮罩門A-端部（兩側）",
     "obj.raf.ssaa": "滾動荧幕A",
     "obj.raf.signal_lighta_3l": "信號燈A 3燈",
-    "obj.raf.signal_lighta_2l": "信號燈A 2燈"
+    "obj.raf.signal_lighta_2l": "信號燈A 2燈",
+    "error.raf.invalid_value": "無效的值",
+    "error.raf.invalid_color": "無效的顏色",
+    "error.raf.invalid_scale": "無效的縮放",
+    "error.raf.invalid_text": "無效的文字",
+    "error.raf.invalid_font": "無效的字體",
+    "name.raf.color": "顏色",
+    "name.raf.scale": "縮放",
+    "name.raf.text": "文字",
+    "name.raf.font": "字體",
+    "tip.raf.change_font": "重載資源包以應用更改"
 }
