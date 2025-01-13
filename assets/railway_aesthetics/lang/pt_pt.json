@@ -24,5 +24,5 @@
     "name.raf.scale": "zoom",
     "name.raf.text": "palavras escritas",
     "name.raf.font": "tipo de letra",
-    "tip.raf.change_font": "Recarregar o pacote de recursos para aplicar as alterações"
+    "tip.raf.reload_resourcepack": "Recarregar o pacote de recursos para aplicar as alterações"
 }

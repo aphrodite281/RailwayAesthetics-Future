@@ -24,5 +24,5 @@
     "name.raf.scale": "Масштаб",
     "name.raf.text": "Текст",
     "name.raf.font": "Шрифт",
-    "tip.raf.change_font": "Перезагрузить пакет для внесения изменений"
+    "tip.raf.reload_resourcepack": "Перезагрузить пакет для внесения изменений"
 }

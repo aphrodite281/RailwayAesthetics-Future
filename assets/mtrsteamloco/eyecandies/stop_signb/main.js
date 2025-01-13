@@ -13,7 +13,7 @@ const faceKey = "face";
 let defaultFont = "aphrodite:library/font/lgc.ttf";
 let nowFont = ClientConfig.get(fontKey) || defaultFont;
 
-const res0 = new ConfigResponder(fontKey, ComponentUtil.translatable("name.raf.font"), defaultFont, str => str, ErrorSupplier.Font, str => {nowFont = str}, builder => builder.setTooltip(ComponentUtil.translatable("tip.raf.change_font")));
+const res0 = new ConfigResponder(fontKey, ComponentUtil.translatable("name.raf.font"), defaultFont, str => str, ErrorSupplier.Font, str => {nowFont = str}, (str, builder) => builder.setTooltip(ComponentUtil.translatable("tip.raf.reload_resourcepack")));
 
 ClientConfig.register(res0);
 
@@ -27,9 +27,9 @@ g0.setFont(font);
 
 const cp = (str) => {return TextU.CP(str)};
 
-const res1 = new ConfigResponder(colorKey, ComponentUtil.translatable("name.raf.color"), "0", str => str, ErrorSupplier.Int, str => {}, builder => {});
-const res2 = new ConfigResponder(scaleKey, ComponentUtil.translatable("name.raf.scale"), "1", str => str, ErrorSupplier.Float, str => {}, builder => {});
-const res3 = new ConfigResponder(textKey, ComponentUtil.translatable("name.raf.text"), "default", str => str, () => java.util.Optional.empty(), str => {}, builder => {});
+const res1 = new ConfigResponder(colorKey, ComponentUtil.translatable("name.raf.color"), "0", str => str, ErrorSupplier.Int, str => {}, (str, builder) => {});
+const res2 = new ConfigResponder(scaleKey, ComponentUtil.translatable("name.raf.scale"), "1", str => str, ErrorSupplier.Float, str => {}, (str, builder) => {});
+const res3 = new ConfigResponder(textKey, ComponentUtil.translatable("name.raf.text"), "default", str => str, () => java.util.Optional.empty(), str => {}, (str, builder) => {});
 
 function create(ctx, state, entity) {
     let configMap = entity.getCustomConfigs();

@@ -24,5 +24,5 @@
     "name.raf.scale": "缩放",
     "name.raf.text": "文字",
     "name.raf.font": "字体",
-    "tip.raf.change_font": "重载资源包以应用更改"
+    "tip.raf.reload_resourcepack": "重载资源包以应用更改"
 }

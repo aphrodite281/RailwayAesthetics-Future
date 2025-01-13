@@ -2,7 +2,7 @@
     "obj.raf.test": "Prüfung",
     "obj.raf.stop_sign_a": "Bahnhofszeichen A",
     "obj.raf.stop_sign_b": "Bahnhofsschild B",
-    "obj.raf.stop_sign_c": "Bahnhofszeichen C",
+    "obj.raf.stop_sign_c": "站牌C",
     "obj.raf.barsa1": "Eisengeländer A­Zentral",
     "obj.raf.barsa2": "Eisengeländer A bis Rechtes Ende",
     "obj.raf.barsa3": "Eisengeländer A–Linkes Ende",
@@ -24,5 +24,5 @@
     "name.raf.scale": "Zoom",
     "name.raf.text": "geschriebene Wörter",
     "name.raf.font": "Schriftart",
-    "tip.raf.change_font": "Ressourcenpaket neu laden, um Änderungen anzuwenden"
+    "tip.raf.reload_resourcepack": "Ressourcenpaket neu laden, um Änderungen anzuwenden"
 }
