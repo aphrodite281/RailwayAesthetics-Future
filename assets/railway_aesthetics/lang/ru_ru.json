@@ -23,6 +23,6 @@
     "name.raf.color": "Цвет",
     "name.raf.scale": "Масштаб",
     "name.raf.text": "Текст",
-    "name.raf.font": "Шрифт",
+    "name.raf.stop_sign_font": "Шрифт B",
     "tip.raf.reload_resourcepack": "Перезагрузить пакет для внесения изменений"
 }

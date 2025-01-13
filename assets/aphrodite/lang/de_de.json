@@ -1,0 +1,6 @@
+{
+    "error.aph.invalid_value": "Ungültiger Wert",
+    "error.aph.only_be": "Kann nur%sein",
+    "name.aph.text_manager_mode": "Textverwaltungsmodus",
+    "tip.aph.text_manager_mode": "0: Scrollen, 1: Capture"
+}

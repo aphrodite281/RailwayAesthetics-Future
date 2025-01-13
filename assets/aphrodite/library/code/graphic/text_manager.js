@@ -10,6 +10,7 @@ importPackage (java.awt.geom);
 importPackage (java.awt.font);
 
 include(Resources.id("aphrodite:library/code/util/value.js"));
+include(Resources.id("aphrodite:library/code/util/error_supplier.js"));
 
 /**
  * 文本经理
@@ -47,29 +48,28 @@ const TextManager = {
             return fm.getHeight();
         }
 
-
-
-        const setComp = TextManager.setComp;
-
         const layout = TextManager.Clip.layout;
 
         function Text(str, font, style, color, x, y, w, h, mode, start) {
+            let getH;
             switch (mode) {
-                case 0: var getH = (font) => getHeight(font); break;
-                case 1: var getH = (font) => getAscent(font); break;
+                case 0: getH = font => getHeight(font); break;
+                default: getH = font => getAscent(font); break;
             }
             if (!(color instanceof Color)) color = new Color(color);
             let h0 = getH(font.deriveFont(style,1000));
             let scale = 1000 / h0;
             font = font.deriveFont(style, h * scale);
-            let width = getW(str, font);
-            let scroll = false;
-            if (width > w) scroll = true;
             h = getH(font);
+            let scroll = false;
+            str = TextManager.processString(str, font, getW);
+            let width = getW(str, font);
+            if (width > w) scroll = true;
             switch (mode) {
-                case 0: var d = getDescent(font); break;
-                case 1: var d = getDescent(font) / 2; break;
+                case 0: d = getDescent(font); break;
+                default: d = getDescent(font) / 2; break;
             }
+            let d;
             const descent = d;
             if (!scroll) {
                 this.draw = (g, xi, yi, time) => {
@@ -93,6 +93,7 @@ const TextManager = {
                     g.setClip(null);
                 }
             }
+
 
             this.dispose = () => {};
         }
@@ -185,27 +186,26 @@ const TextManager = {
             return fm.getHeight();
         }
 
-
-        const setComp = TextManager.setComp;
-
         const layout = TextManager.Buffered.layout;
 
         function Text(str, font, style, color, x, y, w, h, mode, start) {
+            let getH;
             switch (mode) {
-                case 0: var getH = (font) => getHeight(font); break;
-                case 1: var getH = (font) => getAscent(font); break;
+                case 0: getH = (font) => getHeight(font); break;
+                default: getH = (font) => getAscent(font); break;
             }
             if (!(color instanceof Color)) color = new Color(color);
             let h0 = getH(font.deriveFont(style,1000));
             let scale = 1000 / h0;
             font = font.deriveFont(style, h * scale);
+            str = TextManager.processString(str, font, getW);
             let width = getW(str, font);
             let scroll = false;
-            if (width > w) scroll = true;
             h = getH(font);
+            let d;
             switch (mode) {
-                case 0: var d = getDescent(font); break;
-                case 1: var d = getDescent(font) / 2; break;
+                case 0: d = getDescent(font); break;
+                default: d = getDescent(font) / 2; break;
             }
             const descent = d;
             const y0 = h - descent;
@@ -333,3 +333,37 @@ TextManager.Buffered.layout = layout = (g, w, h) => {
     g.drawRect(0, 0, w, h);
     g.dispose();
 }
+
+TextManager.modeKey = "text_manager_mode";
+TextManager.defaultMode = "0";
+
+TextManager.getMode = () => {
+    return ClientConfig.get(TextManager.modeKey);
+}
+
+TextManager.processString = (str, font, getW) => {
+    switch (TextManager.getMode()) {
+        case "0": {
+            break;
+        }
+        case "1": {
+            let str1 = str + "···";
+            while (getW(str1, font) > w && str.length > 0) {
+                if (str.length > 3) {
+                    str = str.substring(0, str.length - 4) + str.substring(str.length - 3);
+                } else {
+                    str = str.substring(0, str.length - 1);
+                }
+            }
+            break;
+        }
+    }
+}
+
+TextManager.configResponder = new ConfigResponder(TextManager.modeKey, ComponentUtil.translatable("name.aph.text_manager_mode"), "0", str => str, ErrorSupplier.only(["0", "1"]), str => {}, (str, builder) => {
+    builder.setTooltip(ComponentUtil.translatable("tip.aph.text_manager_mode"))
+});
+
+//
+
+ClientConfig.register(TextManager.configResponder);

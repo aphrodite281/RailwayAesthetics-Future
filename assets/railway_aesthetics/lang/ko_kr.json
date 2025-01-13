@@ -23,6 +23,6 @@
     "name.raf.color": "색상",
     "name.raf.scale": "줌",
     "name.raf.text": "문자",
-    "name.raf.font": "글꼴",
+    "name.raf.stop_sign_font": "정류장 B 글꼴",
     "tip.raf.reload_resourcepack": "변경 사항을 적용하기 위해 리소스 패키지 다시 로드"
 }

@@ -23,6 +23,6 @@
     "name.raf.color": "cor",
     "name.raf.scale": "zoom",
     "name.raf.text": "palavras escritas",
-    "name.raf.font": "tipo de letra",
+    "name.raf.stop_sign_font": "Tipo de letra do sinal B da estação",
     "tip.raf.reload_resourcepack": "Recarregar o pacote de recursos para aplicar as alterações"
 }

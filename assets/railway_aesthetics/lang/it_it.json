@@ -23,6 +23,6 @@
     "name.raf.color": "colore",
     "name.raf.scale": "zoom",
     "name.raf.text": "parole scritte",
-    "name.raf.font": "carattere tipografico",
+    "name.raf.stop_sign_font": "Caratteri del segno di stazione B",
     "tip.raf.reload_resourcepack": "Ricarica il pacchetto risorse per applicare le modifiche"
 }

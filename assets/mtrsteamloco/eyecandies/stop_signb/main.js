@@ -3,22 +3,26 @@ include(Resources.id("aphrodite:library/code/util/text_u.js"));
 include(Resources.id("aphrodite:library/code/util/error_supplier.js"));
 include(Resources.id("aphrodite:library/code/base/color_int_base.js"));
 
-const fontKey = "font";
+const fontKey = "stop_sign_font";
 const colorKey = "color";
 const scaleKey = "scale";
 const textKey = "text";
 const faceKey = "face";
 
+const defaultFont = "aphrodite:library/font/lgc.ttf";
 
-let defaultFont = "aphrodite:library/font/lgc.ttf";
-let nowFont = ClientConfig.get(fontKey) || defaultFont;
-
-const res0 = new ConfigResponder(fontKey, ComponentUtil.translatable("name.raf.font"), defaultFont, str => str, ErrorSupplier.Font, str => {nowFont = str}, (str, builder) => builder.setTooltip(ComponentUtil.translatable("tip.raf.reload_resourcepack")));
-
+const res0 = new ConfigResponder(fontKey, ComponentUtil.translatable("name.raf.stop_sign_font"), defaultFont, str => str, ErrorSupplier.Font, str => {}, (str, builder) => builder.requireRestart());//setTooltip(ComponentUtil.translatable("tip.raf.reload_resourcepack")));
 ClientConfig.register(res0);
 
+const nowFont = ClientConfig.get(fontKey) + "";
+let fontz;
+if (nowFont.endsWith(".ttf") || nowFont.endsWith(".otf")) {
+    fontz = Resources.readFont(Resources.id(nowFont));
+} else {
+    fontz = Resources.getSystemFont(nowFont);
+}
 
-const font0 = Resources.readFont(Resources.id(ClientConfig.get(fontKey)));
+const font0 = fontz;
 const fontSize = 256;
 const font = font0.deriveFont(Font.PLAIN, fontSize);
 const gt = new GraphicsTexture(1, 1);
@@ -33,7 +37,6 @@ const res3 = new ConfigResponder(textKey, ComponentUtil.translatable("name.raf.t
 
 function create(ctx, state, entity) {
     let configMap = entity.getCustomConfigs();
-
     let oldConfig = configMap.toString();
 
     entity.registerCustomConfig(res1);
@@ -41,7 +44,6 @@ function create(ctx, state, entity) {
     entity.registerCustomConfig(res3);
 
     let newConfig = configMap.toString();
-
     if (oldConfig!= newConfig) {
         entity.sendUpdateC2S();
     }
@@ -50,7 +52,6 @@ function create(ctx, state, entity) {
     state.scale = parseFloat(configMap.get(scaleKey));
     state.text = configMap.get(textKey);
     //或者 state.text = entity.getCustomConfig(colorKey);
-
     state.face = neww(ctx, state.text, state.scale, state.color);
     state.created = true;
 }
@@ -63,10 +64,6 @@ function render(ctx, state, entity) {
     let scale = parseFloat(configMap.get(scaleKey));
     let color = parseInt(configMap.get(colorKey));
     let text = configMap.get(textKey);
-
-    // ctx.setDebugInfo("scale", scale);
-    // ctx.setDebugInfo("color", color);
-    // ctx.setDebugInfo("text", text);
 
     if (scale != state.scale || color != state.color || text != state.text) {
         state.scale = scale;

@@ -1,0 +1,6 @@
+{
+    "error.aph.invalid_value": "Valor inválido",
+    "error.aph.only_be": "Só pode ser%s",
+    "name.aph.text_manager_mode": "Modo de gestão de texto",
+    "tip.aph.text_manager_mode": "0: Rolar, 1: Capturar"
+}

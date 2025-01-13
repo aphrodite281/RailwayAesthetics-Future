@@ -1,0 +1,6 @@
+{
+    "error.aph.invalid_value": "Valore non valido",
+    "error.aph.only_be": "Può essere solo%s",
+    "name.aph.text_manager_mode": "Modalità di gestione del testo",
+    "tip.aph.text_manager_mode": "0: Scorrimento, 1: Cattura"
+}

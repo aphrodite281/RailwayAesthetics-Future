@@ -1,0 +1,6 @@
+{
+    "error.aph.invalid_value": "Valeur invalide",
+    "error.aph.only_be": "Ne peut être que%s",
+    "name.aph.text_manager_mode": "Mode de gestion de texte",
+    "tip.aph.text_manager_mode": "0: défilement, 1: capture"
+}

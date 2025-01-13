@@ -1,0 +1,6 @@
+{
+    "error.aph.invalid_value": "Неверное значение",
+    "error.aph.only_be": "Только%s",
+    "name.aph.text_manager_mode": "Режим управления текстом",
+    "tip.aph.text_manager_mode": "0: Прокрутка, 1: перехват"
+}
