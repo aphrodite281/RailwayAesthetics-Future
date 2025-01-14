@@ -55,7 +55,7 @@ function create(ctx, state, train) {
         let info = {
             ctx: ctx,
             cars: [i],
-            matrices: rightMatrices,
+            matrices: [new Matrices()],
             texture: textureSize,
             model: {
                 size: modelSize,
@@ -64,14 +64,20 @@ function create(ctx, state, train) {
             }
         }
         let rightFace = new Face(info);
-        info.matrices = leftMatrices;
         let leftFace = new Face(info);
     
         let rightThread = new LCDThread(rightFace, true, ctx, state, train, i + 1, first);
         first = false;
         let leftThread = new LCDThread(leftFace, false, ctx, state, train, i + 1);
 
-        tickList.push(() => {rightFace.tick(); leftFace.tick(); rightThread.reStart(), leftThread.reStart()});
+        for (let matrix of rightMatrices) {
+            ctx.drawCalls[i].put("lcd_right_face" + i + "-" + matrix, new ClusterDrawCall(rightFace.model, matrix));
+        }
+        for (let matrix of leftMatrices) {
+            ctx.drawCalls[i].put("lcd_left_face" + i + "-" + matrix, new ClusterDrawCall(leftFace.model, matrix));
+        }
+
+        tickList.push(() => {rightThread.reStart(), leftThread.reStart()});
         disposeList.push(() => {rightFace.close(); leftFace.close();});
         infoArray.push([rightFace, leftFace, rightThread, leftThread]);
     }
@@ -112,10 +118,10 @@ function getMatrices(isRight) {
     for (let position of doorZPositions) {
         matrices.pushPose();
         execute(position);
-        result.push(new Matrices(matrices.last()));
+        result.push(matrices.last());
         matrices.popPose();
     }
-    let matt = new Matrices();
+    let matt = new Matrix4f();
     matt.translate(0, 1.7, 0);
     if (isRight) matt.rotateY(Math.PI);
     result.push(matt)
@@ -149,7 +155,7 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
         let disposeList = [];
         try {
             print(uid + " Start");
-            ctx.setDebugInfo(uid + " Start", PlacementOrder.DOWNSIDE, Date.now().toString());
+            ctx.setDebugInfo(uid + " Start", PlacementOrder.LOWER, Date.now().toString());
 
             let tf = ttf;
             let font0 = fontA.deriveFont(Font.PLAIN, 45);
@@ -1066,7 +1072,7 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
                 ins = Math.min(ins, dy(30));
                 let wa = ins * (l - 1);
                 let x = xd - wa / 2;
-                let y0 = dy(28), h0 = dy(4);
+                let y0 = dy(32), h0 = dy(4);
                 let rx;
                 let newcm = () => new Canvas.Mobile(g, x, y0, h0 * 2 / 3, h0 * 2 / 3, 52, 52, 1, [0x00ff00, color11]);
                 let cm = newcm();
@@ -1327,7 +1333,7 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
 
             while (state.running && state.lastTime + 60000 > now()) {
                 if (tf) {
-                    ctx.setDebugInfo(uid + "fps", PlacementOrder.UPSIDE, uploadManager.getAnalyse());
+                    ctx.setDebugInfo(uid + "fps", PlacementOrder.UPPER, uploadManager.getAnalyse());
                 } else {
                     Thread.sleep(1000);
                 }

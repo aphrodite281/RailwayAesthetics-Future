@@ -20,9 +20,9 @@
     "error.raf.invalid_scale": "잘못된 배율 조정",
     "error.raf.invalid_text": "잘못된 문자",
     "error.raf.invalid_font": "잘못된 글꼴",
+    "tip.raf.font": "글꼴 파일 자원 위치 또는 시스템 글꼴 이름을 입력하십시오.",
     "name.raf.color": "색상",
     "name.raf.scale": "줌",
     "name.raf.text": "문자",
-    "name.raf.stop_sign_font": "정류장 B 글꼴",
-    "tip.raf.reload_resourcepack": "변경 사항을 적용하기 위해 리소스 패키지 다시 로드"
+    "name.raf.stop_sign_font": "정류장 B 글꼴"
 }

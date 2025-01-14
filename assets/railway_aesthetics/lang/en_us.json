@@ -20,9 +20,9 @@
     "error.raf.invalid_scale": "Invalid scaling",
     "error.raf.invalid_text": "Invalid text",
     "error.raf.invalid_font": "Invalid font",
+    "tip.raf.font": "Please enter the font file resource location or system font name",
     "name.raf.color": "colour",
     "name.raf.scale": "zoom",
     "name.raf.text": "written words",
-    "name.raf.stop_sign_font": "Station sign B font",
-    "tip.raf.reload_resourcepack": "Reload resource package to apply changes"
+    "name.raf.stop_sign_font": "Station sign B font"
 }

@@ -62,7 +62,7 @@ const TextManager = {
             font = font.deriveFont(style, h * scale);
             h = getH(font);
             let scroll = false;
-            str = TextManager.processString(str, font, getW);
+            str = TextManager.processString(str, font, w, getW);
             let width = getW(str, font);
             if (width > w) scroll = true;
             switch (mode) {
@@ -198,9 +198,10 @@ const TextManager = {
             let h0 = getH(font.deriveFont(style,1000));
             let scale = 1000 / h0;
             font = font.deriveFont(style, h * scale);
-            str = TextManager.processString(str, font, getW);
-            let width = getW(str, font);
+            str = TextManager.processString(str, font, w, getW);
             let scroll = false;
+            let width = getW(str, font);
+            if (width > w) scroll = true;
             h = getH(font);
             let d;
             switch (mode) {
@@ -341,14 +342,15 @@ TextManager.getMode = () => {
     return ClientConfig.get(TextManager.modeKey);
 }
 
-TextManager.processString = (str, font, getW) => {
+TextManager.processString = (str, font, w, getW) => {
     switch (TextManager.getMode()) {
         case "0": {
             break;
         }
-        case "1": {
-            let str1 = str + "···";
-            while (getW(str1, font) > w && str.length > 0) {
+        default: {
+            if (getW(str, font) <= w) return str;
+            str = str + "...";
+            while (getW(str, font) > w && str.length > 0) {
                 if (str.length > 3) {
                     str = str.substring(0, str.length - 4) + str.substring(str.length - 3);
                 } else {
@@ -358,12 +360,14 @@ TextManager.processString = (str, font, getW) => {
             break;
         }
     }
+    return str;
 }
 
-TextManager.configResponder = new ConfigResponder(TextManager.modeKey, ComponentUtil.translatable("name.aph.text_manager_mode"), "0", str => str, ErrorSupplier.only(["0", "1"]), str => {}, (str, builder) => {
-    builder.setTooltip(ComponentUtil.translatable("tip.aph.text_manager_mode"))
-});
+// TextManager.configResponder = new ConfigResponder(TextManager.modeKey, ComponentUtil.translatable("name.aph.text_manager_mode"), "0", str => str, ErrorSupplier.only(["0", "1"]), str => {}, str => {
+//     let arr = java.lang.reflect.Array.newInstance(ComponentUtil.translatable("").getClass(), 1);
+//     java.lang.reflect.Array.set(arr, 0, ComponentUtil.translatable("tip.aph.text_manager_mode"));
+//     return java.util.Optional.of(arr);
+// }, false);
 
-//
-
+TextManager.configResponder = new ConfigResponder(TextManager.modeKey, ComponentUtil.translatable("name.aph.text_manager_mode"), "0", str => str, ErrorSupplier.only(["0", "1"]), str => {}, str => java.util.Optional.of([ComponentUtil.translatable("tip.aph.text_manager_mode"), ComponentUtil.translatable("tip.aph.reload_resourcepack")]), false);
 ClientConfig.register(TextManager.configResponder);

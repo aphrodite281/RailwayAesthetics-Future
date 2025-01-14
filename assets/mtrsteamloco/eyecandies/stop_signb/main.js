@@ -11,7 +11,7 @@ const faceKey = "face";
 
 const defaultFont = "aphrodite:library/font/lgc.ttf";
 
-const res0 = new ConfigResponder(fontKey, ComponentUtil.translatable("name.raf.stop_sign_font"), defaultFont, str => str, ErrorSupplier.Font, str => {}, (str, builder) => builder.requireRestart());//setTooltip(ComponentUtil.translatable("tip.raf.reload_resourcepack")));
+const res0 = new ConfigResponder(fontKey, ComponentUtil.translatable("name.raf.stop_sign_font"), defaultFont, str => str, ErrorSupplier.Font, str => {}, str => java.util.Optional.of([ComponentUtil.translatable("tip.raf.font"), ComponentUtil.translatable("tip.aph.reload_resourcepack")]), false);
 ClientConfig.register(res0);
 
 const nowFont = ClientConfig.get(fontKey) + "";
@@ -31,9 +31,9 @@ g0.setFont(font);
 
 const cp = (str) => {return TextU.CP(str)};
 
-const res1 = new ConfigResponder(colorKey, ComponentUtil.translatable("name.raf.color"), "0", str => str, ErrorSupplier.Int, str => {}, (str, builder) => {});
-const res2 = new ConfigResponder(scaleKey, ComponentUtil.translatable("name.raf.scale"), "1", str => str, ErrorSupplier.Float, str => {}, (str, builder) => {});
-const res3 = new ConfigResponder(textKey, ComponentUtil.translatable("name.raf.text"), "default", str => str, () => java.util.Optional.empty(), str => {}, (str, builder) => {});
+const res1 = new ConfigResponder(colorKey, ComponentUtil.translatable("name.raf.color"), "0", str => str, ErrorSupplier.Int, str => {}, str => java.util.Optional.empty(), false);
+const res2 = new ConfigResponder(scaleKey, ComponentUtil.translatable("name.raf.scale"), "1", str => str, ErrorSupplier.Float, str => {}, str => java.util.Optional.empty(), false);
+const res3 = new ConfigResponder(textKey, ComponentUtil.translatable("name.raf.text"), "default", str => str, () => java.util.Optional.empty(), str => {}, str => java.util.Optional.empty(), false);
 
 function create(ctx, state, entity) {
     let configMap = entity.getCustomConfigs();
@@ -97,8 +97,8 @@ function neww(ctx, str, scale, color){
     });
     let tex = face.texture;
     let g = tex.graphics;
-    g.setColor(Color.WHITE);
-    g.fillRect(0, 0, size[0], size[1]);
+    // g.setColor(Color.WHITE);
+    // g.fillRect(0, 0, size[0], size[1]);
     g.setColor(new Color(color));
     g.setFont(font);
     g.drawString(str, 0, fm.getAscent());

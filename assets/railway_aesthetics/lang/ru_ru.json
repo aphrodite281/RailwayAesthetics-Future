@@ -20,9 +20,9 @@
     "error.raf.invalid_scale": "Неверный масштаб",
     "error.raf.invalid_text": "Неверный текст",
     "error.raf.invalid_font": "Неверный шрифт",
+    "tip.raf.font": "Введите имя шрифта",
     "name.raf.color": "Цвет",
     "name.raf.scale": "Масштаб",
     "name.raf.text": "Текст",
-    "name.raf.stop_sign_font": "Шрифт B",
-    "tip.raf.reload_resourcepack": "Перезагрузить пакет для внесения изменений"
+    "name.raf.stop_sign_font": "Шрифт B"
 }

@@ -20,9 +20,9 @@
     "error.raf.invalid_scale": "Zoom no válido",
     "error.raf.invalid_text": "Texto inválido",
     "error.raf.invalid_font": "Fuente no válida",
+    "tip.raf.font": "Introduzca la ubicación del recurso del archivo de fuente o el nombre de la fuente del sistema.",
     "name.raf.color": "Color",
     "name.raf.scale": "Zoom",
     "name.raf.text": "Texto",
-    "name.raf.stop_sign_font": "Fuente B de la señal de parada",
-    "tip.raf.reload_resourcepack": "Sobrecargar el paquete de recursos para aplicar cambios"
+    "name.raf.stop_sign_font": "Fuente B de la señal de parada"
 }
