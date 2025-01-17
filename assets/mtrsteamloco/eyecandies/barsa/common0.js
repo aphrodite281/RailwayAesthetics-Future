@@ -1,7 +1,7 @@
 include(Resources.id("aphrodite:library/code/util/error_supplier.js"));
 
 const colorKey = "color";
-const res = new ConfigResponder(colorKey, Component.translatable("name.raf.color"), "0xfafafa").setErrorSupplier(ErrorSupplier.Color);
+const res = new ConfigResponder(colorKey, ComponentUtil.translatable("name.raf.color"), "0xfafafa").setErrorSupplier(ErrorSupplier.Color);
 
 const getColor = entity => java.awt.Color.getColor(entity.getCustomConfig(colorKey));
 

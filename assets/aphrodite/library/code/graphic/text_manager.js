@@ -142,6 +142,8 @@ const TextManager = {
          * @param {number | Null} time 时间
          */
         this.draw = (g, x, y, time) => {
+            if (x == undefined) x = 0;
+            if (y == undefined) y = 0;
             if (time == undefined) time = Date.now();
             for (let [id, text] of map) text.draw(g, x, y, time);
             for (let text of list) text.draw(g, x, y, time);
@@ -217,20 +219,20 @@ const TextManager = {
                 layout(g, w, h);
                 g.setColor(color);
                 g.drawString(str, (w - width) / 2, y0); // 居中绘制
-                this.draw = (gi, xi, yi) => gi.drawImage(tex, xi + x - w / 2, yi + y - h / 2, null);
+                this.draw = (gi, xi, yi, time) => gi.drawImage(tex, xi + x - w / 2, yi + y - h / 2, null);
                 g.dispose();
             } else {
-                let last = Date.now();
+                let last = start;
                 const ins = h * 2; // 间隔
-                this.draw = (gi, xi, yi) => {
+                this.draw = (gi, xi, yi, time) => {
                     let tex = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
                     let g = tex.createGraphics();
                     g.setFont(font);
                     layout(g, w, h);
                     g.setComposite(AlphaComposite.SrcOver);
-                    let tx = ((Date.now() - start) / 1000 * 2 * h) % (width + ins);
-                    if (last > Date.now()) throw new Error("Time error");
-                    last = Date.now();
+                    let tx = ((time - start) / 1000 * 2 * h) % (width + ins);
+                    if (last > time) throw new Error("Time error");
+                    last = time;
                     g.setColor(color);
                     g.drawString(str, -tx - ins, y0);
                     g.drawString(str, -tx + width, y0);
@@ -284,9 +286,12 @@ const TextManager = {
          * @param {number} y y坐标
          * @param {number | Null} time 时间
          */
-        this.draw = (g, x, y) => {
-            for (let [id, text] of map) text.draw(g, x, y);
-            for (let text of list) text.draw(g, x, y);
+        this.draw = (g, x, y, time) => {
+            if (x == undefined) x = 0;
+            if (y == undefined) y = 0;
+            if (time == undefined) time = Date.now();
+            for (let [id, text] of map) text.draw(g, x, y, time);
+            for (let text of list) text.draw(g, x, y, time);
         }
 
         /**
@@ -308,7 +313,7 @@ TextManager.setComp = (g, value) => {
 };
 
 TextManager.Clip.layout = layout = (g, x, y, w, h) => {
-    // return;
+    return;
     const setComp = TextManager.setComp;
     g = g.create();
     setComp(g, 0.1);
@@ -322,7 +327,7 @@ TextManager.Clip.layout = layout = (g, x, y, w, h) => {
 }
 
 TextManager.Buffered.layout = layout = (g, w, h) => {
-    // return;
+    return;
     const setComp = TextManager.setComp;
     g = g.create();
     setComp(g, 0.1);

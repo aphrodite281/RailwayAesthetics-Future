@@ -3,7 +3,7 @@ include(Resources.id("aphrodite:library/code/util/text_u.js"));
 include(Resources.id("aphrodite:library/code/util/error_supplier.js"));
 include(Resources.id("aphrodite:library/code/base/color_int_base.js"));
 
-const fontKey = "stop_sign_font";
+const fontKey = "stop_signb_font";
 const colorKey = "color";
 const scaleKey = "scale";
 const textKey = "text";
@@ -11,7 +11,7 @@ const faceKey = "face";
 
 const defaultFont = "aphrodite:library/font/lgc.ttf";
 
-const res0 = new ConfigResponder(fontKey, ComponentUtil.translatable("name.raf.stop_sign_font"), defaultFont, str => str, ErrorSupplier.Font, str => {}, str => java.util.Optional.of([ComponentUtil.translatable("tip.raf.font"), ComponentUtil.translatable("tip.aph.reload_resourcepack")]), false);
+const res0 = new ConfigResponder(fontKey, ComponentUtil.translatable("name.raf.stop_signb_font"), defaultFont, str => str, ErrorSupplier.Font, str => {}, str => java.util.Optional.of([ComponentUtil.translatable("tip.raf.font"), ComponentUtil.translatable("tip.aph.reload_resourcepack")]), false);
 ClientConfig.register(res0);
 
 const nowFont = ClientConfig.get(fontKey) + "";

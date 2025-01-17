@@ -1,4 +1,4 @@
-const ErrorSupplier = {
+var ErrorSupplier = {
     Int: str => {
         let num = parseInt(str);
         if (isNaN(num)) return java.util.Optional.of(ComponentUtil.translatable("error.aph.invalid_value"));
@@ -10,8 +10,8 @@ const ErrorSupplier = {
         else return java.util.Optional.empty();
     },
     Color: str => {
-        let color = java.awt.Color.getColor(str);
-        if (color == null) return java.util.Optional.of(ComponentUtil.translatable("error.aph.invalid_color"));
+        let num = parseInt(str);
+        if (isNaN(num) || num < 0 || num > 0xffffff) return java.util.Optional.of(ComponentUtil.translatable("error.aph.invalid_color"));
         else return java.util.Optional.empty();
     },
     endWith: args => {
@@ -41,5 +41,7 @@ const ErrorSupplier = {
         } else {
             return java.util.Optional.empty();
         }
-    }
-}
+    },
+};
+
+ErrorSupplier.Boolean = ErrorSupplier.only(["true", "false"]);
