@@ -1,6 +1,8 @@
 {
     "error.aph.invalid_value": "잘못된 값",
+    "error.aph.invalid_color": "잘못된 색상",
     "error.aph.only_be": "%s 만 가능합니다.",
     "name.aph.text_manager_mode": "텍스트 관리 모드",
-    "tip.aph.text_manager_mode": "0: 스크롤, 1: 캡처"
+    "tip.aph.text_manager_mode": "0: 스크롤, 1: 캡처",
+    "tip.aph.reload_resourcepack": "변경 사항을 적용하기 위해 리소스 패키지 다시 로드"
 }

@@ -1,6 +1,8 @@
 {
     "error.aph.invalid_value": "Valore non valido",
-    "error.aph.only_be": "Può essere solo%s",
+    "error.aph.invalid_color": "Colore non valido",
+    "error.aph.only_be": "Può essere solo %s",
     "name.aph.text_manager_mode": "Modalità di gestione del testo",
-    "tip.aph.text_manager_mode": "0: Scorrimento, 1: Cattura"
+    "tip.aph.text_manager_mode": "0: scorrimento, 1: ripresa",
+    "tip.aph.reload_resourcepack": "Ricarica il pacchetto per applicare le modifiche"
 }

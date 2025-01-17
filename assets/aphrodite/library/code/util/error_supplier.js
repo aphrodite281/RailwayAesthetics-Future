@@ -9,6 +9,11 @@ const ErrorSupplier = {
         if (isNaN(num)) return java.util.Optional.of(ComponentUtil.translatable("error.aph.invalid_value"));
         else return java.util.Optional.empty();
     },
+    Color: str => {
+        let color = java.awt.Color.getColor(str);
+        if (color == null) return java.util.Optional.of(ComponentUtil.translatable("error.aph.invalid_color"));
+        else return java.util.Optional.empty();
+    },
     endWith: args => {
         return str => {
             for (let arg of args) {

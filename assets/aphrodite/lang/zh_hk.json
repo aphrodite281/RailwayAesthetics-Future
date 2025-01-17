@@ -1,6 +1,8 @@
 {
     "error.aph.invalid_value": "無效的值",
+    "error.aph.invalid_color": "無效的顏色",
     "error.aph.only_be": "只能是%s",
     "name.aph.text_manager_mode": "文字管理模式",
-    "tip.aph.text_manager_mode": "0:滾動，1:截取"
+    "tip.aph.text_manager_mode": "0:滾動，1:截取",
+    "tip.aph.reload_resourcepack": "重載資源包以應用更改"
 }

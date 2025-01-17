@@ -1,6 +1,8 @@
 {
     "error.aph.invalid_value": "Valor no válido",
+    "error.aph.invalid_color": "Color no válido",
     "error.aph.only_be": "Solo puede ser%s",
     "name.aph.text_manager_mode": "Modo de gestión de texto",
-    "tip.aph.text_manager_mode": "0: rolling, 1: Intercept"
+    "tip.aph.text_manager_mode": "0: rolling, 1: Intercept",
+    "tip.aph.reload_resourcepack": "Sobrecargar el paquete de recursos para aplicar cambios"
 }

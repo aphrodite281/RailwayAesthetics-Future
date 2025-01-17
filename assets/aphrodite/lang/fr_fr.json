@@ -1,6 +1,8 @@
 {
     "error.aph.invalid_value": "Valeur invalide",
+    "error.aph.invalid_color": "Couleur invalide",
     "error.aph.only_be": "Ne peut être que%s",
     "name.aph.text_manager_mode": "Mode de gestion de texte",
-    "tip.aph.text_manager_mode": "0: défilement, 1: capture"
+    "tip.aph.text_manager_mode": "0: défilement, 1: capture",
+    "tip.aph.reload_resourcepack": "Surcharge du package de ressources pour appliquer les modifications"
 }

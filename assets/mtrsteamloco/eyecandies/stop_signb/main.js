@@ -31,7 +31,7 @@ g0.setFont(font);
 
 const cp = (str) => {return TextU.CP(str)};
 
-const res1 = new ConfigResponder(colorKey, ComponentUtil.translatable("name.raf.color"), "0", str => str, ErrorSupplier.Int, str => {}, str => java.util.Optional.empty(), false);
+const res1 = new ConfigResponder(colorKey, ComponentUtil.translatable("name.raf.color"), "0", str => str, ErrorSupplier.Color, str => {}, str => java.util.Optional.empty(), false);
 const res2 = new ConfigResponder(scaleKey, ComponentUtil.translatable("name.raf.scale"), "1", str => str, ErrorSupplier.Float, str => {}, str => java.util.Optional.empty(), false);
 const res3 = new ConfigResponder(textKey, ComponentUtil.translatable("name.raf.text"), "default", str => str, () => java.util.Optional.empty(), str => {}, str => java.util.Optional.empty(), false);
 

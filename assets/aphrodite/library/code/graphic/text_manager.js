@@ -369,5 +369,5 @@ TextManager.processString = (str, font, w, getW) => {
 //     return java.util.Optional.of(arr);
 // }, false);
 
-TextManager.configResponder = new ConfigResponder(TextManager.modeKey, ComponentUtil.translatable("name.aph.text_manager_mode"), "0", str => str, ErrorSupplier.only(["0", "1"]), str => {}, str => java.util.Optional.of([ComponentUtil.translatable("tip.aph.text_manager_mode"), ComponentUtil.translatable("tip.aph.reload_resourcepack")]), false);
+TextManager.configResponder = new ConfigResponder(TextManager.modeKey, ComponentUtil.translatable("name.aph.text_manager_mode"), "1", str => str, ErrorSupplier.only(["0", "1"]), str => {}, str => java.util.Optional.of([ComponentUtil.translatable("tip.aph.text_manager_mode"), ComponentUtil.translatable("tip.aph.reload_resourcepack")]), false);
 ClientConfig.register(TextManager.configResponder);

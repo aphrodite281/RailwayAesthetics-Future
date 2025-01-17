@@ -1,23 +1,23 @@
-include(Resources.id("aphrodite:library/code/base/color_int_base.js"));
+include(Resources.id("aphrodite:library/code/util/error_supplier.js"));
 
-const colors = [["color", 0xfafafa]];
+const colorKey = "color";
+const res = new ConfigResponder(colorKey, Component.translatable("name.raf.color"), "0xfafafa").setErrorSupplier(ErrorSupplier.Color);
+
+const getColor = entity => java.awt.Color.getColor(entity.getCustomConfig(colorKey));
 
 function c(ctx, state, entity, model) {
-    ColorIntBase.init(ctx, state, entity, colors);
+    entity.registerCustomConfig(res);
     let rm = model.copy(); rm.sourceLocation = null;
     duv(rm);
-    setColor(rm, state.color);
+    setColor(rm, getColor(entity));
     let dyn = new DynamicModelHolder();
     dyn.uploadLater(rm);
     state.dyn = dyn;
+    ctx.drawCalls.put("barsa", new ClusterDrawCall(dyn, new Matrix4f()));
 }
 
 function r(ctx, state, entity) {
-    try {
-        ColorIntBase.tick(ctx, state, entity, colors);
-        setColor0(state.dyn, state.color);
-        ctx.drawModel(state.dyn, null);
-    } catch (e) {}
+    setColor0(state.dyn, getColor(entity));
 }
 
 function setColor(rm, c) {
