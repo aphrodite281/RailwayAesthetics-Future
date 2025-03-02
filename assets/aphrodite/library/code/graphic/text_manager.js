@@ -368,11 +368,11 @@ TextManager.processString = (str, font, w, getW) => {
     return str;
 }
 
-// TextManager.configResponder = new ConfigResponder(TextManager.modeKey, ComponentUtil.translatable("name.aph.text_manager_mode"), "0", str => str, ErrorSupplier.only(["0", "1"]), str => {}, str => {
+// TextManager.ConfigResponder = new ConfigResponder.TextField(TextManager.modeKey, ComponentUtil.translatable("name.aph.text_manager_mode"), "0", str => str, ErrorSupplier.only(["0", "1"]), str => {}, str => {
 //     let arr = java.lang.reflect.Array.newInstance(ComponentUtil.translatable("").getClass(), 1);
 //     java.lang.reflect.Array.set(arr, 0, ComponentUtil.translatable("tip.aph.text_manager_mode"));
 //     return java.util.Optional.of(arr);
 // }, false);
 
-TextManager.configResponder = new ConfigResponder(TextManager.modeKey, ComponentUtil.translatable("name.aph.text_manager_mode"), "1", str => str, ErrorSupplier.only(["0", "1"]), str => {}, str => java.util.Optional.of([ComponentUtil.translatable("tip.aph.text_manager_mode"), ComponentUtil.translatable("tip.aph.reload_resourcepack")]), false);
-ClientConfig.register(TextManager.configResponder);
+TextManager.ConfigResponder = new ConfigResponder.TextField(TextManager.modeKey, ComponentUtil.translatable("name.aph.text_manager_mode"), "1", str => str, ErrorSupplier.only(["0", "1"]), str => {}, str => java.util.Optional.of(asJavaArray([ComponentUtil.translatable("tip.aph.text_manager_mode"), ComponentUtil.translatable("tip.aph.reload_resourcepack")])), false);
+ClientConfig.register(TextManager.ConfigResponder);

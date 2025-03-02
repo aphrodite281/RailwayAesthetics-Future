@@ -28,11 +28,8 @@ include(Resources.id("mtr:lcda/icon/hcjt.js")); //换成箭头
 include(Resources.id("mtr:lcda/icon/xjjt.js")); //行进箭头
 include(Resources.id("mtr:lcda/icon/logo.js")); //图标
 
-let defaultScreenTextureSize = [1600, 350];
-let defaultScreenModelSize = [1600 / 2000, 350 / 2000];
-
-let textureSize = defaultScreenTextureSize;
-let modelSize = defaultScreenModelSize;
+let textureSize = [1600, 350];
+let modelSize = [1600 / 2000, 350 / 2000];
 let doorZPositions = [0, 5, -5, 10, -10];
 let doorPosition = [1.3, 1.9];// x、y
 let rotateX = 15 / 180 * Math.PI;// YX(Z)欧拉的X
@@ -43,6 +40,9 @@ let fontA = Resources.getSystemFont("Noto Sans");
 let fontB = Resources.readFont(Resources.id("aphrodite:library/font/zhdh.ttf"));
 let fontC = Resources.getSystemFont("Noto Serif");
 let cu = ColorU;
+
+let model = ModelManager.uploadVertArrays(ModelManager.loadRawModel(Resources.manager(), Resources.id("mtrsteamloco:eyecandies/test/main.obj"), null));
+
 
 function create(ctx, state, train) {
     state.running = true;
@@ -84,9 +84,9 @@ function create(ctx, state, train) {
     state.tickList = tickList;
     state.infoArray = infoArray;
     state.disposeList = disposeList;
+    ctx.drawCalls[0].put("abc", new ClusterDrawCall(model, new Matrix4f()));
 }
 
-let model = ModelManager.uploadVertArrays(ModelManager.loadRawModel(Resources.manager(), Resources.id("mtrsteamloco:eyecandies/test/main.obj"), null));
 
 let acc = Date.now();
 
@@ -121,11 +121,16 @@ function getMatrices(isRight) {
         result.push(matrices.last());
         matrices.popPose();
     }
-    let matt = new Matrix4f();
-    matt.translate(0, 1.7, 0);
-    if (isRight) matt.rotateY(Math.PI);
-    result.push(matt)
+    // let matt = new Matrix4f();
+    // matt.translate(0, 1.7, 0);
+    // if (isRight) matt.rotateY(Math.PI);
+    // result.push(matt)
     return result;
+}
+
+function updateMatrices() {
+    rightMatrices = getMatrices(false);
+    leftMatrices = getMatrices(true);
 }
 
 let smooth = (k, value) => {// 平滑变化
@@ -183,7 +188,7 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
             // let fps = 24;// 帧率
             // let frameTime = 1000 / fps;// 帧时间
             let outAlpha = new Value(0, 1, 0, 1.5, -1, 2);// 门里的指示的透明度
-            var icolor, icolor1, icdest, icname, iename, itime0, itime1, iis, it1, it2, it3, it4, iisArrive, iopen, ihuancheng = new Map(), ixlt0 = [], ixlt1 = [], iindex = -1;// info 数据
+            var icolor, icolor1, icdest, icname, iename, itime0, itime1, iis, it1, it2, it3, it4, iisArrive, iopen = 0, ihuancheng = new Map(), ixlt0 = [], ixlt1 = [], iindex = -1;// info 数据
             let DStyle = 0;
             
             /**
@@ -820,7 +825,7 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
             }
 
             let d = [];
-            let dWidth = w * 18 / 500 * 1.1;
+            let dWidth = Math.min(w * 18 / 500 * 1.1, h * 0.4 * 0.5);
             let drawDoor = () => {
                 let x0 = 0, y0 = h * 0.4, w0 = dWidth, h0 = h * 0.4;
                 let img = new BufferedImage(w0, h0, BufferedImage.TYPE_INT_ARGB);
@@ -904,7 +909,7 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
                 g.drawImage(d[0], x + tx, y, null);
                 g.drawImage(d[1], x - dWidth - tx, y, null);
                 if (dop == false) {
-                    let ww = w * 40 / 500 * 0.7;
+                    let ww = Math.min(dWidth * 2 * 0.8, h * 0.4 * 0.7);
                     y = h * (0.7 + 0.3) / 2 - h * 0.02 - ww / 2;
                     x = w * 45 / 500 - ww / 2;
                     setComp(g, 0.6);

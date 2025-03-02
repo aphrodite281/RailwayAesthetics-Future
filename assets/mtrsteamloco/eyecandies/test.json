@@ -1,8 +1,7 @@
 {
     "test": {
         "name": "obj.raf.test",
-        "scriptFiles": ["mtrsteamloco:eyecandies/test/ticket_barrier.js"],
-        "isTicketBarrier": false,
-        "isEntrance": false
+        "scriptFiles": ["mtrsteamloco:eyecandies/test/config.js"],
+        "abc": 123
     }
 }

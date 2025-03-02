@@ -11,7 +11,8 @@ function Video(data) {
     if( data.ctx != undefined && data.matrices != undefined) {
         this.cars = data.cars!= undefined ? data.cars : [];
         this.ctx = data.ctx;
-        this.isTrain = ctx.isTrain();
+        let str = this.ctx.getClass().getSimpleName() + "";
+        this.isTrain = str.includes("train");
         this.matrices = [];
         for(let i = 0; i < data.matrices.length; i++) {
             if(data.matrices[i] instanceof Array) {

@@ -1,0 +1,12 @@
+{
+    "test": {
+        "name": "Script Test",
+        "scriptFiles": ["mtrsteamloco:rails/test/script.js"]
+    },
+    "roll": {
+        "name": "Rolling Test",
+        "model": "mtrsteamloco:models/rail.obj",
+        "repeatInterval": 0.5,
+        "scriptFiles": ["mtrsteamloco:rails/test/roll.js"]
+    }
+}   

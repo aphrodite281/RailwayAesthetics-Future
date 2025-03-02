@@ -11,7 +11,7 @@ const faceKey = "face";
 
 const defaultFont = "aphrodite:library/font/lgc.ttf";
 
-const res0 = new ConfigResponder(fontKey, ComponentUtil.translatable("name.raf.stop_signb_font"), defaultFont, str => str, ErrorSupplier.Font, str => {}, str => java.util.Optional.of([ComponentUtil.translatable("tip.raf.font"), ComponentUtil.translatable("tip.aph.reload_resourcepack")]), false);
+const res0 = new ConfigResponder.TextField(fontKey, ComponentUtil.translatable("name.raf.stop_signb_font"), defaultFont, str => str, ErrorSupplier.Font, str => {}, str => java.util.Optional.of(asJavaArray([ComponentUtil.translatable("tip.raf.font"), ComponentUtil.translatable("tip.aph.reload_resourcepack")])), false);
 ClientConfig.register(res0);
 
 const nowFont = ClientConfig.get(fontKey) + "";
@@ -31,9 +31,9 @@ g0.setFont(font);
 
 const cp = (str) => {return TextU.CP(str)};
 
-const res1 = new ConfigResponder(colorKey, ComponentUtil.translatable("name.raf.color"), "0", str => str, ErrorSupplier.Color, str => {}, str => java.util.Optional.empty(), false);
-const res2 = new ConfigResponder(scaleKey, ComponentUtil.translatable("name.raf.scale"), "1", str => str, ErrorSupplier.Float, str => {}, str => java.util.Optional.empty(), false);
-const res3 = new ConfigResponder(textKey, ComponentUtil.translatable("name.raf.text"), "default", str => str, () => java.util.Optional.empty(), str => {}, str => java.util.Optional.empty(), false);
+const res1 = new ConfigResponder.TextField(colorKey, ComponentUtil.translatable("name.raf.color"), "0", str => str, ErrorSupplier.Color, str => {}, str => java.util.Optional.empty(), false);
+const res2 = new ConfigResponder.TextField(scaleKey, ComponentUtil.translatable("name.raf.scale"), "1", str => str, ErrorSupplier.Float, str => {}, str => java.util.Optional.empty(), false);
+const res3 = new ConfigResponder.TextField(textKey, ComponentUtil.translatable("name.raf.text"), "default", str => str, () => java.util.Optional.empty(), str => {}, str => java.util.Optional.empty(), false);
 
 function create(ctx, state, entity) {
     let configMap = entity.getCustomConfigs();

@@ -22,20 +22,21 @@ const runKey = "run";
 const sloganKey = "slogan";
 const modeKey = "mode";
 const limitsKey = "limits";
+const scaleKey = "scale";
 const fontKey = "pida_font";
 const defaultFont = "Serif";
 
-let newColorRes = (key, nameKey, value) => new ConfigResponder(key, ComponentUtil.translatable("name.raf." + key), value).setErrorSupplier(ErrorSupplier.Color);
+let newColorRes = (key, nameKey, value) => new ConfigResponder.TextField(key, ComponentUtil.translatable("name.raf." + key), value).setErrorSupplier(ErrorSupplier.Color);
 
 const res0 = newColorRes(backgroundColorKey, "background_color", "0x3936ff");
 const res1 = newColorRes(textColorKey, "text_color", "0xffffff");
 const res2 = newColorRes(stopCheckingColorKey, "stop_checking_color", "0xff0000");
 const res3 = newColorRes(checkingColorKey, "checking_color", "0x00ff00");
 const res4 = newColorRes(waitingColorKey, "waiting_color", "0xffffff");
-const res5 = new ConfigResponder(runKey, ComponentUtil.translatable("name.raf.run"), "true").setErrorSupplier(ErrorSupplier.Boolean);
-const res6 = new ConfigResponder(sloganKey, ComponentUtil.translatable("name.raf.slogan"), "开车前5分钟停止检票");
-const res7 = new ConfigResponder(modeKey, ComponentUtil.translatable("name.raf.mode"), "0").setErrorSupplier(ErrorSupplier.only(["0", "1"])).setTooltipSupplier(str => java.util.Optional.of([ComponentUtil.translatable("tip.raf.pida_mode")]));
-const res8 = new ConfigResponder(limitsKey, ComponentUtil.translatable("name.raf.limits"), "5/15").setErrorSupplier(str => {
+const res5 = new ConfigResponder.TextField(runKey, ComponentUtil.translatable("name.raf.run"), "true").setErrorSupplier(ErrorSupplier.only(["true", "false"]));
+const res6 = new ConfigResponder.TextField(sloganKey, ComponentUtil.translatable("name.raf.slogan"), "开车前5分钟停止检票");
+const res7 = new ConfigResponder.TextField(modeKey, ComponentUtil.translatable("name.raf.mode"), "0").setErrorSupplier(ErrorSupplier.only(["0", "1"])).setTooltipSupplier(str => java.util.Optional.of([ComponentUtil.translatable("tip.raf.pida_mode")]));
+const res8 = new ConfigResponder.TextField(limitsKey, ComponentUtil.translatable("name.raf.limits"), "5/15").setErrorSupplier(str => {
     let arr = str.split("/");
     if (arr.length != 2) {
         return java.util.Optional.of(ComponentUtil.translatable("error.aph.invalid_value"));
@@ -47,8 +48,9 @@ const res8 = new ConfigResponder(limitsKey, ComponentUtil.translatable("name.raf
     }
     return java.util.Optional.empty();
 });
-const res9 = new ConfigResponder(fontKey, ComponentUtil.translatable("name.raf.pida_font"), defaultFont, str => str, ErrorSupplier.Font, str => {}, str => java.util.Optional.of([ComponentUtil.translatable("tip.raf.font"), ComponentUtil.translatable("tip.aph.reload_resourcepack")]), false);
+const res9 = new ConfigResponder.TextField(fontKey, ComponentUtil.translatable("name.raf.pida_font"), defaultFont, str => str, ErrorSupplier.Font, str => {}, str => java.util.Optional.of(asJavaArray([ComponentUtil.translatable("tip.raf.font"), ComponentUtil.translatable("tip.aph.reload_resourcepack")])), false);
 ClientConfig.register(res9);
+const res10 = new ConfigResponder.TextField(scaleKey, ComponentUtil.translatable("name.raf.scale"), "1.0").setErrorSupplier(ErrorSupplier.Float);
 
 const nowFont = ClientConfig.get(fontKey) + "";
 let fontz;
@@ -61,7 +63,9 @@ if (nowFont.endsWith(".ttf") || nowFont.endsWith(".otf")) {
 const font0 = fontz;
 
 const rawModels = ModelManager.loadPartedRawModel(Resources.manager(), Resources.id("mtrsteamloco:eyecandies/pida/main.obj"), null);
-const screenModel = ModelManager.uploadVertArrays(rawModels.get("screen#light"));
+const screenRaw = rawModels.get("screen");
+screenRaw.setAllRenderType("light");
+const screenModel = ModelManager.uploadVertArrays(screenRaw);
 const dModel = ModelManager.uploadVertArrays(rawModels.get("d"));
 
 const get = (entity, key) => entity.getCustomConfig(key);
@@ -75,14 +79,28 @@ const screenKey = "screen";
 const dKey = "d";
 
 function create(ctx, state, entity) {
-    entity.registerCustomConfig(res0, res1, res2, res3, res4, res5, res6, res7, res8);
+    print (ctx.hashCode() + " create");
     let screen = screenModel.copyForMaterialChanges();
     let d = dModel.copyForMaterialChanges();
     let tex = new GraphicsTexture(screenSize[0], screenSize[1]);
+    let g = tex.graphics;
+    g.setColor(Color.BLACK);
+    g.fillRect(0, 0, 1460, 660);
+    tex.upload();
     ctx.setDebugInfo("tex", tex);
     screen.replaceAllTexture(tex.identifier);
-    ctx.drawCalls.put(screenKey, new ClusterDrawCall(screen, new Matrix4f()));
-    ctx.drawCalls.put(dKey, new ClusterDrawCall(d, new Matrix4f()));
+    function getCall(model) {
+        return new DrawCall({commit: (d, b, w, l) => {
+            let mat = b.copy();
+            let num = get(entity, scaleKey);
+            num = parseFloat(num);
+            mat.translate(0, 0.5, 0);
+            mat.scale(num, num, num);
+            d.enqueue(model, mat, l);
+        }});
+    }
+    ctx.drawCalls.put(screenKey, getCall(screen));
+    ctx.drawCalls.put(dKey, getCall(d));
 
     let drawCalls = [];
     if (get(entity, runKey) == "true") {
@@ -90,72 +108,110 @@ function create(ctx, state, entity) {
     } else {
         drawCalls.push(new BLACK(entity, true));
     }
-    let last = Date.now();
     state.running = true;
-    state.t1 =new Thread(() => {
-        let g = tex.graphics
-        g.setStroke(new BasicStroke(3));
+    let st = lt => {
+        let num = 1000 / 20 - (Date.now() - lt);
+        return Math.max(0, num);
+    }
+    state.t1 = new Thread(() => {
+        let last = Date.now();
         while (state.running) {
             try {
                 let start = Date.now();
-                // let img = new BufferedImage(screenSize[0], screenSize[1], BufferedImage.TYPE_INT_ARGB);
 
-                for (let i = 0; i < drawCalls.length; i++) {
-                    drawCalls[i].draw(g);
+                let img = new BufferedImage(screenSize[0], screenSize[1], BufferedImage.TYPE_INT_ARGB);
+                let g = img.createGraphics();
+                // let g = tex.graphics
+                setComp(g, 1);
+                g.setColor(Color.BLACK);
+                g.fillRect(0, 0, screenSize[0], screenSize[1]);
+
+                let calls = drawCalls;
+
+                for (let i = 0; i < calls.length; i++) {
+                    calls[i].draw(g);
                 }
-                tex.upload();
-                //tex.upload(img);
-                ctx.setDebugInfo("draw", Date.now() - start, "ins", Date.now() - last, "drawCall", drawCalls.length);
+                
+                tex.upload(img);
+                g.dispose();
+                ctx.setDebugInfo("draw", Date.now() - start, "ins", Date.now() - last);
+                let ll = last;
                 last = Date.now();
+                Thread.sleep(st(ll));
             } catch (e) {
                 ctx.setDebugInfo("error1", e.toString(), e.stack);
             }
         }
-        state.tex.close();
+        print ("1456")
+
+        Thread.sleep(60000);
+
+        tex.close();
+        // ctx.drawCalls.remove(screenKey);
+        // ctx.drawCalls.remove(dKey);
         print("done-draw");
-    }, "draw");
+    }, ctx.hashCode() + "draw");
     state.t2 = new Thread(() => {
+        let last = Date.now();
         while (state.running) {
-            let start = Date.now();
-            if (get(entity, runKey) == "true") {
-                if (drawCalls[drawCalls.length - 1].toString() == "BLACK") {
-                    drawCalls.push(new DR(entity, false));
+            try {
+                let start = Date.now();
+                let run = get(entity, runKey) + "";
+                let le = drawCalls[drawCalls.length - 1];
+                if (run == "true") {
+                    if (le.TYPE == "BLACK") {
+                        drawCalls.push(new DR(entity, false));
+                    } else {
+                        let result =le.outdated();
+                        if (result != null) {
+                            drawCalls.push(new DR(entity, false, result));
+                        }
+                    }
                 } else {
-                    let result = drawCalls[drawCalls.length - 1].outdated();
-                    if (result != null) {
-                        drawCalls.push(new DR(entity, false, result));
+                    if (le.TYPE != "BLACK") {
+                        drawCalls.push(new BLACK(entity, false));
                     }
                 }
-            } else {
-                if (drawCalls[drawCalls.length - 1].toString() != "BLACK") {
-                    drawCalls.push(new BLACK(entity, false));
+                if (drawCalls.length > 1 && drawCalls[drawCalls.length - 1].isGrown()) {
+                    let newDrawCalls = [drawCalls[drawCalls.length - 1]];
+                    drawCalls = newDrawCalls;
                 }
+                ctx.setDebugInfo("update", Date.now() - start, "ins", Date.now() - last);
+                ctx.setDebugInfo("drawcalls", drawCalls.toString());
+                let ll = last;
+                last = Date.now();
+                Thread.sleep(st(ll));
+            } catch (e) {
+                ctx.setDebugInfo("error2", e.toString(), e.stack);
             }
-            if (drawCalls.length > 1 && drawCalls[drawCalls.length - 1].isGrown()) {
-                let newDrawCalls = [drawCalls[drawCalls.length - 1]];
-                drawCalls = newDrawCalls;
-            }
-            ctx.setDebugInfo("update", Date.now() - start);
         }
         print("done-update");
-    }, "update");
+    }, ctx.hashCode() + "update");
     state.t1.start();
     state.t2.start();
     state.tex = tex;
 }
 
+let tn = 0;
+let fn = 0;
+
 function render(ctx, state, entity) {
+    let ress = [res0, res1, res2, res3, res4, res5, res6, res7, res8, res10];
+    for (let res of ress) {
+        entity.registerCustomConfig(res);
+    }
+
 }
 
 function dispose(ctx, state, entity) {
     state.running = false;
-    ctx.drawCalls.remove(screenKey);
-    ctx.drawCalls.remove(dKey);
+    print(ctx.hashCode() + " dispose");
 }
+
+const setComp = (g, value) => {g.setComposite(AlphaComposite.SrcOver.derive(value))};
 
 function BLACK(entity, isFirst) {
     const start = Date.now();
-    const setComp = (g, value) => {g.setComposite(AlphaComposite.SrcOver.derive(value))};
     const smooth = (k, value) => {// 平滑变化
         if (value > k) return k;
         if (k < 0) return 0;
@@ -174,7 +230,8 @@ function BLACK(entity, isFirst) {
 
     this.outdated = () => null;
     this.isGrown = () => getAlpha() >= 1;
-    this.toString = () => "BLACK";
+    this.TYPE = "BLACK";
+    this.toString = () => "BLACK" + getAlpha();
 }
 
 function DR(entity, isFirst, info) {
@@ -193,15 +250,14 @@ function DR(entity, isFirst, info) {
     for (let i = 0; i < list.length && i < 19; i++) {
         let x = w0 / 2;
         for (let j = 0; j < 6; j++) {
-            drawMiddle(list[i][1][j], font0, Font.PLAIN, list[i][0], x, y, w0, h0);
+            drawMiddle(list[i][1][j], font0, Font.PLAIN, list[i][0], x, y, w0, h0, 0);
             x += w0;
         }
         y += h0; 
     }
-    drawMiddle(slogan, font0, Font.PLAIN, tc, w / 2, h - h0 / 2, w, h0);
+    drawMiddle(slogan, font0, Font.PLAIN, tc, w / 2, h - h0 / 2, w, h0, 0);
 
     let start = Date.now();
-    const setComp = (g, value) => {g.setComposite(AlphaComposite.SrcOver.derive(value))};
     const smooth = (k, value) => {// 平滑变化
         if (value > k) return k;
         if (k < 0) return 0;
@@ -212,14 +268,19 @@ function DR(entity, isFirst, info) {
         else return smooth(1, (Date.now() - start) / 1000 * 0.8);
     }
 
-    this.draw = g => {
-        setComp(g, getAlpha());
+    this.draw = g0 => {
+        let img = new BufferedImage(screenSize[0], screenSize[1], BufferedImage.TYPE_INT_ARGB);
+        let g = img.createGraphics();
         g.setColor(bc);
         g.fillRect(0, 0, w, h);
         g.setColor(tc);
+        g.setStroke(new BasicStroke(3));
         for (let i = 0; i <= 6; i++) g.drawLine(w0 * i, 0, w0 * i, h - h0);
         for (let i = 0; i < 20; i++) g.drawLine(0, h0 * i, w, h0 * i);
         textManager.draw(g);
+        g.dispose();
+        setComp(g0, getAlpha());
+        g0.drawImage(img, 0, 0, null);
     }
 
     this.outdated = () => {
@@ -229,10 +290,11 @@ function DR(entity, isFirst, info) {
     }
 
     this.isGrown = () => getAlpha() >= 1;
-    this.toString = () => "DR";
+    this.TYPE = "DR";
+    this.toString = () => "DR" + getAlpha();
 }
 
-function isChinese(entity) {
+function isChinese() {
     return (Date.now() / 1000 % 20) < 10;
 }
 
@@ -249,7 +311,7 @@ function getInfo(entity) {
     const run = get(entity, runKey);
     const slogan = get(entity, sloganKey);
     const mode = parseInt(get(entity, modeKey));
-    const _isChinese = isChinese(entity);
+    const _isChinese = isChinese();
     const limits = [];
     let limitsStr = get(entity, limitsKey);
     let arr = limitsStr.split("/");

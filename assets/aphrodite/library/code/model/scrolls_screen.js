@@ -6,7 +6,8 @@ function ScrollsScreen(data) {
         this.uvSpeed = data.uvSpeed;
         this.running = data.running;
         this.ctx = data.ctx;
-        this.isTrain = data.ctx.isTrain();
+        let str = this.ctx.getClass().getSimpleName() + "";
+        this.isTrain = str.includes("train");
         this.cars = data.cars!= undefined ? data.cars : [];
         this.display = data.display != undefined ? data.display : true;
         this.matrices = [];

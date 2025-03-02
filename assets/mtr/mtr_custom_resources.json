@@ -1,10 +1,10 @@
 {
     "custom_trains": {
-      "lcda": {
-        "name": "LCDA",
-        "base_type": "train_25_2",
+      "lcda_s_train": {
+        "name": "S-Train(LCD)",
+        "base_train_type": "s_train",
         "color": "2AF0AD",
-        "script_files": ["mtr:lcda/lcda_main.js"]
+        "script_files": ["mtr:deploying/lcda/s_train.js"]
       }
     }
 }

@@ -18,7 +18,8 @@ function Face(data) {
     if(data.ctx != undefined && data.matrices != undefined && data.texture != undefined && data.model != undefined) {
         this.ctx = data.ctx;
         this.cars = data.cars != undefined ? data.cars : [];
-        this.isTrain = this.ctx.isTrain();
+        let str = this.ctx.getClass().getSimpleName() + "";
+        this.isTrain = str.includes("train");
         this.matrices = [];
         for(let i = 0; i < data.matrices.length; i++) {
             if(data.matrices[i] instanceof Array) {
