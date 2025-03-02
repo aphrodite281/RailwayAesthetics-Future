@@ -35,14 +35,15 @@ let doorPosition = [1.3, 1.9];// x、y
 let rotateX = 15 / 180 * Math.PI;// YX(Z)欧拉的X
 let rightMatrices = getMatrices(false);
 let leftMatrices = getMatrices(true);
+let filletPixel = 30;
 
 let fontA = Resources.getSystemFont("Noto Sans");
 let fontB = Resources.readFont(Resources.id("aphrodite:library/font/zhdh.ttf"));
 let fontC = Resources.getSystemFont("Noto Serif");
+
+
+let filletOverlay = new BufferedImage(textureSize[0], textureSize[1], BufferedImage.TYPE_INT_ARGB);
 let cu = ColorU;
-
-let model = ModelManager.uploadVertArrays(ModelManager.loadRawModel(Resources.manager(), Resources.id("mtrsteamloco:eyecandies/test/main.obj"), null));
-
 
 function create(ctx, state, train) {
     state.running = true;
@@ -84,7 +85,6 @@ function create(ctx, state, train) {
     state.tickList = tickList;
     state.infoArray = infoArray;
     state.disposeList = disposeList;
-    ctx.drawCalls[0].put("abc", new ClusterDrawCall(model, new Matrix4f()));
 }
 
 
@@ -128,9 +128,25 @@ function getMatrices(isRight) {
     return result;
 }
 
+function apply() {
+    updateMatrices();
+    generateFilletOverlay();
+}
+
 function updateMatrices() {
     rightMatrices = getMatrices(false);
     leftMatrices = getMatrices(true);
+}
+
+function generateFilletOverlay() {
+    let img = new BufferedImage(textureSize[0], textureSize[1], BufferedImage.TYPE_INT_ARGB);
+    let g = img.createGraphics();
+    g.setColor(Color.WHITE);
+    g.fillRect(0, 0, textureSize[0], textureSize[1]);
+    g.setComposite(AlphaComposite.Clear);
+    g.fillRoundRect(0, 0, textureSize[0], textureSize[1], filletPixel, filletPixel);
+    g.dispose();
+    filletOverlay = img;
 }
 
 let smooth = (k, value) => {// 平滑变化
@@ -1311,6 +1327,9 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
                                 g.fillRect(0, 0, w, h);
                             }
                         }
+
+                        g.setComposite(AlphaComposite.DstOut);
+                        g.drawImage(filletOverlay, 0, 0, null);
                         g.dispose();
                         ti("Draw");
 
