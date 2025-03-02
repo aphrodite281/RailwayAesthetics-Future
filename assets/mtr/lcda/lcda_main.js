@@ -33,16 +33,19 @@ let modelSize = [1600 / 2000, 350 / 2000];
 let doorZPositions = [0, 5, -5, 10, -10];
 let doorPosition = [1.3, 1.9];// x、y
 let rotateX = 15 / 180 * Math.PI;// YX(Z)欧拉的X
-let rightMatrices = getMatrices(false);
-let leftMatrices = getMatrices(true);
 let filletPixel = 30;
+let companyNameCJK = "北武工艺";
+let companyNameENG = "HOKUBUCRAFT";
+let companyLogoPng = undefined;
 
 let fontA = Resources.getSystemFont("Noto Sans");
 let fontB = Resources.readFont(Resources.id("aphrodite:library/font/zhdh.ttf"));
 let fontC = Resources.getSystemFont("Noto Serif");
 
-
+// 以下不建议直接更改
 let filletOverlay = new BufferedImage(textureSize[0], textureSize[1], BufferedImage.TYPE_INT_ARGB);
+let rightMatrices = getMatrices(false);
+let leftMatrices = getMatrices(true);
 let cu = ColorU;
 
 function create(ctx, state, train) {
@@ -658,11 +661,15 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
                 drawMiddle(ename, font0, p, color1, x, y + dy1(0.725), w1, dy1(0.35));
 
                 x = w * 5 / 500, w1 = h1;
-                let canvas = Canvas.createWithCenterAndScale(g, x + w1 / 2, y + h1 / 2, w1 / 2500, 2500, 2500);
-                logo(canvas);
+                if (companyLogoPng == undefined) {
+                    let canvas = Canvas.createWithCenterAndScale(g, x + w1 / 2, y + h1 / 2, w1 / 2500, 2500, 2500);
+                    logo(canvas);
+                } else {
+                    g.drawImage(companyLogoPng, x, y, w1, h1, null);
+                }
                 x = dx(52);
-                drawMiddle("北武工艺", font0, p, 0, x, dy2(0.35), dx(58), dy2(0.5));
-                drawMiddle("HOKUBUCRAFT", font0, p, 0, x, dy2(0.75), dx(58), dy2(0.3));
+                drawMiddle(companyNameCJK, font0, p, 0, x, dy2(0.35), dx(58), dy2(0.5));
+                drawMiddle(companyNameENG, font0, p, 0, x, dy2(0.75), dx(58), dy2(0.3));
 
                 let color = 0x606060;
                 drawMiddle(" 终 点 站:", font0, p, color, dx(340), dy2(0.33), dx(40), dy2(0.45));
