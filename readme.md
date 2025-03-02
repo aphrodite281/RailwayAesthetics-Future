@@ -1,24 +1,24 @@
 # Railway Aesthetics - Future
 
-欢迎来到铁路美学-未来！
-这是一个Minecraft资源包，它依赖于 `ANTE` 与 `MTR` mod。
-Welcome to Railway Aesthetics - Future!
+欢迎来到铁路美学-未来！  
+这是一个Minecraft资源包，它依赖于 `ANTE` 与 `MTR` mod。  
+Welcome to Railway Aesthetics - Future!  
 This is a Minecraft resource pack that depends on `ANTE` and `MTR` mod.
 
-当前版本: V1.0.0 适配 `ANTE 1.0.0`
-Previous version: V1.0.0 `NTE 1.0.0` compatible
+当前版本: V1.0.0 适配 `ANTE 1.0.0`  
+Previous version: V1.0.0 `ANTE 1.0.0` compatible
 
 欢迎加入我们的 QQ 群: 836291719
 Welcome to join our QQ group: 836291719
 
-相关链接 Related links:
-- [RailwayAesthetics-Future 仓库 Repository](https://github.com/aphrodite281/RailwayAesthetics-Future)
-- [NTE 发行版 Releases](https://github.com/aphrodite281/mtr-nte/releases/)
-- [NTE 文档 Documentation](https://aphrodite281.github.io/mtr-nte/)
+相关链接 Related links:  
+- [RailwayAesthetics-Future 仓库 Repository](https://github.com/aphrodite281/RailwayAesthetics-Future)  
+- [NTE 发行版 Releases](https://github.com/aphrodite281/mtr-nte/releases/)  
+- [NTE 文档 Documentation](https://aphrodite281.github.io/mtr-nte/)  
 
 
-> 下载方法 :跳转至 [Railway Aesthetics - Future 发行版](https://github.com/aphrodite281/RailwayAesthetics-Future/releases) 下载最新版本 
-> Download versions from [Railway Aesthetics - Future Releases](https://github.com/aphrodite281/RailwayAesthetics-Future/releases)
+> 下载方法 :跳转至 [Railway Aesthetics - Future 发行版](https://github.com/aphrodite281/RailwayAesthetics-Future/releases) 下载最新版本   
+> Download versions from [Railway Aesthetics - Future Releases](https://github.com/aphrodite281/RailwayAesthetics-Future/releases)  
 
 
 
