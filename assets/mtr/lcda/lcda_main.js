@@ -33,6 +33,7 @@ let modelSize = [1600 / 2000, 350 / 2000];
 let doorZPositions = [0, 5, -5, 10, -10];
 let doorPosition = [1.3, 1.9];// x、y
 let rotateX = 15 / 180 * Math.PI;// YX(Z)欧拉的X
+let finalTranslate = [0, 0, 0];
 let filletPixel = 30;
 let companyNameCJK = "北武工艺";
 let companyNameENG = "HOKUBUCRAFT";
@@ -121,6 +122,8 @@ function getMatrices(isRight) {
     for (let position of doorZPositions) {
         matrices.pushPose();
         execute(position);
+        let [x, y, z] = finalTranslate;
+        matrices.translate(x, y, z);
         result.push(matrices.last());
         matrices.popPose();
     }
