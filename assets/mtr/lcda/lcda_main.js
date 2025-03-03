@@ -1280,7 +1280,7 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
             let lastStart;
             // let timeoutTimes = 0;
 
-            let lastImg, lastTime, needUpload = false;
+            let lastImg, lastTime, needUpload = false, lastAlpha = 0;
             let draw = new Runnable({run: () => {
                 try {
                     let fps = -100;
@@ -1303,7 +1303,7 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
                         needUpload = false;
                     }
                     ti("Upload");
-                    if (mainAlpha.get() == 0 && !mainAlpha.isChanged()) {
+                    if (mainAlpha.get() == 0 && mainAlpha == lastAlpha) {
                         ti("Skip Draw");
                     } else {
                         // let done = false;
@@ -1347,6 +1347,7 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
                         lastImg = img;
                         lastTime = time;
                     }
+                    lastAlpha = mainAlpha.get();
                     used.push("Offside: " + uploadManager.getOffside());
                     let dd = new Date();
                     let ts = dd.getMinutes().toString().padStart(2, '0') + ":" + dd.getSeconds().toString().padStart(2, '0') + "::" + dd.getMilliseconds().toString().padStart(3, '0');
