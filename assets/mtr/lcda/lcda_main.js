@@ -88,7 +88,6 @@ function create(ctx, state, train) {
     }
     state.tickList = tickList;
     state.infoArray = infoArray;
-    state.disposeList = disposeList;
 }
 
 
@@ -104,9 +103,6 @@ function render(ctx, state, train) {
 function dispose(ctx, state, train) {
     state.running = false;
     state.lastTime = -10000;
-    for (let entry of state.disposeList) {
-        entry();
-    }
 }
 
 function getMatrices(isRight) {
@@ -153,6 +149,20 @@ function generateFilletOverlay() {
     g.fillRoundRect(0, 0, textureSize[0], textureSize[1], filletPixel, filletPixel);
     g.dispose();
     filletOverlay = img;
+}
+
+let distanceInput = new ConfigResponder.TextField("lcda_distance", ComponentUtil.translatable("name.raf.lcda_distance"), "1")
+    .setErrorSupplier(str => {
+        let value = Number(str);
+        if (isNaN(value) || value <= 0) {
+            return java.util.Optional.of(asJavaArray([ComponentUtil.translatable("error.raf.invalid_value")]));
+        }
+    })
+
+ClientConfig.register(distanceInput);
+
+function drawingDistance() {
+    return Number(ClientConfig.get("lcda_distance"));
 }
 
 let smooth = (k, value) => {// 平滑变化
@@ -1305,6 +1315,8 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
                     ti("Upload");
                     if (mainAlpha.get() == 0 && mainAlpha == lastAlpha) {
                         ti("Skip Draw");
+                    } else if (MinecraftClient.getCameraPos().distanceSq(train.lastCarPosition[carIndex - 1]) > drawingDistance()) {
+                        ti("Offside");
                     } else {
                         // let done = false;
                         let time = now();
@@ -1383,6 +1395,7 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
             for (let fun of disposeList) {
                 fun();
             }
+            face.close();
         }
     } , "ARAF-LCD-Thread On Train " + ctx.hashCode() + " " + carIndex + " " + (isRight? "Right" : "Left"));
 
