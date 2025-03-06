@@ -1290,7 +1290,7 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
             let lastStart;
             // let timeoutTimes = 0;
 
-            let lastImg, lastTime, needUpload = false, lastAlpha = 0;
+            let lastImg, lastTime, needUpload = false, lastAlpha = -114514;
             let draw = new Runnable({run: () => {
                 try {
                     let fps = -100;
@@ -1374,7 +1374,7 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
                 }
             }});
 
-
+            draw.run();
             //let submit = new Runnable({run: () => executor.submit(draw)});
             submitPool.scheduleAtFixedRate(draw, 1000, 1000 / 20, TimeUnit.MILLISECONDS);
 
