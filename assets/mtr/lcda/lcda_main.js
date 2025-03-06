@@ -64,7 +64,7 @@ function create(ctx, state, train) {
             texture: textureSize,
             model: {
                 size: modelSize,
-                renderType: "light",
+                renderType: "lighttranslucent",
                 uvSize: [1, 1]
             }
         }
