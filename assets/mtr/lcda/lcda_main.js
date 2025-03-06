@@ -153,10 +153,11 @@ function generateFilletOverlay() {
 
 let distanceInput = new ConfigResponder.TextField("lcda_distance", ComponentUtil.translatable("name.raf.lcda_distance"), "1")
     .setErrorSupplier(str => {
-        let value = Number(str);
+        let value = Number(str + "");
         if (isNaN(value) || value <= 0) {
             return java.util.Optional.of(asJavaArray([ComponentUtil.translatable("error.raf.invalid_value")]));
         }
+        return java.util.Optional.empty();
     })
 
 ClientConfig.register(distanceInput);
