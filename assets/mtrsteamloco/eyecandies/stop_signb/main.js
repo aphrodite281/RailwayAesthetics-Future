@@ -11,7 +11,7 @@ const faceKey = "face";
 
 const defaultFont = "aphrodite:library/font/lgc.ttf";
 
-const res0 = new ConfigResponder.TextField(fontKey, ComponentUtil.translatable("name.raf.stop_signb_font"), defaultFont, str => str, ErrorSupplier.Font, str => {}, str => java.util.Optional.of(asJavaArray([ComponentUtil.translatable("tip.raf.font"), ComponentUtil.translatable("tip.aph.reload_resourcepack")])), false);
+const res0 = new ConfigResponder.TextField(fontKey, ComponentUtil.translatable("name.raf.stop_signb_font"), defaultFont, str => str, ErrorSupplier.Font, str => {}, str => java.util.Optional.of(asJavaArray([ComponentUtil.translatable("tip.raf.font"), ComponentUtil.translatable("tip.aph.reload_resourcepack")], Component)), false);
 ClientConfig.register(res0);
 
 const nowFont = ClientConfig.get(fontKey) + "";

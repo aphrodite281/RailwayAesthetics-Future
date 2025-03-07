@@ -64,16 +64,16 @@ function create(ctx, state, train) {
             texture: textureSize,
             model: {
                 size: modelSize,
-                renderType: "lighttranslucent",
+                renderType: "light",
                 uvSize: [1, 1]
             }
         }
         let rightFace = new Face(info);
         let leftFace = new Face(info);
     
-        let rightThread = new LCDThread(rightFace, true, ctx, state, train, i + 1, first);
+        let rightThread = new LCDThread(rightFace, true, ctx, state, i + 1, first);
         first = false;
-        let leftThread = new LCDThread(leftFace, false, ctx, state, train, i + 1);
+        let leftThread = new LCDThread(leftFace, false, ctx, state, i + 1);
 
         for (let matrix of rightMatrices) {
             ctx.drawCalls[i].put("lcd_right_face" + i + "-" + matrix, new ClusterDrawCall(rightFace.model, matrix));
@@ -98,6 +98,7 @@ function render(ctx, state, train) {
     for (let entry of state.tickList) {
         entry();
     }
+    ctx.setDebugInfo("lp", train.lastWorldPose[0].getTranslationPart().toString());
 }
 
 function dispose(ctx, state, train) {
@@ -133,6 +134,7 @@ function getMatrices(isRight) {
 function apply() {
     updateMatrices();
     generateFilletOverlay();
+    textureSize = [textureSize[0] * pixelDensity(), textureSize[1] * pixelDensity()];
 }
 
 function updateMatrices() {
@@ -151,19 +153,20 @@ function generateFilletOverlay() {
     filletOverlay = img;
 }
 
-let distanceInput = new ConfigResponder.TextField("lcda_distance", ComponentUtil.translatable("name.raf.lcda_distance"), "1")
+const pd = "lcda_pixel_density"
+let pdInput = new ConfigResponder.TextField(pd, ComponentUtil.translatable("name.raf.lcda_pixel_density"), "1")
     .setErrorSupplier(str => {
         let value = Number(str + "");
         if (isNaN(value) || value <= 0) {
-            return Optional.of(asJavaArray([ComponentUtil.translatable("error.raf.invalid_value")]));
+            return Optional.of(asJavaArray([ComponentUtil.translatable("error.raf.invalid_value")], Component));
         }
         return Optional.empty();
     })
 
-ClientConfig.register(distanceInput);
+ClientConfig.register(pdInput);
 
-function drawingDistance() {
-    return Number(ClientConfig.get("lcda_distance"));
+function pixelDensity() {
+    return Number(ClientConfig.get(pd));
 }
 
 let smooth = (k, value) => {// 平滑变化
@@ -187,8 +190,9 @@ let smooth = (k, value) => {// 平滑变化
     }
 }*/
 
-function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
-    let uid = "LCDThread-" + "Car" + carIndex + '-' + (isRight ? "Right " : "Left  ");;
+function LCDThread(face, isRight, ctx, state, carIndex, ttf) {
+    let uid = "LCDThread-" + "Car" + carIndex + '-' + (isRight ? "Right " : "Left  ");
+    let train = () => ctx.getWrapperObject();
     let thread = new Thread(() => {
         let disposeList = [];
         try {
@@ -203,7 +207,7 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
             let tex = face.texture;
             let uploadManager = new UploadManager(tex);
             let upload = uploadManager.upload;
-            let isOnRoute = () => train.isOnRoute();
+            let isOnRoute = () => train().isOnRoute();
             let w = tex.width, h = tex.height;
             disposeList.push(() => {
                 uploadManager.dispose();
@@ -279,8 +283,8 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
                     return luminance > 255 / 2 ? 0 : 0xffffff;
                 }
                 while(1) {
-                    let plas = train.getThisRoutePlatforms();
-                    let ind = train.getThisRoutePlatformsNextIndex();
+                    let plas = train().getThisRoutePlatforms();
+                    let ind = train().getThisRoutePlatformsNextIndex();
                     iindex = ind;
                     if (plas.length == 0) break;
                     if (plas == null) break;
@@ -302,9 +306,9 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
                     edest = TU.NP(dest);
                     station = pla.station;
                     ss();
-                    let pro = train.getRailProgress(0);
-                    let index = train.getRailIndex(pro, true);
-                    let pd = train.path()[index];
+                    let pro = train().getRailProgress(0);
+                    let index = train().getRailIndex(pro, true);
+                    let pd = train().path()[index];
                     let rail = pd.rail;
                     let p0 = new Vector3f(rail.getPosition(0)), p1 = new Vector3f(rail.getPosition(rail.getLength() + 100));
                     let plat = pla.platform;
@@ -319,7 +323,7 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
                     t3 = TU.CP(name), t4 = TU.NP(name);
                     is = false;
             
-                    let paths = train.path();
+                    let paths = train().path();
                     let dsub = [];
                     dsub.push(0);
                     for (let i = 1; i <= paths.length; i++) {
@@ -327,11 +331,11 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
                     }
             
                     let d = pla.distance;
-                    let s = train.spacing();
+                    let s = train().spacing();
                     let rv1 = d - s * carIndex;
                     let rv2 = d - s * (carIndex - 1);
-                    let po1 = train.getRailIndex(rv1, true);
-                    let po2 = train.getRailIndex(rv2, true);
+                    let po1 = train().getRailIndex(rv1, true);
+                    let po2 = train().getRailIndex(rv2, true);
                     let r1 = paths[po1].rail;
                     let r2 = paths[po2].rail;
                     let v1 = rv1 - dsub[po1];
@@ -938,7 +942,7 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
             let outWidth = w * 30 / 500;
             let DA0 = (g) => {
                 let dop = iopen > 0 ? 1 : 0;
-                let dv = smooth(1, iopen * train.doorValue() * 3 * iisArrive);
+                let dv = smooth(1, iopen * train().doorValue() * 3 * iisArrive);
                 setComp(g, 1);
                 let x = w * 45 / 500, y = h * (0.7 - 0.4);
                 let v = dv;
@@ -1314,10 +1318,9 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
                         needUpload = false;
                     }
                     ti("Upload");
+                    ti("Positions" + MinecraftClient.getCameraPos().toString() + train().lastWorldPose[carIndex - 1].getTranslationPart().toString())
                     if (mainAlpha.get() == 0 && mainAlpha == lastAlpha) {
                         ti("Skip Draw");
-                    } else if (MinecraftClient.getCameraPos().distanceSq(train.lastCarPosition[carIndex - 1]) > drawingDistance()) {
-                        ti("Offside");
                     } else {
                         // let done = false;
                         let time = now();
@@ -1359,15 +1362,17 @@ function LCDThread(face, isRight, ctx, state, train, carIndex, ttf) {
                         needUpload = true;
                         lastImg = img;
                         lastTime = time;
+                        lastAlpha = mainAlpha.get();
                     }
-                    lastAlpha = mainAlpha.get();
                     used.push("Offside: " + uploadManager.getOffside());
                     let dd = new Date();
                     let ts = dd.getMinutes().toString().padStart(2, '0') + ":" + dd.getSeconds().toString().padStart(2, '0') + "::" + dd.getMilliseconds().toString().padStart(3, '0');
-                    ctx.setDebugInfo(uid, ts, "Ctrl: " + ctrlUsed, "FPS:" + fps.toFixed(2).toString().padStart(5, '0'), "\n", 
-                    "Pools: " + ["ctrl: " + ctrlPool.getActiveCount() + "/" + ctrlPool.getPoolSize(), "submit: " + submitPool.getActiveCount() + "/" + submitPool.getPoolSize()].toString(), "D-Calls:" + DDrawCalls.toString(), "S-Calls:" + SDrawCalls.toString(), "\n", 
-                    "Used: " + used.toString(), "DStyle: " + DStyle, "\n", 
-                    "Arrive: " + iisArrive, "OnRoute: " + isOnRoute(), "Alpha: " + mainAlpha.dir() + " " +  mainAlpha.speed()+ " " + mainAlpha.get().toFixed(2).toString().padStart(5, '0')); // , "upload: " + uoloadPool.getActiveCount() + "/" + uoloadPool.getPoolSize(), "executor: " + executor.getActiveCount() + "/" + executor.getPoolSize() , "Timeout: " + timeoutTimes
+                    if (tf) {
+                        ctx.setDebugInfo(uid, ts, "Ctrl: " + ctrlUsed, "FPS:" + fps.toFixed(2).toString().padStart(5, '0'), "\n", 
+                        "Pools: " + ["ctrl: " + ctrlPool.getActiveCount() + "/" + ctrlPool.getPoolSize(), "submit: " + submitPool.getActiveCount() + "/" + submitPool.getPoolSize()].toString(), "D-Calls:" + DDrawCalls.toString(), "S-Calls:" + SDrawCalls.toString(), "\n", 
+                        "Used: " + used.toString(), "DStyle: " + DStyle, "\n", 
+                        "Arrive: " + iisArrive, "OnRoute: " + isOnRoute(), "Alpha: " + mainAlpha.dir() + " " +  mainAlpha.speed()+ " " + mainAlpha.get().toFixed(2).toString().padStart(5, '0')); // , "upload: " + uoloadPool.getActiveCount() + "/" + uoloadPool.getPoolSize(), "executor: " + executor.getActiveCount() + "/" + executor.getPoolSize() , "Timeout: " + timeoutTimes
+                    }
                 } catch (e) {
                     ctx.setDebugInfo(uid + " Error At: ", now().toString(), e.message, e.stack);
                     print(uid + " Error At: " + now().toString() + "     " + e.message + "      " + e.stack);

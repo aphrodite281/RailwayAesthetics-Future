@@ -34,6 +34,7 @@ function UploadManager(tex, tmax, tmin, tavg, tf, ty) {
     let history = [];
     let lasttime = 0;
     let offside = 0;
+    let latest = null;
 
     /**
      * 上传图片
@@ -68,7 +69,10 @@ function UploadManager(tex, tmax, tmin, tavg, tf, ty) {
             history = ne;
             avg = sum / history.length;
         }
+        latest = img;
     }
+
+    this.getLatest = () => latest;
 
     this.getAnalyse = () => {
         let img = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);

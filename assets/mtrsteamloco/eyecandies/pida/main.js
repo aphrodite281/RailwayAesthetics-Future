@@ -35,20 +35,20 @@ const res3 = newColorRes(checkingColorKey, "checking_color", "0x00ff00");
 const res4 = newColorRes(waitingColorKey, "waiting_color", "0xffffff");
 const res5 = new ConfigResponder.TextField(runKey, ComponentUtil.translatable("name.raf.run"), "true").setErrorSupplier(ErrorSupplier.only(["true", "false"]));
 const res6 = new ConfigResponder.TextField(sloganKey, ComponentUtil.translatable("name.raf.slogan"), "开车前5分钟停止检票");
-const res7 = new ConfigResponder.TextField(modeKey, ComponentUtil.translatable("name.raf.mode"), "0").setErrorSupplier(ErrorSupplier.only(["0", "1"])).setTooltipSupplier(str => java.util.Optional.of([ComponentUtil.translatable("tip.raf.pida_mode")]));
+const res7 = new ConfigResponder.TextField(modeKey, ComponentUtil.translatable("name.raf.mode"), "0").setErrorSupplier(ErrorSupplier.only(["0", "1"])).setTooltipSupplier(str => java.util.Optional.of(asJavaArray([ComponentUtil.translatable("tip.raf.pida_mode")], Component)));
 const res8 = new ConfigResponder.TextField(limitsKey, ComponentUtil.translatable("name.raf.limits"), "5/15").setErrorSupplier(str => {
     let arr = str.split("/");
     if (arr.length != 2) {
-        return java.util.Optional.of(ComponentUtil.translatable("error.aph.invalid_value"));
+        return java.util.Optional.of(asJavaArray([ComponentUtil.translatable("error.aph.invalid_value")], Component));
     }
     let num1 = parseFloat(arr[0]);
     let num2 = parseFloat(arr[1]);
     if (isNaN(num1) || isNaN(num2) || num1 < 0 || num2 < 0) {
-        return java.util.Optional.of(ComponentUtil.translatable("error.aph.invalid_value"));
+        return java.util.Optional.of(asJavaArray([ComponentUtil.translatable("error.aph.invalid_value")], Component));
     }
     return java.util.Optional.empty();
 });
-const res9 = new ConfigResponder.TextField(fontKey, ComponentUtil.translatable("name.raf.pida_font"), defaultFont, str => str, ErrorSupplier.Font, str => {}, str => java.util.Optional.of(asJavaArray([ComponentUtil.translatable("tip.raf.font"), ComponentUtil.translatable("tip.aph.reload_resourcepack")])), false);
+const res9 = new ConfigResponder.TextField(fontKey, ComponentUtil.translatable("name.raf.pida_font"), defaultFont, str => str, ErrorSupplier.Font, str => {}, str => java.util.Optional.of(asJavaArray([ComponentUtil.translatable("tip.raf.font"), ComponentUtil.translatable("tip.aph.reload_resourcepack")], Component)), false);
 ClientConfig.register(res9);
 const res10 = new ConfigResponder.TextField(scaleKey, ComponentUtil.translatable("name.raf.scale"), "1.0").setErrorSupplier(ErrorSupplier.Float);
 
