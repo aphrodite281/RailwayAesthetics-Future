@@ -155,9 +155,9 @@ let distanceInput = new ConfigResponder.TextField("lcda_distance", ComponentUtil
     .setErrorSupplier(str => {
         let value = Number(str + "");
         if (isNaN(value) || value <= 0) {
-            return java.util.Optional.of(asJavaArray([ComponentUtil.translatable("error.raf.invalid_value")]));
+            return Optional.of(asJavaArray([ComponentUtil.translatable("error.raf.invalid_value")]));
         }
-        return java.util.Optional.empty();
+        return Optional.empty();
     })
 
 ClientConfig.register(distanceInput);
