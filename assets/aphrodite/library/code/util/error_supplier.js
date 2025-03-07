@@ -39,7 +39,7 @@ var ErrorSupplier = {
         str = str + "";
         if (str.endsWith(".ttf") || str.endsWith(".otf")) {
             try {
-                let font = Resources.readFont(Resources.id(str)]));
+                let font = Resources.readFont(Resources.id(str));
                 return Optional.empty();
             } catch (e) {
                 return Optional.of(asJavaArray([ComponentUtil.translatable("error.aph.invalid_font")]));
