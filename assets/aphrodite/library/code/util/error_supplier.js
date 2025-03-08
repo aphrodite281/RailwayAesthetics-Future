@@ -2,19 +2,19 @@ var ErrorSupplier = {
     Int: function(str) {
         str = str + "";
         let num = parseInt(str);
-        if (isNaN(num)) return Optional.of(asJavaArray([ComponentUtil.translatable("error.aph.invalid_value")], Component));
+        if (isNaN(num)) return Optional.of(ComponentUtil.translatable("error.aph.invalid_value"));
         else return Optional.empty();
     }, 
     Float:function(str) {
         str = str + "";
         let num = parseFloat(str);
-        if (isNaN(num)) return Optional.of(asJavaArray([ComponentUtil.translatable("error.aph.invalid_value")], Component));
+        if (isNaN(num)) return Optional.of(ComponentUtil.translatable("error.aph.invalid_value"));
         else return Optional.empty();
     },
     Color:function(str) {
         str = str + "";
         let num = parseInt(str);
-        if (isNaN(num) || num < 0 || num > 0xffffff) return Optional.of(asJavaArray([ComponentUtil.translatable("error.aph.invalid_color")], Component));
+        if (isNaN(num) || num < 0 || num > 0xffffff) return Optional.of(ComponentUtil.translatable("error.aph.invalid_color"));
         else return Optional.empty();
     },
     endWith: function(args) {
@@ -23,7 +23,7 @@ var ErrorSupplier = {
             for (let arg of args) {
                 if (str.endsWith(arg)) return Optional.empty();
             }
-            return Optional.of(asJavaArray([ComponentUtil.translatable("error.aph.invalid_value")], Component));
+            return Optional.of(ComponentUtil.translatable("error.aph.invalid_value"));
         }
     },
     only: function(args) {
@@ -32,19 +32,31 @@ var ErrorSupplier = {
             for (let arg of args) {
                 if (str == arg) return Optional.empty();
             }
-            return Optional.of(asJavaArray([ComponentUtil.translatable("error.aph.only_be", args.join(", "))], Component));
+            return Optional.of(ComponentUtil.translatable("error.aph.only_be", args.join(", ")));
         }
     }, 
     Font: function(str) {
         str = str + "";
         if (str.endsWith(".ttf") || str.endsWith(".otf")) {
-            try {
-                let font = Resources.readFont(Resources.id(str));
-                return Optional.empty();
-            } catch (e) {
-                return Optional.of(asJavaArray([ComponentUtil.translatable("error.aph.invalid_font")], Component));
+            if (!Resources.hasResource(Resources.id(str))) {
+                return Optional.of(ComponentUtil.translatable("error.aph.invalid_font"));
             }
-        } else {
+        }
+        return Optional.empty();
+    },
+    Number: function(str) {
+        str = str + "";
+        let num = Number(str);
+        if (isNaN(num)) return Optional.of(ComponentUtil.translatable("error.aph.invalid_value"));
+        return Optional.empty();
+    },
+    NumberRange: function(min, max, includeMin, includeMax) {
+        return function(str) {
+            str = str + "";
+            let num = Number(str);
+            if ((min != null && (includeMin? num < min : num <= min)) || (max != null && (includeMax? num > max : num >= max))) {
+                return Optional.of(ComponentUtil.translatable("error.aph.number_range", min, max));
+            }
             return Optional.empty();
         }
     }

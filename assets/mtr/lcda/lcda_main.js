@@ -14,10 +14,12 @@ include(Resources.id("aphrodite:library/code/util/text_u.js"));
 include(Resources.id("aphrodite:library/code/util/map_tostring.js"));
 include(Resources.id("aphrodite:library/code/util/array_tostring.js"));
 include(Resources.id("aphrodite:library/code/util/value.js"));
+include(Resources.id("aphrodite:library/code/util/error_supplier.js"));
 include(Resources.id("aphrodite:library/code/graphic/color_u.js"));
 include(Resources.id("aphrodite:library/code/graphic/text_manager.js"));
 include(Resources.id("aphrodite:library/code/graphic/canvas.js"));
 include(Resources.id("aphrodite:library/code/graphic/upload_manager.js"));
+
 include(Resources.id("mtr:lcda/icon/hc.js")); //换乘
 include(Resources.id("mtr:lcda/icon/zd.js")); //站点
 include(Resources.id("mtr:lcda/icon/bz.js")); //爆炸
@@ -64,7 +66,7 @@ function create(ctx, state, train) {
             texture: textureSize,
             model: {
                 size: modelSize,
-                renderType: "light",
+                renderType: "lighttranslucent",
                 uvSize: [1, 1]
             }
         }
@@ -133,8 +135,9 @@ function getMatrices(isRight) {
 
 function apply() {
     updateMatrices();
-    generateFilletOverlay();
     textureSize = [textureSize[0] * pixelDensity(), textureSize[1] * pixelDensity()];
+    filletPixel = pixelDensity() * filletPixel;
+    generateFilletOverlay();
 }
 
 function updateMatrices() {
@@ -153,20 +156,23 @@ function generateFilletOverlay() {
     filletOverlay = img;
 }
 
-const pd = "lcda_pixel_density"
-let pdInput = new ConfigResponder.TextField(pd, ComponentUtil.translatable("name.raf.lcda_pixel_density"), "1")
-    .setErrorSupplier(str => {
-        let value = Number(str + "");
-        if (isNaN(value) || value <= 0) {
-            return Optional.of(asJavaArray([ComponentUtil.translatable("error.raf.invalid_value")], Component));
-        }
-        return Optional.empty();
-    })
+const pdKey = "lcda_pixel_density"
+let pdInput = new ConfigResponder.TextField(pdKey, ComponentUtil.translatable("name.raf.lcda_pixel_density"), "0.5")
+    .setErrorSupplier(ErrorSupplier.NumberRange(0, null, false, false));
 
 ClientConfig.register(pdInput);
 
 function pixelDensity() {
-    return Number(ClientConfig.get(pd));
+    return Number(ClientConfig.get(pdKey));
+}
+
+const fpsKey = "lcda_fps"
+let fpsInput = new ConfigResponder.TextField(fpsKey, ComponentUtil.translatable("name.raf.lcda_fps"), "24")
+    .setErrorSupplier(ErrorSupplier.NumberRange(0, null, false, false));
+ClientConfig.register(fpsInput);
+
+function fpsGlobal() {
+    return Number(ClientConfig.get(fpsKey));
 }
 
 let smooth = (k, value) => {// 平滑变化
@@ -205,7 +211,7 @@ function LCDThread(face, isRight, ctx, state, carIndex, ttf) {
             let font2 = fontC.deriveFont(Font.PLAIN, 45);
             
             let tex = face.texture;
-            let uploadManager = new UploadManager(tex);
+            let uploadManager = new UploadManager(tex, fpsGlobal() + 20, fpsGlobal() - 20);
             let upload = uploadManager.upload;
             let isOnRoute = () => train().isOnRoute();
             let w = tex.width, h = tex.height;
@@ -867,7 +873,7 @@ function LCDThread(face, isRight, ctx, state, carIndex, ttf) {
 
             let d = [];
             let dWidth = Math.min(w * 18 / 500 * 1.1, h * 0.4 * 0.5);
-            let drawDoor = () => {
+            {
                 let x0 = 0, y0 = h * 0.4, w0 = dWidth, h0 = h * 0.4;
                 let img = new BufferedImage(w0, h0, BufferedImage.TYPE_INT_ARGB);
                 let g = img.createGraphics();
@@ -909,7 +915,6 @@ function LCDThread(face, isRight, ctx, state, carIndex, ttf) {
                     g.dispose();
                 }
             }
-            drawDoor();
 
             let out = [];
             let drawOut = (isFill) => {
@@ -942,7 +947,7 @@ function LCDThread(face, isRight, ctx, state, carIndex, ttf) {
             let outWidth = w * 30 / 500;
             let DA0 = (g) => {
                 let dop = iopen > 0 ? 1 : 0;
-                let dv = smooth(1, iopen * train().doorValue() * 3 * iisArrive);
+                let dv = smooth(1, iopen * train().doorValue() * 1.5 * iisArrive);
                 setComp(g, 1);
                 let x = w * 45 / 500, y = h * (0.7 - 0.4);
                 let v = dv;
@@ -1318,7 +1323,6 @@ function LCDThread(face, isRight, ctx, state, carIndex, ttf) {
                         needUpload = false;
                     }
                     ti("Upload");
-                    ti("Positions" + MinecraftClient.getCameraPos().toString() + train().lastWorldPose[carIndex - 1].getTranslationPart().toString())
                     if (mainAlpha.get() == 0 && mainAlpha == lastAlpha) {
                         ti("Skip Draw");
                     } else {
@@ -1382,11 +1386,12 @@ function LCDThread(face, isRight, ctx, state, carIndex, ttf) {
 
             draw.run();
             //let submit = new Runnable({run: () => executor.submit(draw)});
-            submitPool.scheduleAtFixedRate(draw, 1000, 1000 / 20, TimeUnit.MILLISECONDS);
+            submitPool.scheduleAtFixedRate(draw, 1000, 1000 / fpsGlobal(), TimeUnit.MILLISECONDS);
 
             while (state.running && state.lastTime + 60000 > now()) {
                 if (tf) {
                     ctx.setDebugInfo(uid + "fps", PlacementOrder.UPPER, uploadManager.getAnalyse());
+                    ctx.setDebugInfo(uid + "tex", PlacementOrder.UPPER, face.texture);
                 } else {
                     Thread.sleep(1000);
                 }

@@ -39,12 +39,12 @@ const res7 = new ConfigResponder.TextField(modeKey, ComponentUtil.translatable("
 const res8 = new ConfigResponder.TextField(limitsKey, ComponentUtil.translatable("name.raf.limits"), "5/15").setErrorSupplier(str => {
     let arr = str.split("/");
     if (arr.length != 2) {
-        return java.util.Optional.of(asJavaArray([ComponentUtil.translatable("error.aph.invalid_value")], Component));
+        return java.util.Optional.of(ComponentUtil.translatable("error.aph.invalid_value"));
     }
     let num1 = parseFloat(arr[0]);
     let num2 = parseFloat(arr[1]);
     if (isNaN(num1) || isNaN(num2) || num1 < 0 || num2 < 0) {
-        return java.util.Optional.of(asJavaArray([ComponentUtil.translatable("error.aph.invalid_value")], Component));
+        return java.util.Optional.of(ComponentUtil.translatable("error.aph.invalid_value"));
     }
     return java.util.Optional.empty();
 });

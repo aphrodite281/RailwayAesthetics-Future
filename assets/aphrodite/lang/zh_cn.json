@@ -1,5 +1,6 @@
 {
     "error.aph.invalid_value": "无效的值",
+    "error.aph.number_range": "数值范围为 %s 到 %s",
     "error.aph.invalid_color": "无效的颜色",
     "error.aph.only_be": "只能是 %s",
     "name.aph.text_manager_mode": "文本管理模式",
