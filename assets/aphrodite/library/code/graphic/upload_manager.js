@@ -30,6 +30,7 @@ function UploadManager(tex, tmax, tmin, tavg, tf, ty) {
     const fontA = Resources.getSystemFont("Noto Sans");
     const w = 1000, h = 80;
     const anaTex = new GraphicsTexture(w, h);
+    anaTex.graphics.setComposite(AlphaComposite.Src);
     let last, max, min, avg, times = 0;
     let history = [];
     let lasttime = 0;
@@ -37,14 +38,16 @@ function UploadManager(tex, tmax, tmin, tavg, tf, ty) {
 
     /**
      * 上传图片
+     * @param {BufferedImage} img 新图片
      * @param {number} timestamp 时间戳
      */
-    this.upload = (timestamp) => {
+    this.upload = (img, timestamp) => {
         if (timestamp <= lasttime) {
             offside++;
             return;
         }
         else lasttime = timestamp;
+        tex.graphics.drawImage(img, 0, 0, null);
         tex.upload();
         if (last == undefined) last = Date.now();
         else {
@@ -71,7 +74,8 @@ function UploadManager(tex, tmax, tmin, tavg, tf, ty) {
 
     this.getAnalyse = () => {
         let arr = history;
-        let g = tex.graphics;
+        let img = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+        let g = img.createGraphics();
 
         const f = (x) => 1000 / x;
         const fy = (y) => h - h / (tmax - tmin) * (y - tmin);
@@ -137,6 +141,7 @@ function UploadManager(tex, tmax, tmin, tavg, tf, ty) {
         g.drawRect(0, 0, w, h);
 
         g.dispose();
+        anaTex.graphics.drawImage(img, 0, 0, null);
 
         anaTex.upload();
         return anaTex;

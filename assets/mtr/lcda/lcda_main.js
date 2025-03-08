@@ -217,7 +217,6 @@ function LCDThread(model, isRight, ctx, state, carIndex, ttf) {
             let tex = new GraphicsTexture(textureSize[0], textureSize[1]);
             model.replaceAllTexture(tex.identifier);
             let w = tex.width, h = tex.height;
-            let g0 = tex.graphics;
             
             let uploadManager = new UploadManager(tex, fpsGlobal() + 20, fpsGlobal() - 20);
             let upload = uploadManager.upload;
@@ -1308,7 +1307,7 @@ function LCDThread(model, isRight, ctx, state, carIndex, ttf) {
             let lastStart;
             // let timeoutTimes = 0;
 
-            let lastTime, needUpload = false, lastAlpha = -114514;
+            let lastSuit, lastTime, needUpload = false, lastAlpha = -114514;
             let draw = new Runnable({run: () => {
                 try {
                     let fps = -100;
@@ -1325,19 +1324,16 @@ function LCDThread(model, isRight, ctx, state, carIndex, ttf) {
                     else if (mainAlpha.get() == 0 && isOnRoute()) mainAlpha.turn(1);
                     mainAlpha.update();
                     ti("Update");
-
-                    if (needUpload) {
-                        upload(lastTime);
-                        needUpload = false;
-                    }
-                    ti("Upload");
                     if (mainAlpha.get() == 0 && mainAlpha.get() == lastAlpha) {
                         ti("Skip Draw");
                     } else {
                         // let done = false;
                         let time = now();
                         let a = mainAlpha.get();
-                        let g = g0;
+                        // let suit = tex.createBuffer();
+                        // let g = suit.graphics;
+                        let img = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+                        let g = img.createGraphics();
                         // let runUpload = new Runnable({run: () => {
                         //     if (done) upload(img, time);
                         //     else timeoutTimes++;
@@ -1366,9 +1362,11 @@ function LCDThread(model, isRight, ctx, state, carIndex, ttf) {
 
                         g.setComposite(AlphaComposite.DstOut);
                         g.drawImage(filletOverlay, 0, 0, null);
+                        g.dispose();
                         ti("Draw");
 
-                        needUpload = true;
+                        upload(img, time);
+                        ti("Upload")
                         lastTime = time;
                         lastAlpha = mainAlpha.get();
                     }
@@ -1396,9 +1394,8 @@ function LCDThread(model, isRight, ctx, state, carIndex, ttf) {
             while (state.running && state.lastTime + 60000 > now()) {
                 if (tf) {
                     ctx.setDebugInfo(uid + "fps", PlacementOrder.UPPER, uploadManager.getAnalyse());
-                } else {
-                    Thread.sleep(1000);
                 }
+                Thread.sleep(10);
             }
             ctx.setDebugInfo(uid + "Exit", true);
 
