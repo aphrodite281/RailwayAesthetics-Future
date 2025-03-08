@@ -1323,7 +1323,7 @@ function LCDThread(face, isRight, ctx, state, carIndex, ttf) {
                         needUpload = false;
                     }
                     ti("Upload");
-                    if (mainAlpha.get() == 0 && mainAlpha == lastAlpha) {
+                    if (mainAlpha.get() == 0 && mainAlpha.get() == lastAlpha) {
                         ti("Skip Draw");
                     } else {
                         // let done = false;
