@@ -9,7 +9,6 @@ importPackage(java.awt.geom);
 importPackage(java.awt.font);
 importPackage(java.util.concurrent);
 
-include(Resources.id("aphrodite:library/code/model/face.js"));
 include(Resources.id("aphrodite:library/code/util/text_u.js"));
 include(Resources.id("aphrodite:library/code/util/map_tostring.js"));
 include(Resources.id("aphrodite:library/code/util/array_tostring.js"));
@@ -51,6 +50,8 @@ let rightMatrices = getMatrices(false);
 let leftMatrices = getMatrices(true);
 let cu = ColorU;
 
+let baseFaceModel = genFaceModel();
+
 function create(ctx, state, train) {
     state.running = true;
     state.lastTime = Date.now();
@@ -59,29 +60,19 @@ function create(ctx, state, train) {
     let disposeList = [];
     let first = true;
     for (let i = 0; i < train.trainCars(); i++) {
-        let info = {
-            ctx: ctx,
-            cars: [i],
-            matrices: [new Matrices()],
-            texture: textureSize,
-            model: {
-                size: modelSize,
-                renderType: "lighttranslucent",
-                uvSize: [1, 1]
-            }
-        }
-        let rightFace = new Face(info);
-        let leftFace = new Face(info);
+
+        let rightFace = baseFaceModel.copyForMaterialChanges();
+        let leftFace = baseFaceModel.copyForMaterialChanges();
     
         let rightThread = new LCDThread(rightFace, true, ctx, state, i + 1, first);
         first = false;
         let leftThread = new LCDThread(leftFace, false, ctx, state, i + 1);
 
         for (let matrix of rightMatrices) {
-            ctx.drawCalls[i].put("lcd_right_face" + i + "-" + matrix, new ClusterDrawCall(rightFace.model, matrix));
+            ctx.drawCalls[i].put("lcd_right_face" + i + "-" + matrix, new ClusterDrawCall(rightFace, matrix));
         }
         for (let matrix of leftMatrices) {
-            ctx.drawCalls[i].put("lcd_left_face" + i + "-" + matrix, new ClusterDrawCall(leftFace.model, matrix));
+            ctx.drawCalls[i].put("lcd_left_face" + i + "-" + matrix, new ClusterDrawCall(leftFace, matrix));
         }
 
         tickList.push(() => {rightThread.reStart(), leftThread.reStart()});
@@ -137,7 +128,8 @@ function apply() {
     updateMatrices();
     textureSize = [textureSize[0] * pixelDensity(), textureSize[1] * pixelDensity()];
     filletPixel = pixelDensity() * filletPixel;
-    generateFilletOverlay();
+    filletOverlay = genFilletOverlay();
+    baseFaceModel = genFaceModel();
 }
 
 function updateMatrices() {
@@ -145,7 +137,7 @@ function updateMatrices() {
     leftMatrices = getMatrices(true);
 }
 
-function generateFilletOverlay() {
+function genFilletOverlay() {
     let img = new BufferedImage(textureSize[0], textureSize[1], BufferedImage.TYPE_INT_ARGB);
     let g = img.createGraphics();
     g.setColor(Color.WHITE);
@@ -153,7 +145,7 @@ function generateFilletOverlay() {
     g.setComposite(AlphaComposite.Clear);
     g.fillRoundRect(0, 0, textureSize[0], textureSize[1], filletPixel, filletPixel);
     g.dispose();
-    filletOverlay = img;
+    return img;
 }
 
 const pdKey = "lcda_pixel_density"
@@ -181,6 +173,18 @@ let smooth = (k, value) => {// 平滑变化
     return (Math.cos(value / k * Math.PI + Math.PI) + 1) / 2 * k;
 }
 
+function genFaceModel() {
+    let builder = new RawMeshBuilder(4, "lighttranslucent", Resources.id("minecraft:textures/misc/white.png"));
+    for(let i = 0; i < 4; i++) {
+        builder.vertex(new Vector3f(modelSize[0] * (i == 0 || i == 1? 0.5 : -0.5), modelSize[1] * (i == 0 || i == 3 ? -0.5 : 0.5), 0)).uv(i == 0 || i ==1 ? 1 : 0, i == 0 || i == 3 ? 1 : 0).normal(0, 0, 0).endVertex();
+    }
+    let rawModel = new RawModel();
+    rawModel.append(builder.getMesh());
+    rawModel.triangulate();
+    let model = ModelManager.uploadVertArrays(rawModel);
+    return model;
+}
+
 /* let route0 = [];
 {
     let getColor = (color) => {
@@ -196,7 +200,7 @@ let smooth = (k, value) => {// 平滑变化
     }
 }*/
 
-function LCDThread(face, isRight, ctx, state, carIndex, ttf) {
+function LCDThread(model, isRight, ctx, state, carIndex, ttf) {
     let uid = "LCDThread-" + "Car" + carIndex + '-' + (isRight ? "Right " : "Left  ");
     let train = () => ctx.getWrapperObject();
     let thread = new Thread(() => {
@@ -210,13 +214,17 @@ function LCDThread(face, isRight, ctx, state, carIndex, ttf) {
             let font1 = fontB.deriveFont(Font.PLAIN, 45);
             let font2 = fontC.deriveFont(Font.PLAIN, 45);
             
-            let tex = face.texture;
+            let tex = new GraphicsTexture(textureSize[0], textureSize[1]);
+            model.replaceAllTexture(tex.identifier);
+            let w = tex.width, h = tex.height;
+            let g0 = tex.graphics;
+            
             let uploadManager = new UploadManager(tex, fpsGlobal() + 20, fpsGlobal() - 20);
             let upload = uploadManager.upload;
             let isOnRoute = () => train().isOnRoute();
-            let w = tex.width, h = tex.height;
             disposeList.push(() => {
                 uploadManager.dispose();
+                tex.close();
             });
 
             let planPool = Executors.newScheduledThreadPool(4);
@@ -1300,7 +1308,7 @@ function LCDThread(face, isRight, ctx, state, carIndex, ttf) {
             let lastStart;
             // let timeoutTimes = 0;
 
-            let lastImg, lastTime, needUpload = false, lastAlpha = -114514;
+            let lastTime, needUpload = false, lastAlpha = -114514;
             let draw = new Runnable({run: () => {
                 try {
                     let fps = -100;
@@ -1319,7 +1327,7 @@ function LCDThread(face, isRight, ctx, state, carIndex, ttf) {
                     ti("Update");
 
                     if (needUpload) {
-                        upload(lastImg, lastTime);
+                        upload(lastTime);
                         needUpload = false;
                     }
                     ti("Upload");
@@ -1329,15 +1337,13 @@ function LCDThread(face, isRight, ctx, state, carIndex, ttf) {
                         // let done = false;
                         let time = now();
                         let a = mainAlpha.get();
-                        let img = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+                        let g = g0;
                         // let runUpload = new Runnable({run: () => {
                         //     if (done) upload(img, time);
                         //     else timeoutTimes++;
                         // }});
                         // uoloadPool.schedule(runUpload, 400, TimeUnit.MILLISECONDS);// 延迟1000ms执行上传
 
-                        let g;
-                        g = img.createGraphics();
                         g.setColor(new Color(0));
                         g.fillRect(0, 0, w, h);
     
@@ -1360,11 +1366,9 @@ function LCDThread(face, isRight, ctx, state, carIndex, ttf) {
 
                         g.setComposite(AlphaComposite.DstOut);
                         g.drawImage(filletOverlay, 0, 0, null);
-                        g.dispose();
                         ti("Draw");
 
                         needUpload = true;
-                        lastImg = img;
                         lastTime = time;
                         lastAlpha = mainAlpha.get();
                     }
@@ -1387,11 +1391,11 @@ function LCDThread(face, isRight, ctx, state, carIndex, ttf) {
             draw.run();
             //let submit = new Runnable({run: () => executor.submit(draw)});
             submitPool.scheduleAtFixedRate(draw, 1000, 1000 / fpsGlobal(), TimeUnit.MILLISECONDS);
+            if (tf) ctx.setDebugInfo(uid + "tex", PlacementOrder.UPPER, tex);
 
             while (state.running && state.lastTime + 60000 > now()) {
                 if (tf) {
                     ctx.setDebugInfo(uid + "fps", PlacementOrder.UPPER, uploadManager.getAnalyse());
-                    ctx.setDebugInfo(uid + "tex", PlacementOrder.UPPER, face.texture);
                 } else {
                     Thread.sleep(1000);
                 }

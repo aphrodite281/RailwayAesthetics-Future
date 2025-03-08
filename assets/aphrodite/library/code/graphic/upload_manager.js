@@ -34,20 +34,18 @@ function UploadManager(tex, tmax, tmin, tavg, tf, ty) {
     let history = [];
     let lasttime = 0;
     let offside = 0;
-    let latest = null;
 
     /**
      * 上传图片
-     * @param {BufferedImage} img 图片
      * @param {number} timestamp 时间戳
      */
-    this.upload = (img, timestamp) => {
+    this.upload = (timestamp) => {
         if (timestamp <= lasttime) {
             offside++;
             return;
         }
         else lasttime = timestamp;
-        tex.upload(img);
+        tex.upload();
         if (last == undefined) last = Date.now();
         else {
             times++;
@@ -69,15 +67,11 @@ function UploadManager(tex, tmax, tmin, tavg, tf, ty) {
             history = ne;
             avg = sum / history.length;
         }
-        latest = img;
     }
 
-    this.getLatest = () => latest;
-
     this.getAnalyse = () => {
-        let img = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
         let arr = history;
-        let g = img.createGraphics();
+        let g = tex.graphics;
 
         const f = (x) => 1000 / x;
         const fy = (y) => h - h / (tmax - tmin) * (y - tmin);
@@ -144,7 +138,7 @@ function UploadManager(tex, tmax, tmin, tavg, tf, ty) {
 
         g.dispose();
 
-        anaTex.upload(img);
+        anaTex.upload();
         return anaTex;
     }
 
