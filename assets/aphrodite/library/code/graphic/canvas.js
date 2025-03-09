@@ -421,7 +421,7 @@ Canvas.getBitmap = (ft, s, tw, th, colorMap) => {
     let img = new BufferedImage(tw * s, th * s, BufferedImage.TYPE_INT_ARGB);
     let g = img.createGraphics();
     colorMap = Canvas.standardizationColorMap(colorMap);
-    let canvas = Canvas.createWithCenterAndScale(g, w / 2, h / 2, s, tw, th, 1, colorMap);
+    let canvas = Canvas.createWithCenterAndScale(g, img.getWidth() / 2, img.getHeight() / 2, s, tw, th, 1, colorMap);
     ft(canvas);
     g.dispose();
     return img;

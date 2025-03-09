@@ -23,8 +23,11 @@
     "tip.raf.font": "请输入字体文件资源位置或系统字体名",
     "name.raf.color": "颜色",
     "name.raf.scale": "缩放",
+    "name.raf.pida_font": "乘客资讯显示屏 A 字体",
     "name.raf.text": "文字",
     "name.raf.stop_signb_font": "站牌B 字体",
     "name.raf.lcda_pixel_density": "LCDA 像素密度",
-    "name.raf.lcda_fps": "LCDA FPS"
+    "name.raf.lcda_fps": "LCDA FPS",
+    "name.raf.lcda_record": "LCDA 录制屏幕",
+    "name.raf.name.raf.lcda_record_mode": "LCDA 录制模式"
 }

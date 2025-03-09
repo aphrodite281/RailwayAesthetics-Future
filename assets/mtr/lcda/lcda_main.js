@@ -67,7 +67,6 @@ function create(ctx, state, train) {
     state.lastTime = Date.now();
     let infoArray = [];
     let tickList = [];
-    let disposeList = [];
     let first = true;
     for (let i = 0; i < train.trainCars(); i++) {
 
@@ -86,7 +85,6 @@ function create(ctx, state, train) {
         }
 
         tickList.push(() => {rightThread.reStart(), leftThread.reStart()});
-        disposeList.push(() => {rightFace.close(); leftFace.close();});
         infoArray.push([rightFace, leftFace, rightThread, leftThread]);
     }
     state.tickList = tickList;
@@ -103,7 +101,6 @@ function render(ctx, state, train) {
     for (let entry of state.tickList) {
         entry();
     }
-    ctx.setDebugInfo("lp", train.lastWorldPose[0].getTranslationPart().toString());
 }
 
 function dispose(ctx, state, train) {
@@ -173,7 +170,8 @@ function lcdaGenFilletOverlay() {
 
 const lcdaRecordModeKey = "lcda_record_mode"
 const lcdaRecordModeInput = new ConfigResponder.TextField(lcdaRecordModeKey, ComponentUtil.translatable("name.raf.lcda_record_mode"), "0")
-    .setErrorSupplier(ErrorSupplier.only([0, 1]));
+    .setErrorSupplier(ErrorSupplier.only(['0', '1']));
+ClientConfig.register(lcdaRecordModeInput);
 
 function lcdaRecordMode() {
     return Number(ClientConfig.get(lcdaRecordModeKey));
@@ -215,6 +213,7 @@ function lcdaRecordInput(train) {
                 let carIndex = Number(pair[0]);
                 let right = Number(pair[1]);
                 if (isNaN(carIndex) || isNaN(right)) return e;
+                if (right != 0 && right != 1) return e;
                 if (carIndex < 1 || carIndex > train.trainCars()) return e;
             }
             return Optional.empty();
@@ -243,7 +242,7 @@ let lcdaSmooth = (k, value) => {// 平滑变化
     return (Math.cos(value / k * Math.PI + Math.PI) + 1) / 2 * k;
 }
 
-function lcdaGenFaceModel() {
+function lcdaGenFaceModel() {// lighttranslucent light
     let builder = new RawMeshBuilder(4, "lighttranslucent", Resources.id("minecraft:textures/misc/white.png"));
     for(let i = 0; i < 4; i++) {
         builder.vertex(new Vector3f(lcdaConfigs.modelSize[0] * (i == 0 || i == 1? 0.5 : -0.5), lcdaConfigs.modelSize[1] * (i == 0 || i == 3 ? -0.5 : 0.5), 0)).uv(i == 0 || i ==1 ? 1 : 0, i == 0 || i == 3 ? 1 : 0).normal(0, 0, 0).endVertex();
@@ -254,21 +253,6 @@ function lcdaGenFaceModel() {
     let model = ModelManager.uploadVertArrays(rawModel);
     return model;
 }
-
-/* let route0 = [];
-{
-    let getColor = (color) => {
-        let rr = color >> 16 & 0xff;
-        let g = color >> 8 & 0xff;
-        let b = color & 0xff;
-        let luminance  = 0.299 * rr + 0.587 * g + 0.114 * b;
-        return luminance > 255 / 2 ? 0 : 0xffffff;
-    }
-    for (let i = 1; i <= 100; i++) {
-        let color = Math.random() * 0xffffff;
-        route0.push([i + "号线", "Line " + i, color, getColor(color)]);
-    }
-}*/
 
 function LCDThread(model, isRight, ctx, state, carIndex, ttf) {
     let uid = "LCDThread-" + "Car" + carIndex + '-' + (isRight ? "Right " : "Left  ");
@@ -293,7 +277,6 @@ function LCDThread(model, isRight, ctx, state, carIndex, ttf) {
             let isOnRoute = () => train().isOnRoute();
             disposeList.push(() => {
                 uploadManager.dispose();
-                tex.close();
             });
 
             let planPool = Executors.newScheduledThreadPool(4);
@@ -401,20 +384,26 @@ function LCDThread(model, isRight, ctx, state, carIndex, ttf) {
                     function getOpen(raw) {
                         if (raw == 0) return -1;
                         if (raw == 3) return 2;
-                        let b = train().isReversed()
+                        let b = train().isReversed();
                         if (isRight && raw == 2 && !b) return 1;
                         if (!isRight && raw == 1 && !b) return 1;
+                        if (isRight && raw == 1 &&  b) return 1;
+                        if (!isRight && raw == 2 &&  b) return 1;
                         return 0;
                     }
 
                     if (! (plat.containsPos(p0.toBlockPos()) && plat.containsPos(p1.toBlockPos()))) {
                         t1 = "下一站", t2 = "Next Station";
                         while(index < path.length - 1) {
-                            let rail = path[index].rail;
+                            let inff = path[index];
+                            if (inff == undefined) {
+                                index++;
+                                continue;
+                            }
+                            let rail = inff.rail;
                             let pp0 = new Vector3f(rail.getPosition(0)), pp1 = new Vector3f(rail.getPosition(rail.getLength() + 1));
                             if (plat.containsPos(pp0.toBlockPos()) && plat.containsPos(pp1.toBlockPos())) {
                                 open = getOpen(rail.getOpeningDirection());
-                                ctx.setDebugInfo("open", rail.getOpeningDirection(), rail.getRenderReversed());
                                 break;
                             }
                             index++;
@@ -423,7 +412,6 @@ function LCDThread(model, isRight, ctx, state, carIndex, ttf) {
                         t1 = "到达", t2 = "Arrive";
                         isArrive = true;
                         open = getOpen(rail.getOpeningDirection());
-                        ctx.setDebugInfo("open", rail.getOpeningDirection(), rail.getRenderReversed());
                     }
                     
                     name = station.name;
@@ -1226,14 +1214,26 @@ function LCDThread(model, isRight, ctx, state, carIndex, ttf) {
                 let x = xd - wa / 2;
                 let y0 = dy(32), h0 = dy(4);
                 let rx;
-                let newcm = () => new Canvas.Mobile(g, x, y0, h0 * 2 / 3, h0 * 2 / 3, 52, 52, 1, [0x00ff00, color11]);
-                let cm = newcm();
-                let kw = 0.9;
-                let jnum = (ins - dy(7)) / (cm.w * kw);
-                jnum *= 0.6;
+
+                let len = h0 * 2 / 3;
+                // let newcm = () => new Canvas.Mobile(g, x, y0, h0 * 2 / 3, h0 * 2 / 3, 52, 52, 1, [0x00ff00, color11]);
+                // let cm = newcm();
+                let lenA = ins - dy(10);
+                lenA = lenA * 0.6;
+                let jnum = lenA / len;
                 jnum = Math.ceil(jnum);
-                let aw = (jnum - 1) * cm.w * kw;
-                
+                let aw = jnum * len;
+
+                let imgXjjt = new BufferedImage(aw, h0, BufferedImage.TYPE_INT_ARGB);
+                {
+                    let g = imgXjjt.createGraphics();
+                    let img = Canvas.getBitmap(xjjt, len / 52, 52, 52, [0x00ff00, color11]);
+                    for (let i = 0; i < jnum; i++) {
+                        g.drawImage(img, i * len, (h0 - len) / 2, null);
+                    }
+                    g.dispose();
+                }
+
                 for (let i = 0; i < l; i++) {
                     let [cn, en, huan, guo] = xlt1[i];
                     if (i != l - 1) {
@@ -1243,11 +1243,7 @@ function LCDThread(model, isRight, ctx, state, carIndex, ttf) {
                         if (i == ind - 1) {
                             rx = x;
                         } else {
-                            cm.x = x + (ins - aw) / 2;
-                            for (let i = 0; i < jnum; i++) {
-                                xjjt(cm);
-                                cm.x += cm.w * kw;
-                            } 
+                            g.drawImage(imgXjjt, x + (ins - imgXjjt.getWidth()) / 2, y0 - h0 / 2, null);
                         }
                     }
 
@@ -1318,13 +1314,10 @@ function LCDThread(model, isRight, ctx, state, carIndex, ttf) {
                     textManager.draw(g, 0, 0);
                     let ta = ((now() - st) / 1000 * 0.6) % 1;
                     ta = lcdaSmooth(1, ta);
-                    ta = ta * (ins - aw - dy(8));
-                    let x = rx + dy(4) + ta;
-                    let cm = new Canvas.Mobile(g, x, y0, h0 * 2 / 3, h0 * 2 / 3, 52, 52, 1 - a, [0x00ff00, color11]);
-                    for (let i = 0; i < jnum; i++) {
-                        xjjt(cm);
-                        cm.x += cm.w * kw;
-                    }
+                    ta = ta * (ins - aw - dy(10));
+                    ta = Math.max(ta, 0);
+                    let x = rx + dy(5) + ta;
+                    g.drawImage(imgXjjt, x, y0 - h0 / 2, null);
                 }
 
                 this.isFresh = () => isSame([xlt1, ixlt1, ind, iindex, hex, icolor, color11, icolor1]);
@@ -1424,7 +1417,7 @@ function LCDThread(model, isRight, ctx, state, carIndex, ttf) {
                     else if (mainAlpha.get() == 0 && isOnRoute()) mainAlpha.turn(1);
                     mainAlpha.update();
                     ti("Update");
-                    if ((mainAlpha.get() == 0 && mainAlpha.get() == lastAlpha) || (lcdaRecordMode() && !lcdaNeedRecord(train(), carIndex, isRight))) {
+                    if ((mainAlpha.get() == 0 && mainAlpha.get() == lastAlpha) || (lcdaRecordMode() == 1 && !lcdaNeedRecord(train(), carIndex, isRight))) {
                         ti("Skip Draw");
                     } else {
                         // let done = false;
@@ -1510,12 +1503,13 @@ function LCDThread(model, isRight, ctx, state, carIndex, ttf) {
             ctx.setDebugInfo(uid +  " Error At: ", System.currentTimeMillis() + e.message , e.stack);
             print(uid + " Error At: " + System.currentTimeMillis() + e.message + e.stack);
         } finally {
-            Thread.sleep(1000);
             for (let fun of disposeList) {
                 fun();
             }
             // model.close();
+            Thread.sleep(2000);
             tex.close();
+            print(uid + " CloseTex");
         }
     } , "ARAF-LCD-Thread On Train " + ctx.hashCode().toString(16) + " " + carIndex + " " + (isRight? "Right" : "Left"));
 
