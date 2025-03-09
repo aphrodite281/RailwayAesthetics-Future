@@ -29,5 +29,6 @@
     "name.raf.lcda_pixel_density": "LCDA 像素密度",
     "name.raf.lcda_fps": "LCDA FPS",
     "name.raf.lcda_record": "LCDA 录制屏幕",
-    "name.raf.name.raf.lcda_record_mode": "LCDA 录制模式"
+    "name.raf.lcda_record_mode": "LCDA 录制模式",
+    "name.raf.lcda_config": "LCDA 配置"
 }

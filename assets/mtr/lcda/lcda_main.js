@@ -19,7 +19,8 @@ include(Resources.id("aphrodite:library/code/graphic/color_u.js"));
 include(Resources.id("aphrodite:library/code/graphic/text_manager.js"));
 include(Resources.id("aphrodite:library/code/graphic/canvas.js"));
 include(Resources.id("aphrodite:library/code/graphic/upload_manager.js"));
-include(Resources.id("aphrodite:library/code/graphic/images_output_manager.js"))
+include(Resources.id("aphrodite:library/code/graphic/images_output_manager.js"));
+include(Resources.id("aphrodite:library/code/gui/btn_enter_sub_bar.js"))
 
 include(Resources.id("mtr:lcda/icon/hc.js")); //换乘
 include(Resources.id("mtr:lcda/icon/zd.js")); //站点
@@ -171,7 +172,7 @@ function lcdaGenFilletOverlay() {
 const lcdaRecordModeKey = "lcda_record_mode"
 const lcdaRecordModeInput = new ConfigResponder.TextField(lcdaRecordModeKey, ComponentUtil.translatable("name.raf.lcda_record_mode"), "0")
     .setErrorSupplier(ErrorSupplier.only(['0', '1']));
-ClientConfig.register(lcdaRecordModeInput);
+// ClientConfig.register(lcdaRecordModeInput);
 
 function lcdaRecordMode() {
     return Number(ClientConfig.get(lcdaRecordModeKey));
@@ -183,7 +184,7 @@ const lcdaPDInput = new ConfigResponder.TextField(lcdaPDKey, ComponentUtil.trans
     .setSaveConsumer((v) => {
         lcdaCheckChanges();
     });
-ClientConfig.register(lcdaPDInput);
+// ClientConfig.register(lcdaPDInput);
 
 function lcdaPixelDensity() {
     return Number(ClientConfig.get(lcdaPDKey));
@@ -192,11 +193,13 @@ function lcdaPixelDensity() {
 const lcdaFpsKey = "lcda_fps"
 const lcdaFpsInput = new ConfigResponder.TextField(lcdaFpsKey, ComponentUtil.translatable("name.raf.lcda_fps"), "24")
     .setErrorSupplier(ErrorSupplier.NumberRange(0, null, false, false));
-ClientConfig.register(lcdaFpsInput);
+// ClientConfig.register(lcdaFpsInput);
 
 function lcdaFpsGlobal() {
     return Number(ClientConfig.get(lcdaFpsKey));
 }
+
+ClientConfig.register(btnEnterSubBar("lcda", "made by aphrodite281", ComponentUtil.translatable("name.raf.lcda_config"), [lcdaRecordModeInput, lcdaPDInput, lcdaFpsInput]));
 
 const lcdaRecordKey = "lcda_record"
 function lcdaRecordInput(train) {
