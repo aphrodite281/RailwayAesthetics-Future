@@ -4,6 +4,7 @@
 
 importPackage(java.lang);
 importPackage(java.awt);
+importPackage(java.time);
 importPackage(java.awt.image);
 importPackage(java.awt.geom);
 importPackage(java.awt.font);
@@ -18,6 +19,7 @@ include(Resources.id("aphrodite:library/code/graphic/color_u.js"));
 include(Resources.id("aphrodite:library/code/graphic/text_manager.js"));
 include(Resources.id("aphrodite:library/code/graphic/canvas.js"));
 include(Resources.id("aphrodite:library/code/graphic/upload_manager.js"));
+include(Resources.id("aphrodite:library/code/graphic/images_output_manager.js"))
 
 include(Resources.id("mtr:lcda/icon/hc.js")); //换乘
 include(Resources.id("mtr:lcda/icon/zd.js")); //站点
@@ -29,28 +31,36 @@ include(Resources.id("mtr:lcda/icon/hcjt.js")); //换成箭头
 include(Resources.id("mtr:lcda/icon/xjjt.js")); //行进箭头
 include(Resources.id("mtr:lcda/icon/logo.js")); //图标
 
-let textureSize = [1600, 350];
-let modelSize = [1600 / 2000, 350 / 2000];
-let doorZPositions = [0, 5, -5, 10, -10];
-let doorPosition = [1.3, 1.9];// x、y
-let rotateX = 15 / 180 * Math.PI;// YX(Z)欧拉的X
-let finalTranslate = [0, 0, 0];
-let filletPixel = 30;
-let companyNameCJK = "北武工艺";
-let companyNameENG = "HOKUBUCRAFT";
-let companyLogoPng = undefined;
+const lcdaConfigs = {
+    textureSize: [1600, 350],
+    modelSize: [1600 / 2000, 350 / 2000],
+    doorZPositions: [0, 5, -5, 10, -10],
+    doorPosition: [1.3, 1.9],
+    rotateX: 15 / 180 * Math.PI,
+    finalTranslate: [0, 0, 0],
+    filletPixel: 30,
+    companyNameCJK: "北武工艺",
+    companyNameENG: "HOKUBUCRAFT",
+    companyLogoPng: undefined,
+}
+
+const lcdaLastConfigs = {
+    lastTextureSize: lcdaConfigs.textureSize,
+    lastFilletPixel: lcdaConfigs.filletPixel,
+    lastlcdaPixelDensity: lcdaPixelDensity()
+}
+
+const lcdaGlobalBuffer = {
+    baseFaceModel: undefined,
+    rightMatrices: undefined,
+    leftMatrices: undefined,
+    fontA: Resources.getSystemFont("Noto Sans"),
+    filletOverlay: new BufferedImage(lcdaConfigs.textureSize[0], lcdaConfigs.textureSize[1], BufferedImage.TYPE_INT_ARGB)
+}
 
 let fontA = Resources.getSystemFont("Noto Sans");
-let fontB = Resources.readFont(Resources.id("aphrodite:library/font/zhdh.ttf"));
-let fontC = Resources.getSystemFont("Noto Serif");
 
-// 以下不建议直接更改
-let filletOverlay = new BufferedImage(textureSize[0], textureSize[1], BufferedImage.TYPE_INT_ARGB);
-let rightMatrices = getMatrices(false);
-let leftMatrices = getMatrices(true);
-let cu = ColorU;
-
-let baseFaceModel = genFaceModel();
+lcdaApply();
 
 function create(ctx, state, train) {
     state.running = true;
@@ -61,17 +71,17 @@ function create(ctx, state, train) {
     let first = true;
     for (let i = 0; i < train.trainCars(); i++) {
 
-        let rightFace = baseFaceModel.copyForMaterialChanges();
-        let leftFace = baseFaceModel.copyForMaterialChanges();
+        let rightFace = lcdaGlobalBuffer.baseFaceModel.copyForMaterialChanges();
+        let leftFace = lcdaGlobalBuffer.baseFaceModel.copyForMaterialChanges();
     
         let rightThread = new LCDThread(rightFace, true, ctx, state, i + 1, first);
         first = false;
         let leftThread = new LCDThread(leftFace, false, ctx, state, i + 1);
 
-        for (let matrix of rightMatrices) {
+        for (let matrix of lcdaGlobalBuffer.rightMatrices) {
             ctx.drawCalls[i].put("lcd_right_face" + i + "-" + matrix, new ClusterDrawCall(rightFace, matrix));
         }
-        for (let matrix of leftMatrices) {
+        for (let matrix of lcdaGlobalBuffer.leftMatrices) {
             ctx.drawCalls[i].put("lcd_left_face" + i + "-" + matrix, new ClusterDrawCall(leftFace, matrix));
         }
 
@@ -81,6 +91,8 @@ function create(ctx, state, train) {
     }
     state.tickList = tickList;
     state.infoArray = infoArray;
+    train.registerCustomConfig(lcdaRecordInput(train));
+    train.sendCustomConfigsUpdateC2S();
 }
 
 
@@ -99,20 +111,20 @@ function dispose(ctx, state, train) {
     state.lastTime = -10000;
 }
 
-function getMatrices(isRight) {
+function lcdaGetMatrices(isRight) {
     let result = [];
     let matrices = new Matrices();
     let k = isRight? -1 : 1;
-    matrices.translate(- k * doorPosition[0], doorPosition[1], 0);
+    matrices.translate(- k * lcdaConfigs.doorPosition[0], lcdaConfigs.doorPosition[1], 0);
     let execute = (translateZ) => {
         matrices.translate(0, 0, translateZ);
         matrices.rotateY(k * Math.PI / 2);
-        matrices.rotateX(rotateX);
+        matrices.rotateX(lcdaConfigs.rotateX);
     }
-    for (let position of doorZPositions) {
+    for (let position of lcdaConfigs.doorZPositions) {
         matrices.pushPose();
         execute(position);
-        let [x, y, z] = finalTranslate;
+        let [x, y, z] = lcdaConfigs.finalTranslate;
         matrices.translate(x, y, z);
         result.push(matrices.last());
         matrices.popPose();
@@ -124,59 +136,117 @@ function getMatrices(isRight) {
     return result;
 }
 
-function apply() {
-    updateMatrices();
-    textureSize = [textureSize[0] * pixelDensity(), textureSize[1] * pixelDensity()];
-    filletPixel = pixelDensity() * filletPixel;
-    filletOverlay = genFilletOverlay();
-    baseFaceModel = genFaceModel();
+function lcdaApply() {
+    lcdaUpdateMatrices();
+    lcdaLastConfigs.lastTextureSize = lcdaConfigs.textureSize;
+    lcdaLastConfigs.lastFilletPixel = lcdaConfigs.filletPixel;
+    lcdaLastConfigs.textureSize = [lcdaConfigs.textureSize[0] * lcdaPixelDensity(), lcdaConfigs.textureSize[1] * lcdaPixelDensity()];
+    lcdaConfigs.filletPixel = lcdaPixelDensity() * lcdaConfigs.filletPixel;
+    lcdaGlobalBuffer.filletOverlay = lcdaGenFilletOverlay();
+    lcdaGlobalBuffer.baseFaceModel = lcdaGenFaceModel();
 }
 
-function updateMatrices() {
-    rightMatrices = getMatrices(false);
-    leftMatrices = getMatrices(true);
+function lcdaCheckChanges() {
+    if (lcdaLastConfigs.lastlcdaPixelDensity != lcdaPixelDensity()) {
+        lcdaConfigs.textureSize = [lcdaLastConfigs.lastTextureSize[0] * lcdaPixelDensity(), lcdaLastConfigs.lastTextureSize[1] * lcdaPixelDensity()];
+        lcdaConfigs.filletPixel = lcdaPixelDensity() * lcdaLastConfigs.lastFilletPixel;
+        lcdaGlobalBuffer.filletOverlay = lcdaGenFilletOverlay();
+        lcdaLastConfigs.lastlcdaPixelDensity = lcdaPixelDensity();
+    } 
 }
 
-function genFilletOverlay() {
-    let img = new BufferedImage(textureSize[0], textureSize[1], BufferedImage.TYPE_INT_ARGB);
+function lcdaUpdateMatrices() {
+    lcdaGlobalBuffer.rightMatrices = lcdaGetMatrices(false);
+    lcdaGlobalBuffer.leftMatrices = lcdaGetMatrices(true);
+}
+
+function lcdaGenFilletOverlay() {
+    let img = new BufferedImage(lcdaConfigs.textureSize[0], lcdaConfigs.textureSize[1], BufferedImage.TYPE_INT_ARGB);
     let g = img.createGraphics();
     g.setColor(Color.WHITE);
-    g.fillRect(0, 0, textureSize[0], textureSize[1]);
+    g.fillRect(0, 0, lcdaConfigs.textureSize[0], lcdaConfigs.textureSize[1]);
     g.setComposite(AlphaComposite.Clear);
-    g.fillRoundRect(0, 0, textureSize[0], textureSize[1], filletPixel, filletPixel);
+    g.fillRoundRect(0, 0, lcdaConfigs.textureSize[0], lcdaConfigs.textureSize[1], lcdaConfigs.filletPixel, lcdaConfigs.filletPixel);
     g.dispose();
     return img;
 }
 
-const pdKey = "lcda_pixel_density"
-let pdInput = new ConfigResponder.TextField(pdKey, ComponentUtil.translatable("name.raf.lcda_pixel_density"), "0.5")
-    .setErrorSupplier(ErrorSupplier.NumberRange(0, null, false, false));
+const lcdaRecordModeKey = "lcda_record_mode"
+const lcdaRecordModeInput = new ConfigResponder.TextField(lcdaRecordModeKey, ComponentUtil.translatable("name.raf.lcda_record_mode"), "0")
+    .setErrorSupplier(ErrorSupplier.only([0, 1]));
 
-ClientConfig.register(pdInput);
-
-function pixelDensity() {
-    return Number(ClientConfig.get(pdKey));
+function lcdaRecordMode() {
+    return Number(ClientConfig.get(lcdaRecordModeKey));
 }
 
-const fpsKey = "lcda_fps"
-let fpsInput = new ConfigResponder.TextField(fpsKey, ComponentUtil.translatable("name.raf.lcda_fps"), "24")
-    .setErrorSupplier(ErrorSupplier.NumberRange(0, null, false, false));
-ClientConfig.register(fpsInput);
+const lcdaPDKey = "lcda_pixel_density"
+const lcdaPDInput = new ConfigResponder.TextField(lcdaPDKey, ComponentUtil.translatable("name.raf.lcda_pixel_density"), "0.5")
+    .setErrorSupplier(ErrorSupplier.NumberRange(0, null, false, false))
+    .setSaveConsumer((v) => {
+        lcdaCheckChanges();
+    });
+ClientConfig.register(lcdaPDInput);
 
-function fpsGlobal() {
-    return Number(ClientConfig.get(fpsKey));
+function lcdaPixelDensity() {
+    return Number(ClientConfig.get(lcdaPDKey));
 }
 
-let smooth = (k, value) => {// 平滑变化
+const lcdaFpsKey = "lcda_fps"
+const lcdaFpsInput = new ConfigResponder.TextField(lcdaFpsKey, ComponentUtil.translatable("name.raf.lcda_fps"), "24")
+    .setErrorSupplier(ErrorSupplier.NumberRange(0, null, false, false));
+ClientConfig.register(lcdaFpsInput);
+
+function lcdaFpsGlobal() {
+    return Number(ClientConfig.get(lcdaFpsKey));
+}
+
+const lcdaRecordKey = "lcda_record"
+function lcdaRecordInput(train) {
+    let e = Optional.of(ComponentUtil.translatable("error.aph.invalid_value"));
+    return new ConfigResponder.TextField(lcdaRecordKey, ComponentUtil.translatable("name.raf.lcda_record"), "")
+        .setErrorSupplier(str => {
+            str = str + "";
+            let tokens = str.split("|");
+            for (let i = 0; i < tokens.length; i++) {
+                let token = tokens[i];
+                if (token.length == 0) continue;
+                let pair = token.split(":");
+                if (pair.length != 2) return e;
+                let carIndex = Number(pair[0]);
+                let right = Number(pair[1]);
+                if (isNaN(carIndex) || isNaN(right)) return e;
+                if (carIndex < 1 || carIndex > train.trainCars()) return e;
+            }
+            return Optional.empty();
+        })
+} 
+
+function lcdaNeedRecord(train, carIndex, isRight) {
+    let res = train.getCustomConfigs();
+    let v = res.get(lcdaRecordKey);
+    if (v == null) return false;
+    v = v + "";
+    let tokens = v.split("|");
+    for (let i = 0; i < tokens.length; i++) {
+        let token = tokens[i];
+        let pair = token.split(":");
+        if (pair.length != 2) continue;
+        let index = Number(pair[0]);
+        let right = Number(pair[1]);
+        if (index == carIndex && (right == 1) == isRight) return true;
+    }
+}
+
+let lcdaSmooth = (k, value) => {// 平滑变化
     if (value > k) return k;
     if (k < 0) return 0;
     return (Math.cos(value / k * Math.PI + Math.PI) + 1) / 2 * k;
 }
 
-function genFaceModel() {
+function lcdaGenFaceModel() {
     let builder = new RawMeshBuilder(4, "lighttranslucent", Resources.id("minecraft:textures/misc/white.png"));
     for(let i = 0; i < 4; i++) {
-        builder.vertex(new Vector3f(modelSize[0] * (i == 0 || i == 1? 0.5 : -0.5), modelSize[1] * (i == 0 || i == 3 ? -0.5 : 0.5), 0)).uv(i == 0 || i ==1 ? 1 : 0, i == 0 || i == 3 ? 1 : 0).normal(0, 0, 0).endVertex();
+        builder.vertex(new Vector3f(lcdaConfigs.modelSize[0] * (i == 0 || i == 1? 0.5 : -0.5), lcdaConfigs.modelSize[1] * (i == 0 || i == 3 ? -0.5 : 0.5), 0)).uv(i == 0 || i ==1 ? 1 : 0, i == 0 || i == 3 ? 1 : 0).normal(0, 0, 0).endVertex();
     }
     let rawModel = new RawModel();
     rawModel.append(builder.getMesh());
@@ -204,21 +274,21 @@ function LCDThread(model, isRight, ctx, state, carIndex, ttf) {
     let uid = "LCDThread-" + "Car" + carIndex + '-' + (isRight ? "Right " : "Left  ");
     let train = () => ctx.getWrapperObject();
     let thread = new Thread(() => {
+        
         let disposeList = [];
+        let tex = new GraphicsTexture(lcdaConfigs.textureSize[0], lcdaConfigs.textureSize[1]);
+        let w = tex.width, h = tex.height;
+
         try {
             print(uid + " Start");
             ctx.setDebugInfo(uid + " Start", PlacementOrder.LOWER, Date.now().toString());
 
             let tf = ttf;
             let font0 = fontA.deriveFont(Font.PLAIN, 45);
-            let font1 = fontB.deriveFont(Font.PLAIN, 45);
-            let font2 = fontC.deriveFont(Font.PLAIN, 45);
             
-            let tex = new GraphicsTexture(textureSize[0], textureSize[1]);
             model.replaceAllTexture(tex.identifier);
-            let w = tex.width, h = tex.height;
             
-            let uploadManager = new UploadManager(tex, fpsGlobal() + 20, fpsGlobal() - 20);
+            let uploadManager = new UploadManager(tex, lcdaFpsGlobal() + 20, lcdaFpsGlobal() - 20);
             let upload = uploadManager.upload;
             let isOnRoute = () => train().isOnRoute();
             disposeList.push(() => {
@@ -231,6 +301,7 @@ function LCDThread(model, isRight, ctx, state, carIndex, ttf) {
             disposeList.push(() => planPool.shutdown());
 
             let now = () => Date.now();
+            let nano = () => System.nanoTime();
             let SDrawCalls = [];// [旧图, [新渐变的, 新alpha]] 渐变绘制
             let DDrawCalls = [];// [对象1, 对象2] 动态绘制
             let mainAlpha = new Value(isOnRoute() ? 1 : 0, 1, 0, 1.2, 0, 0);// 主渐变alpha
@@ -321,17 +392,40 @@ function LCDThread(model, isRight, ctx, state, carIndex, ttf) {
                     ss();
                     let pro = train().getRailProgress(0);
                     let index = train().getRailIndex(pro, true);
-                    let pd = train().path()[index];
+                    let path = train().path();
+                    let pd = path[index];
                     let rail = pd.rail;
-                    let p0 = new Vector3f(rail.getPosition(0)), p1 = new Vector3f(rail.getPosition(rail.getLength() + 100));
+                    let p0 = new Vector3f(rail.getPosition(0)), p1 = new Vector3f(rail.getPosition(rail.getLength() + 1));
                     let plat = pla.platform;
                     
+                    function getOpen(raw) {
+                        if (raw == 0) return -1;
+                        if (raw == 3) return 2;
+                        let b = train().isReversed()
+                        if (isRight && raw == 2 && !b) return 1;
+                        if (!isRight && raw == 1 && !b) return 1;
+                        return 0;
+                    }
+
                     if (! (plat.containsPos(p0.toBlockPos()) && plat.containsPos(p1.toBlockPos()))) {
                         t1 = "下一站", t2 = "Next Station";
+                        while(index < path.length - 1) {
+                            let rail = path[index].rail;
+                            let pp0 = new Vector3f(rail.getPosition(0)), pp1 = new Vector3f(rail.getPosition(rail.getLength() + 1));
+                            if (plat.containsPos(pp0.toBlockPos()) && plat.containsPos(pp1.toBlockPos())) {
+                                open = getOpen(rail.getOpeningDirection());
+                                ctx.setDebugInfo("open", rail.getOpeningDirection(), rail.getRenderReversed());
+                                break;
+                            }
+                            index++;
+                        }
                     } else {
                         t1 = "到达", t2 = "Arrive";
                         isArrive = true;
+                        open = getOpen(rail.getOpeningDirection());
+                        ctx.setDebugInfo("open", rail.getOpeningDirection(), rail.getRenderReversed());
                     }
+                    
                     name = station.name;
                     t3 = TU.CP(name), t4 = TU.NP(name);
                     is = false;
@@ -343,7 +437,7 @@ function LCDThread(model, isRight, ctx, state, carIndex, ttf) {
                         dsub[i] = dsub[i - 1] + paths[i - 1].rail.getLength();
                     }
             
-                    let d = pla.distance;
+                    /* let d = pla.distance;
                     let s = train().spacing();
                     let rv1 = d - s * carIndex;
                     let rv2 = d - s * (carIndex - 1);
@@ -363,7 +457,7 @@ function LCDThread(model, isRight, ctx, state, carIndex, ttf) {
                     if (!isRight && o2) open = 0;
                     if (isRight && o2) open = 1;
                     if (!isRight && o1) open = 1;
-                    if (o1 && o2) open = 2;
+                    if (o1 && o2) open = 2;*/
                     /* let k = acc / 1000 % 100;
                     for (let i = 0; i < k; i++) {
                         huancheng.set(route0[i][0] + "|" + route0[i][1], [route0[i][0], route0[i][1], route0[i][2], route0[i][3]]);
@@ -692,15 +786,15 @@ function LCDThread(model, isRight, ctx, state, carIndex, ttf) {
                 drawMiddle(ename, font0, p, color1, x, y + dy1(0.725), w1, dy1(0.35));
 
                 x = w * 5 / 500, w1 = h1;
-                if (companyLogoPng == undefined) {
+                if (lcdaConfigs.companyLogoPng == undefined) {
                     let canvas = Canvas.createWithCenterAndScale(g, x + w1 / 2, y + h1 / 2, w1 / 2500, 2500, 2500);
                     logo(canvas);
                 } else {
-                    g.drawImage(companyLogoPng, x, y, w1, h1, null);
+                    g.drawImage(lcdaConfigs.companyLogoPng, x, y, w1, h1, null);
                 }
                 x = dx(52);
-                drawMiddle(companyNameCJK, font0, p, 0, x, dy2(0.35), dx(58), dy2(0.5));
-                drawMiddle(companyNameENG, font0, p, 0, x, dy2(0.75), dx(58), dy2(0.3));
+                drawMiddle(lcdaConfigs.companyNameCJK, font0, p, 0, x, dy2(0.35), dx(58), dy2(0.5));
+                drawMiddle(lcdaConfigs.companyNameENG, font0, p, 0, x, dy2(0.75), dx(58), dy2(0.3));
 
                 let color = 0x606060;
                 drawMiddle(" 终 点 站:", font0, p, color, dx(340), dy2(0.33), dx(40), dy2(0.45));
@@ -833,7 +927,7 @@ function LCDThread(model, isRight, ctx, state, carIndex, ttf) {
                 this.stop = () => {if(et == null) et = now();};
                 this.draw = (g, time) => {
                     if (disposed) return;
-                    setComp(g, smooth(1, (time - start) / 1000 * 0.8));
+                    setComp(g, lcdaSmooth(1, (time - start) / 1000 * 0.8));
                     g.drawImage(tex, 0, 0, null);
                     textManager.draw(g, 0, 0);
                     if (style == 0) tp.draw(g, x, y);
@@ -954,7 +1048,7 @@ function LCDThread(model, isRight, ctx, state, carIndex, ttf) {
             let outWidth = w * 30 / 500;
             let DA0 = (g) => {
                 let dop = iopen > 0 ? 1 : 0;
-                let dv = smooth(1, iopen * train().doorValue() * 1.5 * iisArrive);
+                let dv = lcdaSmooth(1, iopen * train().doorValue() * 1.5 * iisArrive);
                 setComp(g, 1);
                 let x = w * 45 / 500, y = h * (0.7 - 0.4);
                 let v = dv;
@@ -978,11 +1072,11 @@ function LCDThread(model, isRight, ctx, state, carIndex, ttf) {
                 if (v == 1) {
                     x = w * 45 / 500 - outWidth / 2, y = h * (0.7 - 0.4);
                     g.drawImage(out[0], x, y, null);
-                    setComp(g, smooth(1, outAlpha.get(true)));
+                    setComp(g, lcdaSmooth(1, outAlpha.get(true)));
                     g.drawImage(out[1], x, y, null);
                 }
             }
-            
+            let cu = ColorU;
             function DR0() {
                 let st = now();
                 let et = null;
@@ -1036,11 +1130,11 @@ function LCDThread(model, isRight, ctx, state, carIndex, ttf) {
                     if (stopped) return;
                     let t = time - st;
                     t = t / 1000 * 0.8;
-                    let a = 1 - smooth(1, t);
+                    let a = 1 - lcdaSmooth(1, t);
                     if (et != null) {
                         let t1 = time - et;
                         t1 = t1 / 1000 * 0.8;
-                        let a1 = smooth(1, t1);
+                        let a1 = lcdaSmooth(1, t1);
                         a = Math.max(a, a1);
                     }
                     let dn = a * dx(100);
@@ -1087,7 +1181,7 @@ function LCDThread(model, isRight, ctx, state, carIndex, ttf) {
                     let wx = 100 * scale;
                     let ys = [dy(20), 0, dy(17), 0, dy(20)];
                     for (let i = 0; i < 5; i+=2) {
-                        let v = smooth(1, ((time / 1000) * 0.8) % 1);
+                        let v = lcdaSmooth(1, ((time / 1000) * 0.8) % 1);
                         let xx = dx(x[i] + txx[i]) - sizeX[i] / 2 + wx / 2 + v * (sizeX[i] - wx);
                         let canvas = Canvas.createWithCenterAndScale(g, xx, ys[i], scale, 100, 100, 1 - a, [0x00ff00, color0]);
                         jt(canvas);
@@ -1200,11 +1294,11 @@ function LCDThread(model, isRight, ctx, state, carIndex, ttf) {
                     if (stopped) return;
                     let t = time - st;
                     t = t / 1000 * 0.8;
-                    let a = 1 - smooth(1, t);
+                    let a = 1 - lcdaSmooth(1, t);
                     if (et != null) {
                         let t1 = time - et;
                         t1 = t1 / 1000 * 0.8;
-                        let a1 = smooth(1, t1);
+                        let a1 = lcdaSmooth(1, t1);
                         a = Math.max(a, a1);
                         if (a == 1) {
                             stopped = true;
@@ -1223,7 +1317,7 @@ function LCDThread(model, isRight, ctx, state, carIndex, ttf) {
                     g.drawImage(img, 0, 0, null);
                     textManager.draw(g, 0, 0);
                     let ta = ((now() - st) / 1000 * 0.6) % 1;
-                    ta = smooth(1, ta);
+                    ta = lcdaSmooth(1, ta);
                     ta = ta * (ins - aw - dy(8));
                     let x = rx + dy(4) + ta;
                     let cm = new Canvas.Mobile(g, x, y0, h0 * 2 / 3, h0 * 2 / 3, 52, 52, 1 - a, [0x00ff00, color11]);
@@ -1306,30 +1400,35 @@ function LCDThread(model, isRight, ctx, state, carIndex, ttf) {
             // disposeList.push(() => executor.shutdown());
             let lastStart;
             // let timeoutTimes = 0;
+            
+            let iom = new ImagesOutputManager.ASync("lcda_output/" + ctx.hashCode().toString(16) + "-" + carIndex + "-" + (isRight ? "Right" : "Left"));
+            disposeList.push(() => iom.close());
+            ImagesOutputManager.saveVideoConverterTo("lcda_output");
 
-            let lastSuit, lastTime, needUpload = false, lastAlpha = -114514;
+            let f = lcdaGlobalBuffer.filletOverlay;
+
+            let lastAlpha = -114514;
             let draw = new Runnable({run: () => {
                 try {
                     let fps = -100;
                     if (lastStart != undefined) fps = 1000 / (now() - lastStart);
                     lastStart = now();
                     let used = [];
-                    let last = now();
+                    let last = nano();
                     let ti = (prompt) => {
-                        used.push(prompt + ": " + (now()- last).toString().padStart(2, '0'));
-                        last = now();
+                        used.push(prompt + ": " + ((nano()- last) / 1e6).toString().padStart(2, '0'));
+                        last = nano();
                     }
 
                     if (mainAlpha.get() == 1 && !isOnRoute()) mainAlpha.turn(-1);
                     else if (mainAlpha.get() == 0 && isOnRoute()) mainAlpha.turn(1);
                     mainAlpha.update();
                     ti("Update");
-                    if (mainAlpha.get() == 0 && mainAlpha.get() == lastAlpha) {
+                    if ((mainAlpha.get() == 0 && mainAlpha.get() == lastAlpha) || (lcdaRecordMode() && !lcdaNeedRecord(train(), carIndex, isRight))) {
                         ti("Skip Draw");
                     } else {
                         // let done = false;
                         let time = now();
-                        let a = mainAlpha.get();
                         // let suit = tex.createBuffer();
                         // let g = suit.graphics;
                         let img = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
@@ -1345,6 +1444,7 @@ function LCDThread(model, isRight, ctx, state, carIndex, ttf) {
     
                         let sdc = SDrawCalls, ddc = DDrawCalls;
     
+                        let a = mainAlpha.get();
                         if (a > 0) {
 
                             for (let i = 0; i < sdc.length; i++) sdc[i].draw(g, time);
@@ -1352,28 +1452,34 @@ function LCDThread(model, isRight, ctx, state, carIndex, ttf) {
                             DA0(g);
 
                             for (let i = 0; i < ddc.length; i++) ddc[i].draw(g, time);
-    
-                            if (a != 1) {
-                                setComp(g, 1 - a);
-                                g.setColor(new Color(0));
-                                g.fillRect(0, 0, w, h);
-                            }
+                        }
+
+                        if (a != 1) {
+                            setComp(g, 1 - a);
+                            g.setColor(new Color(0));
+                            g.fillRect(0, 0, w, h);
                         }
 
                         g.setComposite(AlphaComposite.DstOut);
-                        g.drawImage(filletOverlay, 0, 0, null);
+                        g.drawImage(f, 0, 0, null);
                         g.dispose();
                         ti("Draw");
 
                         upload(img, time);
                         ti("Upload")
+
+                        if (lcdaNeedRecord(train(), carIndex, isRight)) {
+                            iom.preserve(img, time);
+                            ti("Preserve" + iom.toString());
+                        }
+
                         lastTime = time;
                         lastAlpha = mainAlpha.get();
                     }
                     used.push("Offside: " + uploadManager.getOffside());
                     let dd = new Date();
                     let ts = dd.getMinutes().toString().padStart(2, '0') + ":" + dd.getSeconds().toString().padStart(2, '0') + "::" + dd.getMilliseconds().toString().padStart(3, '0');
-                    if (tf) {
+                    if (tf || lcdaNeedRecord(train(), carIndex, isRight)) {
                         ctx.setDebugInfo(uid, ts, "Ctrl: " + ctrlUsed, "FPS:" + fps.toFixed(2).toString().padStart(5, '0'), "\n", 
                         "Pools: " + ["ctrl: " + ctrlPool.getActiveCount() + "/" + ctrlPool.getPoolSize(), "submit: " + submitPool.getActiveCount() + "/" + submitPool.getPoolSize()].toString(), "D-Calls:" + DDrawCalls.toString(), "S-Calls:" + SDrawCalls.toString(), "\n", 
                         "Used: " + used.toString(), "DStyle: " + DStyle, "\n", 
@@ -1388,14 +1494,14 @@ function LCDThread(model, isRight, ctx, state, carIndex, ttf) {
 
             draw.run();
             //let submit = new Runnable({run: () => executor.submit(draw)});
-            submitPool.scheduleAtFixedRate(draw, 1000, 1000 / fpsGlobal(), TimeUnit.MILLISECONDS);
+            submitPool.scheduleAtFixedRate(draw, 1000, 1000 / lcdaFpsGlobal(), TimeUnit.MILLISECONDS);
             if (tf) ctx.setDebugInfo(uid + "tex", PlacementOrder.UPPER, tex);
 
-            while (state.running && state.lastTime + 60000 > now()) {
+            while (state.running) {
                 if (tf) {
                     ctx.setDebugInfo(uid + "fps", PlacementOrder.UPPER, uploadManager.getAnalyse());
                 }
-                Thread.sleep(10);
+                Thread.sleep(100);
             }
             ctx.setDebugInfo(uid + "Exit", true);
 
@@ -1404,16 +1510,18 @@ function LCDThread(model, isRight, ctx, state, carIndex, ttf) {
             ctx.setDebugInfo(uid +  " Error At: ", System.currentTimeMillis() + e.message , e.stack);
             print(uid + " Error At: " + System.currentTimeMillis() + e.message + e.stack);
         } finally {
+            Thread.sleep(1000);
             for (let fun of disposeList) {
                 fun();
             }
-            face.close();
+            // model.close();
+            tex.close();
         }
-    } , "ARAF-LCD-Thread On Train " + ctx.hashCode() + " " + carIndex + " " + (isRight? "Right" : "Left"));
+    } , "ARAF-LCD-Thread On Train " + ctx.hashCode().toString(16) + " " + carIndex + " " + (isRight? "Right" : "Left"));
 
     this.isAlive = () => thread.isAlive();
     this.reStart = () => {
         if (!thread.isAlive()) try {thread.start();} catch (e) {}
     }
-    this.toString = () => "ARAF-LCD-Thread On Train " + ctx.hashCode() + " " + carIndex + " " + (isRight? "Right" : "Left");
+    this.toString = () => "ARAF-LCD-Thread On Train " + ctx.hashCode().toString(16) + " " + carIndex + " " + (isRight? "Right" : "Left");
 }

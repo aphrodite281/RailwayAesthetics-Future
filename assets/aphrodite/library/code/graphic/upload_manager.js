@@ -10,8 +10,6 @@ importPackage (java.awt.image);
 importPackage (java.awt.geom);
 importPackage (java.awt.font);
 
-
-
 /**
  * 上传经理
  * @param {GraphicsTexture} tex 纹理对象
@@ -31,6 +29,7 @@ function UploadManager(tex, tmax, tmin, tavg, tf, ty) {
     const w = 1000, h = 80;
     const anaTex = new GraphicsTexture(w, h);
     anaTex.graphics.setComposite(AlphaComposite.Src);
+    tex.graphics.setComposite(AlphaComposite.Src);
     let last, max, min, avg, times = 0;
     let history = [];
     let lasttime = 0;
@@ -47,8 +46,9 @@ function UploadManager(tex, tmax, tmin, tavg, tf, ty) {
             return;
         }
         else lasttime = timestamp;
-        tex.graphics.drawImage(img, 0, 0, null);
-        tex.upload();
+
+        tex.upload(img);
+
         if (last == undefined) last = Date.now();
         else {
             times++;
