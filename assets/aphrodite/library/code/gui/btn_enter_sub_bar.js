@@ -1,13 +1,14 @@
-function btnEnterSubBar(key, filling, title, responders) {
+function btnEnterSubBar(key, filling, title, responders, funGetMap, funSave) {
     return new ConfigResponder({
         key: () => key, 
-        init: map => {
-            map.put(key, filling);
+        init: map0 => {
+            let map = funGetMap();
+            map0.put(key, filling);
             for (let responder of responders) {
                 responder.init(map);
             }
         },
-        getListEntries: (map, builder, screenSuplier) => {
+        getListEntries: (map0, builder, screenSuplier) => {
             let btnListEntry = IScreen.ClothConfig2.newButtonListEntry(ComponentUtil.literal(""), IScreen.newButton(0, 0, 300, 20, title, btn => {
                 let screen;
                 let parent = screenSuplier.get();
@@ -19,6 +20,7 @@ function btnEnterSubBar(key, filling, title, responders) {
                 let entryBuilder = builder.entryBuilder();
                 let common = builder.getOrCreateCategory(title);
                 
+                let map = funGetMap();
                 for (let responder of responders) {
                     for (let entry of responder.getListEntries(map, entryBuilder, () => screen)) {
                         common.addEntry(entry);
@@ -26,8 +28,7 @@ function btnEnterSubBar(key, filling, title, responders) {
                 }
 
                 builder.setSavingRunnable(() => {
-                    ClientConfig.save();
-                    Resources.resetComponents();
+                    funSave();
                 });
                 screen = builder.build();
                 MinecraftClient.setScreen(screen);

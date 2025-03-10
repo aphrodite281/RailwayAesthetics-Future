@@ -91,6 +91,7 @@ function create(ctx, state, train) {
     state.tickList = tickList;
     state.infoArray = infoArray;
     train.registerCustomConfig(lcdaRecordInput(train));
+    train.registerCustomConfig(lcdaBtnEnterSubBar);
     train.sendCustomConfigsUpdateC2S();
 }
 
@@ -199,7 +200,11 @@ function lcdaFpsGlobal() {
     return Number(ClientConfig.get(lcdaFpsKey));
 }
 
-ClientConfig.register(btnEnterSubBar("lcda", "made by aphrodite281", ComponentUtil.translatable("name.raf.lcda_config"), [lcdaRecordModeInput, lcdaPDInput, lcdaFpsInput]));
+const lcdaBtnEnterSubBar = btnEnterSubBar("lcda", "made by aphrodite281", ComponentUtil.translatable("name.raf.lcda_config"), [lcdaRecordModeInput, lcdaPDInput, lcdaFpsInput, TextManager.configResponder], () => ClientConfig.getCustomConfigs(), () => {
+    ClientConfig.save();
+    Resources.resetComponents();
+})
+ClientConfig.register(lcdaBtnEnterSubBar);
 
 const lcdaRecordKey = "lcda_record"
 function lcdaRecordInput(train) {
@@ -1320,7 +1325,7 @@ function LCDThread(model, isRight, ctx, state, carIndex, ttf) {
                     ta = ta * (ins - aw - dy(10));
                     ta = Math.max(ta, 0);
                     let x = rx + dy(5) + ta;
-                    g.drawImage(imgXjjt, x, y0 - h0 / 2, null);
+                    if (!isNaN(x)) g.drawImage(imgXjjt, x, y0 - h0 / 2, null);
                 }
 
                 this.isFresh = () => isSame([xlt1, ixlt1, ind, iindex, hex, icolor, color11, icolor1]);
@@ -1475,7 +1480,7 @@ function LCDThread(model, isRight, ctx, state, carIndex, ttf) {
                     used.push("Offside: " + uploadManager.getOffside());
                     let dd = new Date();
                     let ts = dd.getMinutes().toString().padStart(2, '0') + ":" + dd.getSeconds().toString().padStart(2, '0') + "::" + dd.getMilliseconds().toString().padStart(3, '0');
-                    if (tf || lcdaNeedRecord(train(), carIndex, isRight)) {
+                    if (lcdaRecordMode() == 0 ? tf : lcdaNeedRecord(train(), carIndex, isRight)) {
                         ctx.setDebugInfo(uid, ts, "Ctrl: " + ctrlUsed, "FPS:" + fps.toFixed(2).toString().padStart(5, '0'), "\n", 
                         "Pools: " + ["ctrl: " + ctrlPool.getActiveCount() + "/" + ctrlPool.getPoolSize(), "submit: " + submitPool.getActiveCount() + "/" + submitPool.getPoolSize()].toString(), "D-Calls:" + DDrawCalls.toString(), "S-Calls:" + SDrawCalls.toString(), "\n", 
                         "Used: " + used.toString(), "DStyle: " + DStyle, "\n", 
