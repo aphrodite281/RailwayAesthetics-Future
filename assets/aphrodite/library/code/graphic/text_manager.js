@@ -348,7 +348,7 @@ TextManager.getMode = () => {
 }
 
 TextManager.processString = (str, font, w, getW) => {
-    switch (TextManager.getMode()) {
+    switch (TextManager.getMode() + "") {
         case "0": {
             break;
         }

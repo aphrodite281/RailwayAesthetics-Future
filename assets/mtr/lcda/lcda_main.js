@@ -385,6 +385,7 @@ function LCDThread(model, isRight, ctx, state, carIndex, ttf) {
                     let index = train().getRailIndex(pro, true);
                     let path = train().path();
                     let pd = path[index];
+                    if (pd == undefined) break;
                     let rail = pd.rail;
                     let p0 = new Vector3f(rail.getPosition(0)), p1 = new Vector3f(rail.getPosition(rail.getLength() + 1));
                     let plat = pla.platform;
@@ -1157,6 +1158,7 @@ function LCDThread(model, isRight, ctx, state, carIndex, ttf) {
                         let r = h2 * 0.1;
                         g.fillRoundRect(x1 - w2 / 2, y1 - h2 / 2, w2, h2, r, r);
                         if(i == 4) {
+                            /*
                             g.setColor(new Color(color));
                             let x = x1 - w2 * 0.35, y = y1 - h2 * 0.04;
                             let font = font0.deriveFont(Font.PLAIN, h2 * 0.13);
@@ -1168,6 +1170,25 @@ function LCDThread(model, isRight, ctx, state, carIndex, ttf) {
                             y = y1;
                             drawMiddle(strs[j][0], font0, b, color, x, y - h2 * 0.25 / 2, w2 * 0.73, h2 * 0.36, 0);
                             drawMiddle(strs[j][1], font0, b, color, x, y + h2 * 0.15, w2 * 0.73, h2 * 0.2, 0);
+                            */
+
+                            let font = font0.deriveFont(Font.PLAIN, h2 * 0.13);
+                            let x = x1 - w2 * 0.35, y = y1 - h2 * 0.04;
+                            let w3 = w2 * 0.3, h3 = h2 * 0.2;
+                            drawMiddle("下一站", font, b, color, x, y, w3, h3, 0);
+                            y += h3 * 0.6;
+                            h3 = h2 * 0.1;
+                            y += h3 * 0.6;
+                            drawMiddle("Next Station", font, b, color, x, y, w3, h3, 0);
+                            x = x1 + w2 * 0.15;
+                            w3 = w2 * 0.6;
+                            h3 = h2 * 0.3;
+                            y = y1 - h3 * 0.6 + h2 * 0.08;
+                            drawMiddle(strs[j][0], font0, b, color, x, y, w3, h3, 0);
+                            y += h3 * 0.6;
+                            h3 = h2 * 0.2;
+                            y += h3 * 0.6;
+                            drawMiddle(strs[j][1], font0, b, color, x, y, w3, h3, 0);
                         } else {
                             drawMiddle(strs[j][0], font0, b, color, x1, y - h2 * 0.1, w2 * 0.8, h2 * 0.35, 0);
                             drawMiddle(strs[j][1], font0, b, color, x1, y1 + h2 * 0.25 - h2 * 0.07, w2 * 0.8, h2 * 0.2, 0);
@@ -1393,7 +1414,7 @@ function LCDThread(model, isRight, ctx, state, carIndex, ttf) {
             ctrl.run();
             ctrlPool.scheduleAtFixedRate(ctrl, 0, 100, TimeUnit.MILLISECONDS);
 
-            let submitPool = Executors.newScheduledThreadPool(1);
+            let submitPool = Executors.newScheduledThreadPool(10);
             disposeList.push(() => submitPool.shutdown());
             // let uoloadPool = Executors.newScheduledThreadPool(4);
             // let executor = Executors.newFixedThreadPool(10);

@@ -1,3 +1,5 @@
+importPackage(java.lang);
+
 /**
  * 本类意在方便实现定速增长相关功能。
  * 
@@ -9,14 +11,18 @@
  * @param {number} loop 循环模式(0:不循环， 1:单向循环 2:双向循环)
  */
 function Value(min, max, now, speed, direction, loop) {
-    let last = Date.now();
+    function time() {
+        return System.nanoTime() / 1e6;
+    }
+
+    let last = time();
     let dir = direction;
     let changed = false;
     let old = now;
 
     const updatew = () => {
-        now += dir * speed * (Date.now() - last) / 1000;
-        last = Date.now();  
+        now += dir * speed * (time() - last) / 1000;
+        last = time();  
         if (loop == 2 && (now < min || now > max)) {
             dir = - dir;
         }
