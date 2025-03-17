@@ -1,4 +1,4 @@
-name: Build
+name: Pages
 on: [ pull_request, push ]
 
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
