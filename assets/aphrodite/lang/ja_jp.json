@@ -1,8 +1,9 @@
 {
     "error.aph.invalid_value": "無効な値",
+    "error.aph.number_range": "数値範囲は%sから%s",
     "error.aph.invalid_color": "無効な色",
     "error.aph.only_be": "%sのみ",
     "name.aph.text_manager_mode": "テキスト管理モード",
-    "tip.aph.text_manager_mode": "0：スクロール、1：切り取り",
+    "tip.aph.text_manager_mode": "0：スクロール、1：切り取り、2：圧縮",
     "tip.aph.reload_resourcepack": "リソースバンドルを再ロードして変更を適用"
 }

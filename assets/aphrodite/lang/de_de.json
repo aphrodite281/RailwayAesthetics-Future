@@ -1,8 +1,9 @@
 {
-    "error.aph.invalid_value": "Ungültiger Wert",
+    "error.aph.invalid_value": "ungültiger Wert",
+    "error.aph.number_range": "Wertebereich von %s bis %s",
     "error.aph.invalid_color": "Ungültige Farbe",
-    "error.aph.only_be": "Nur %s",
+    "error.aph.only_be": "Kann nur%sein",
     "name.aph.text_manager_mode": "Textverwaltungsmodus",
-    "tip.aph.text_manager_mode": "0: scrollen, 1: abschneiden",
+    "tip.aph.text_manager_mode": "0: Scrollen, 1: Capture, 2: Komprimieren",
     "tip.aph.reload_resourcepack": "Ressourcenpakete überladen, um Änderungen anzuwenden"
 }

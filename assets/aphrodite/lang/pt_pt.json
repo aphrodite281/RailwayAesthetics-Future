@@ -1,8 +1,9 @@
 {
-    "error.aph.invalid_value": "Valor inválido",
+    "error.aph.invalid_value": "valor inválido",
+    "error.aph.number_range": "Valor variado de %s a %s",
     "error.aph.invalid_color": "Cor inválida",
-    "error.aph.only_be": "Só pode ser %s",
+    "error.aph.only_be": "Só pode ser%s",
     "name.aph.text_manager_mode": "Modo de gestão de texto",
-    "tip.aph.text_manager_mode": "0: rolar, 1: capturar",
-    "tip.aph.reload_resourcepack": "Recarregar pacotes para aplicar as alterações"
+    "tip.aph.text_manager_mode": "0: Scroll, 1: Capture, 2: Compress",
+    "tip.aph.reload_resourcepack": "Recarregar o pacote de recursos para aplicar as alterações"
 }

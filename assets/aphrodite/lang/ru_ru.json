@@ -1,8 +1,9 @@
 {
     "error.aph.invalid_value": "Неверное значение",
+    "error.aph.number_range": "Диапазон значений от%s до%s",
     "error.aph.invalid_color": "Неверный цвет",
     "error.aph.only_be": "Только%s",
     "name.aph.text_manager_mode": "Режим управления текстом",
-    "tip.aph.text_manager_mode": "0: Прокрутка, 1: перехват",
+    "tip.aph.text_manager_mode": "0: прокрутка, 1: перехват, 2: сжатие",
     "tip.aph.reload_resourcepack": "Перезагрузить пакет для внесения изменений"
 }

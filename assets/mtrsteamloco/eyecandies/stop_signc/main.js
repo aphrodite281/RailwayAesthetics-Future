@@ -1,116 +1,178 @@
-/**
- * @author: Aphrodite281 QQ: 3435494979
- */
+importPackage (java.awt);
 
-importPackage(java.awt);
-importPackage(java.awt.geom);
 include(Resources.id("aphrodite:library/code/util/text_u.js"));
+include(Resources.id("aphrodite:library/code/util/tostring.js"));
+include(Resources.id("aphrodite:library/code/graphic/text_manager.js"));
 
-const MCU = MinecraftClient;
-const MCD = MTRClientData;
-const RU = Resources;
-const MM = ModelManager;
+const keyBackgroundColor = "background_color";
+const keyTextColor = "text_color";
+const keyPlatformDistance = "platform_distance";
+const keyScale = "scale";
 
-const rms = MM.loadPartedRawModel(RU.manager(), RU.id("mtrsteamloco:eyecandies/stop_signc/main.obj"), null);
+const res1 = new ConfigResponder.TextField(keyBackgroundColor, ComponentUtil.translatable("name.raf.background_color"), "0xffffff");
+const res2 = new ConfigResponder.TextField(keyTextColor, ComponentUtil.translatable("name.raf.text_color"), "0x000000");
+const res3 = new ConfigResponder.TextField(keyPlatformDistance, ComponentUtil.translatable("name.raf.platform_distance"), "5");
+const res4 = new ConfigResponder.TextField(keyScale, ComponentUtil.translatable("name.raf.scale"), "1");
 
-//const zhdh = RU.readFont(RU.id("aphrodite:library/font/zhdh.ttf")).deriveFont(Font.PLAIN, 60);
-const zhdh = RU.getSystemFont("Noto Serif");
-const m = "0, 1.5, 15, 16, 14.5, 16";
+const rms = ModelManager.loadPartedRawModel(Resources.manager(), Resources.id("mtrsteamloco:eyecandies/stop_signc/main.obj"), null);
+const ms = uploadPartedModels(rms);
+
+const font = Resources.getSystemFont("Noto Serif");
+
 
 function create(ctx, state, entity) {
-    let nu = false;
-    pi = (key, mnum) => {
-        let num = parseInt(entity.data.get(key));
-        if (isNaN(num)) {
-            num = mnum;
-            entity.data.put(key, mnum + "");
-            nu = true;
+    entity.registerCustomConfig(res1);
+    entity.registerCustomConfig(res2);
+    entity.registerCustomConfig(res3);
+    entity.registerCustomConfig(res4);
+    entity.sendUpdateC2S();
+    state.dyn = new DynamicModelHolder();
+    state.info = genInfo(entity);
+    state.tex = genTexture(state.info);
+    state.model = genModel(state.tex, state.info);
+    ctx.drawCalls.put(0, new DrawCall({
+        commit: function(drawScheduler, base, world, light) {
+            let b = base.copy();
+            b.scale(state.info.scale, state.info.scale, state.info.scale);
+            drawScheduler.enqueue(state.model.d, b, light);
+            drawScheduler.enqueue(state.model.f, b, light);
         }
-        return num;
-    }
-    pf = (key, mnum) => {
-        let num = parseFloat(entity.data.get(key));
-        if (isNaN(num)) {
-            num = mnum;
-            entity.data.put(key, mnum + "");
-            nu = true;
-        }
-        return num;
-    }
-    state.ca = pi("colorA", 0xffffff);
-    state.cb = pi("colorB", 0);
-    state.sc = pf("scale", 1);
-    state.list = getList(entity);
-    state.tex = drawTex(state.ca, state.cb, state.list);
-    let rmd = rms.get("d").copy(); rmd.sourceLocation = null; setColor(rmd, state.ca); apScale(rmd, state.sc);
-    let rmf = rms.get("f").copy(); rmf.sourceLocation = null; apScale(rmf, state.sc); rmf.replaceAllTexture(state.tex.identifier);
-    state.d0 = new DynamicModelHolder(); state.d0.uploadLater(rmd);
-    state.d1 = new DynamicModelHolder(); state.d1.uploadLater(rmf);
+    }));
 }
-function render(ctx, state, entity) {
-    ctx.setDebugInfo("list", state.list[3].length)
-    let nu = false, isC = false, isC0 = false;
-    pi = (key, mnum) => {
-        let num = parseInt(entity.data.get(key));
-        if (isNaN(num)) {
-            num = mnum;
-            entity.data.put(key, mnum + "");
-            nu = true;
-        }
-        if (num != mnum) isC = true;
-        return num;
-    }
-    pf = (key, mnum) => {
-        let num = parseFloat(entity.data.get(key));
-        if (isNaN(num)) {
-            num = mnum;
-            entity.data.put(key, mnum + "");
-            nu = true;
-        }
-        if (num != mnum) isC0 = true;
-        return num;
-    }
-    state.ca = pi("colorA", state.ca);
-    state.cb = pi("colorB", state.cb);
-    state.sc = pf("scale", state.sc);
-    let list = getList(entity);
-    if (isChanged(state.list, list)) isC = true;
-    state.list = list;
-    if (isC0) {
-        let rmd = rms.get("d").copy(); rmd.sourceLocation = null; setColor(rmd, state.ca); apScale(rmd, state.sc);
-        let rmf = rms.get("f").copy(); rmf.sourceLocation = null; apScale(rmf, state.sc);
-        state.d0.uploadLater(rmd);
-        state.d1.uploadLater(rmf);
-    }
-    if (isC) {
-        state.tex.close();
-        state.tex = drawTex(state.ca, state.cb, state.list);
-        setColor0(state.d0, state.ca);
-    }
-    try {
-        state.d1.getUploadedModel().replaceAllTexture(state.tex.identifier);
-    } catch (e) {}
 
-    ctx.drawModel(state.d0, null);
-    ctx.drawModel(state.d1, null);
+function render(ctx, state, entity) {
+    let info = genInfo(entity);
+    if (toString(info) != toString(state.info)) {
+        state.info = info;
+        state.tex.close();
+        state.tex = genTexture(info);
+        state.model = genModel(state.tex, state.info);
+    }
 }
 
 function dispose(ctx, state, entity) {
-    state.d0.close();
-    state.d1.close();
     state.tex.close();
+    state.dyn.close();
 }
 
-function setColor(rm, c) {
-    let color = c << 8 | 0xff;
-    for (let [mat, ml] of rm.meshList) {
-        mat.attrState.setColor(color >> 24 & 0xff, color >> 16 & 0xff, color >> 8 & 0xff, color & 0xff);
+function genInfo(entity) {
+    let bgc = parseInt(entity.getCustomConfig(keyBackgroundColor));
+    let txc = parseInt(entity.getCustomConfig(keyTextColor));
+    let pd = parseInt(entity.getCustomConfig(keyPlatformDistance));
+    let scale = parseFloat(entity.getCustomConfig(keyScale));
+    let station = MinecraftClient.getStationAt(entity.getWorldPosVector3f());
+    let staName = "无车站|No Station";
+    let pla = null;
+    if (station != null) {
+        staName = station.name;
+        pla = MinecraftClient.getPlatformAt(entity.getWorldPosVector3f(), pd, 4, 5);
+    }
+    let routes = [];
+    if (pla != null) {
+        for (let ro of MTRClientData.ROUTES) {
+            if (ro.isHidden) continue;
+            for (let i = 0; i < ro.platformIds.length; i++) {
+                let rpf = ro.platformIds[i];
+                if (rpf.platformId == pla.id) {
+                    // cs.push(ro.color);
+                    let ind = i + 1;
+                    if (ind < ro.platformIds.length) {
+                        let pid = ro.platformIds[ind].platformId;
+                        let s = "未知|Unknown";
+                        for (let [id, st] of MTRClientData.DATA_CACHE.platformIdToStation) {
+                            if (id == pid) {
+                                s = st.name;
+                                break;
+                            }
+                        }
+                        routes.push({ name: s, color: ro.color });
+                    } else {
+                        routes.push({ name: null, color: ro.color });
+                    }
+                    break;
+                }
+            }
+        }
+    }
+    if (routes.length == 0) routes.push({ name: "无线路|No Route", color: 0xbfffda });
+    return {
+        bgc: bgc,
+        txc: txc,
+        scale: scale,
+        staName: staName,
+        routes: routes
     }
 }
 
-function setColor0(dyn, c) {
+function genTexture(info) {
+    const w = 400, h = 320;
+    let tex = new GraphicsTexture(w, h);
+    let g = tex.graphics;
+    
+    let textManager = new TextManager.Buffered();
+    let drawMiddle = textManager.drawMiddle;
+
+    function drawSuit(cp, np, midx, midy, w, h) {
+        drawMiddle(cp, font, Font.PLAIN, info.txc, midx, midy - h / 2 + h * 0.3, w, h * 0.6, 0, 2);
+        drawMiddle(np, font, Font.PLAIN, info.txc, midx, midy + h / 2 - h * 0.2, w, h * 0.4, 0, 2);
+    }
+
+    g.setColor(new Color(info.bgc));
+    g.fillRect(0, 0, w, h);
+
+    let p = w / 40;
+    let w1 = (w + p) / info.routes.length, h0 = h / 16, x = 0, y = h * 0.56;
+
+    let names = [];
+    for (let route of info.routes) {
+        g.setColor(new Color(route.color));
+        let path = new Path2D.Float();
+        path.moveTo(x - p, y);
+        path.lineTo(x + w1 - p, y);
+        path.lineTo(x + w1, y + h0);
+        path.lineTo(x, y + h0);
+        path.closePath();
+        g.fill(path);
+        x += w1;
+
+        if (route.name != null) {
+            names.push(route.name);
+        }
+    }
+
+    drawSuit(TextU.CP(info.staName), TextU.NP(info.staName), w / 2, h * 0.26, w * 0.8, h * 0.4);
+
+    if (names.length > 0) {
+        drawSuit("下一站", "Next  Station", w * 0.15, h * 0.8, w * 0.18, h * 0.2);
+        let x = w * 0.65, w1 = w * 0.68, h1 = h * 0.35;
+        let h2 = h1 / names.length;
+        let y = h * 0.8 - h1 / 2 + h2 / 2;
+        for (let i = 0; i < names.length; i++) {
+            let name = names[i];
+            drawSuit(TextU.CP(name), TextU.NP(name), x, y, w1, h2);
+            y += h2;
+        }
+    } else drawSuit("终点站", "Terminus", w / 2, h * 0.8, w * 0.8, h * 0.3);
+
+    textManager.draw(g);
+    textManager.dispose();
+
+    tex.upload();
+
+    return tex;
+}
+
+function genModel(tex, info) {
+    let d = ms["d"].copyForMaterialChanges();
+    let f = ms["f"].copyForMaterialChanges();
+    f.replaceAllTexture(tex.identifier);
+    setColor(d, info.bgc);
+
+    return {d: d, f: f};
+}
+
+function setColor(mc, c) {
     let color = c << 8 | 0xff;
-    let mc = dyn.getUploadedModel();
     let vs = [mc.uploadedOpaqueParts, mc.uploadedTranslucentParts];
     for (let v of vs) {
         for (let vr of v.meshList) {
@@ -120,98 +182,12 @@ function setColor0(dyn, c) {
     }
 }
 
-function apScale(rm, s) {
-    rm.applyTranslation(0, -0.5, 0.475);
-    rm.applyScale(s, s, s);
-    rm.applyTranslation(0, 0.5, -0.5 + 0.025 * s);
-}
-
-function getList(entity) {
-    let st = MCU.getStationAt(entity.getWorldPosVector3f());
-    let name = st.name;
-    let cp = TextU.CP(name);
-    let np = TextU.NP(name);
-    let pla = MCU.getPlatformAt(entity.getWorldPosVector3f(), 5, 3, 4);
-    let cs = [], ns = [];
-    for (let ro of MCD.ROUTES) {
-        if (ro.isHidden) continue;
-        for (let i = 0; i < ro.platformIds.length; i++) {
-            let rpf = ro.platformIds[i];
-            if (rpf.platformId == pla.id) {
-                cs.push(ro.color);
-                let ind = i + 1;
-                if (ind < ro.platformIds.length) {
-                    let pid = ro.platformIds[ind].platformId;
-                    let s = "Null|null";
-                    for (let [id, st] of MCD.DATA_CACHE.platformIdToStation) {
-                        if (id == pid) {
-                            s = st.name;
-                            break;
-                        }
-                    }
-                    ns.push(s);
-                }
-                break;
-            }
-        }
+function uploadPartedModels(rawModels) {
+    let result = {};
+    for (it = rawModels.entrySet().iterator(); it.hasNext(); ) {
+      entry = it.next();
+      // entry.getValue().applyUVMirror(false, false);
+      result[entry.getKey()] = ModelManager.uploadVertArrays(entry.getValue());
     }
-    return [cp, np, cs, ns];
-}
-
-function isChanged(l0, l1) {
-    if (l0.length!= l1.length) return true;
-    for (let i = 0; i < l0.length; i++) {
-        if (l0[i].toString() != l1[i].toString()) return true;
-    }
-    return false;
-}
-
-function drawTex(dc, tc, [cp, np, cs, ns]) {
-    let tex = new GraphicsTexture(400, 320);
-
-    let g = tex.graphics;
-    let zh = (cp, np, s0, s1, x, y0, y1) => {
-        let f0 = zhdh.deriveFont(Font.PLAIN, s0);
-        g.setFont(f0);
-        g.drawString(cp, x - getW(cp, f0) / 2, y0);
-        let f1 = zhdh.deriveFont(Font.PLAIN, s1);
-        g.setFont(f1);
-        g.drawString(np, x - getW(np, f1) / 2, y1);
-    }
-    g.setColor(new Color(dc));
-    g.fillRect(0, 0, 400, 320);
-    let w = 410 / cs.length, h = 20, x = 0, y = 180;
-    for (let c of cs) {
-        g.setColor(new Color(c));
-        let path = new Path2D.Float();
-        path.moveTo(x - 10, y);
-        path.lineTo(x + w - 10, y);
-        path.lineTo(x + w, y + h);
-        path.lineTo(x, y + h);
-        path.closePath();
-        g.fill(path);
-        x += w;
-    }
-    g.setColor(new Color(tc));
-    zh(cp, np, 80, 50, 200, 90, 150);
-    if (ns.length > 0) {
-        zh("下一站", "Next  Station", 40, 18, 80, 260, 280);
-        let l = ns.length;
-        let x = 300, s0 = 50 / l, s1 = 30 / l, y = 210;
-        for (let n of ns) {
-            zh(TextU.CP(n), TextU.NP(n) + "", s0, s1, x, y + s0, y + s0 + s1 + 10 / l);
-            y += s0 + s1 + 10 / l * 2;
-        }
-    } else {
-        zh("终点站", "Terminus", 50, 20, 200, 260, 290);
-    }
-
-    tex.upload();
-    return tex;
-}
-
-function getW(str, font) {
-    let frc = Resources.getFontRenderContext();
-    bounds = font.getStringBounds(str, frc);
-    return Math.ceil(bounds.getWidth());
+    return result;
 }

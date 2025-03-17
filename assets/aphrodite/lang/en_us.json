@@ -1,8 +1,9 @@
 {
-    "error.aph.invalid_value": "Invalid value",
+    "error.aph.invalid_value": "invalid value",
+    "error.aph.number_range": "The numerical range is from%s to%s",
     "error.aph.invalid_color": "Invalid color",
     "error.aph.only_be": "Can only be%s",
     "name.aph.text_manager_mode": "Text management mode",
-    "tip.aph.text_manager_mode": "0: Scroll, 1: Capture",
+    "tip.aph.text_manager_mode": "0: Scroll, 1: Capture, 2: Compress",
     "tip.aph.reload_resourcepack": "Reload resource package to apply changes"
 }

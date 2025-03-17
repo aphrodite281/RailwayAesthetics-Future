@@ -1,21 +1,36 @@
 {
     "psda1": {
         "name": "obj.raf.psda1",
-        "scriptFiles": ["mtrsteamloco:eyecandies/psda/main1.js"]
+        "asPlatform": true,
+        "shape": "0, 4, 7, 16, 23, 9", 
+        "leastCollisions": "0, 0, 0, 0, 0, 0",
+        "scriptFiles": ["mtrsteamloco:eyecandies/psda/middle.js"]
     },
     "psda2l": {
         "name": "obj.raf.psda2l",
-        "scriptFiles": ["mtrsteamloco:eyecandies/psda/main2l.js"],
+        "asPlatform": true,
+        "shape": "8, 4, 7, 16, 23, 9/ 1, 0, 4, 15, 24, 11",
+        "leastCollisions": "1, 0, 4, 15, 24, 11",
+        "flag": [true, false],
+        "scriptFiles": ["mtrsteamloco:eyecandies/psda/node.js"],
         "lightLevel": 8
     },
     "psda2r": {
         "name": "obj.raf.psda2r",
-        "scriptFiles": ["mtrsteamloco:eyecandies/psda/main2r.js"],
+        "asPlatform": true,
+        "shape": "0, 4, 7, 8, 23, 9/ 1, 0, 4, 15, 24, 11",
+        "leastCollisions": "1, 0, 4, 15, 24, 11",
+        "flag": [false, true],
+        "scriptFiles": ["mtrsteamloco:eyecandies/psda/node.js"],
         "lightLevel": 8
     },
     "psda3": {
         "name": "obj.raf.psda3",
-        "scriptFiles": ["mtrsteamloco:eyecandies/psda/main3.js"],
+        "asPlatform": true,
+        "shape": "0, 4, 7, 16, 23, 9/ 1, 0, 4, 15, 24, 11",
+        "leastCollisions": "1, 0, 4, 15, 24, 11",
+        "flag": [true, true],
+        "scriptFiles": ["mtrsteamloco:eyecandies/psda/node.js"],
         "lightLevel": 8
     }
 }

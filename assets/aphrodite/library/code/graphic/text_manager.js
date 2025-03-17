@@ -19,7 +19,7 @@ const TextManager = {
     /**
      * 使用 Clip 方式控制文本区域
      */
-    Clip: function (w, h, fx, fy) {
+    Clip: function (fx, fy) {
         if (fx == undefined) fx = x => x;
         if (fy == undefined) fy = y => y;
         let map = new Map();
@@ -48,11 +48,12 @@ const TextManager = {
             return fm.getHeight();
         }
 
-        const layout = TextManager.Clip.layout;
+        const layout = TextManager.layout;
 
-        function Text(str, font, style, color, x, y, w, h, mode, start) {
+        function Text(str, font, style, color, x, y, w, h, highMode, processingMode, start) {
+            if (processingMode == undefined) processingMode = TextManager.getMode();
             let getH;
-            switch (mode) {
+            switch (highMode) {
                 case 0: getH = font => getHeight(font); break;
                 default: getH = font => getAscent(font); break;
             }
@@ -62,36 +63,46 @@ const TextManager = {
             font = font.deriveFont(style, h * scale);
             h = getH(font);
             let scroll = false;
-            str = TextManager.processString(str, font, w, getW);
+            str = TextManager.processString(str, font, w, getW, processingMode);
             let width = getW(str, font);
-            if (width > w) scroll = true;
-            switch (mode) {
+            if (width > w && processingMode == 0) scroll = true;
+            switch (highMode) {
                 case 0: d = getDescent(font); break;
                 default: d = getDescent(font) / 2; break;
             }
             let d;
             const descent = d;
+            let s0 = w / width;
             if (!scroll) {
                 this.draw = (g, xi, yi, time) => {
-                    g.setClip(new Rectangle2D.Float(xi + x - w / 2, yi + y - h / 2, w, h));
+                    g = g.create();
+                    g.translate(xi + x - w / 2, yi + y - h / 2);
+                    layout(g, w, h);
+                    g.setColor(color);
                     g.setFont(font);
-                    layout(g, xi + x, yi + y, w, h);
-                    g.drawString(str, xi + x - w / 2 + (w - width) / 2, yi + y + h / 2 - descent);
-                    g.setClip(null);
+                    if (s0 < 1) {
+                        g.scale(s0, 1);
+                        g.drawString(str, 0, h - descent);
+                    } else g.drawString(str, w / 2 + (w - width) / 2, h - descent);
+                    g.dispose();
                 }
+                this.scroll = () => false;
             } else {
                 const ins = h * 2; // 间隔
                 this.draw = (g, xi, yi, time) => {
-                    g.setClip(new Rectangle2D.Float(xi + x - w / 2, yi + y - h / 2, w, h));
+                    g = g.create();
+                    g.translate(xi + x - w / 2, yi + y - h / 2);
+                    g.setClip(new Rectangle2D.Float(0, 0, w, h));
                     g.setFont(font);
-                    layout(g, xi + x, yi + y, w, h);
+                    layout(g, w, h);
                     let tx = ((time - start) / 1000 * 2 * h) % (width + ins);
                     tx = 0;
                     g.setColor(color);
-                    g.drawString(str, xi + x - w / 2 - tx - ins, yi + y + h / 2 - descent);
-                    g.drawString(str, xi + x - w / 2 - tx + width, yi + y + h / 2 - descent);
-                    g.setClip(null);
+                    g.drawString(str, - tx - ins, h - descent);
+                    g.drawString(str, - tx + width, h - descent);
+                    g.dispose();
                 }
+                this.scroll = () => true;
             }
 
 
@@ -108,18 +119,19 @@ const TextManager = {
          * @param {number} y y坐标
          * @param {number} w 最大宽度
          * @param {number} h 最大高度
-         * @param {number} mode 高度算法 0:Height, 1: Ascent 默认为1
+         * @param {number} highMode 高度算法 0:Height, 1: Ascent 默认为1
+         * @param {number} processingMode 处理模式 0: 滚动, 1: 截取, 2: 缩放
          * @param {number} start 开始时间
          * @param {Any | Null} id
          */
-        this.drawMiddle = (str, font, style, color, x, y, w, h, mode, start, id) => {
+        this.drawMiddle = (str, font, style, color, x, y, w, h, highMode, processingMode, start, id) => {
             if (start == null) start = 0;
-            if (mode == undefined) mode = 1;
+            if (highMode == undefined) highMode = 1;
             if (id != undefined) {
                 if (map.has(id)) map.get(id).dispose();
-                map.set(id, new Text(str, font, style, color, fx(x), fy(y), w, h, mode, start));
+                map.set(id, new Text(str, font, style, color, fx(x), fy(y), w, h, highMode, processingMode, start));
             } else {
-                list.push(new Text(str, font, style, color, fx(x), fy(y), w, h, mode, start));
+                list.push(new Text(str, font, style, color, fx(x), fy(y), w, h, highMode, processingMode, start));
             }
         }
 
@@ -155,11 +167,17 @@ const TextManager = {
         this.dispose = () => {
             g0.dispose();
         }
+
+        this.scroll = () => {
+            for (let [id, text] of map) if (text.scroll()) return true;
+            for (let text of list) if (text.scroll()) return true;
+            return false;
+        }
     },
     /**
      * 使用 BufferedImage 方式控制文本区域
      */
-    Buffered: function (w, h, fx, fy) {
+    Buffered: function (fx, fy) {
         if (fx == undefined) fx = x => x;
         if (fy == undefined) fy = y => y;
         let map = new Map();
@@ -188,11 +206,13 @@ const TextManager = {
             return fm.getHeight();
         }
 
-        const layout = TextManager.Buffered.layout;
+        const layout = TextManager.layout;
 
-        function Text(str, font, style, color, x, y, w, h, mode, start) {
+        function Text(str, font, style, color, x, y, w, h, highMode, processingMode, start) {
+            if (processingMode == undefined) processingMode = TextManager.getMode();
+
             let getH;
-            switch (mode) {
+            switch (highMode) {
                 case 0: getH = (font) => getHeight(font); break;
                 default: getH = (font) => getAscent(font); break;
             }
@@ -200,27 +220,32 @@ const TextManager = {
             let h0 = getH(font.deriveFont(style,1000));
             let scale = 1000 / h0;
             font = font.deriveFont(style, h * scale);
-            str = TextManager.processString(str, font, w, getW);
+            str = TextManager.processString(str, font, w, getW, processingMode);
             let scroll = false;
             let width = getW(str, font);
-            if (width > w) scroll = true;
+            if (width > w && processingMode == 0) scroll = true;
             h = getH(font);
             let d;
-            switch (mode) {
+            switch (highMode) {
                 case 0: d = getDescent(font); break;
                 default: d = getDescent(font) / 2; break;
             }
             const descent = d;
             const y0 = h - descent;
+            let s0 = w / width;
             if (!scroll) {
                 let tex = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
                 let g = tex.createGraphics();
                 g.setFont(font);
                 layout(g, w, h);
                 g.setColor(color);
-                g.drawString(str, (w - width) / 2, y0); // 居中绘制
-                this.draw = (gi, xi, yi, time) => gi.drawImage(tex, xi + x - w / 2, yi + y - h / 2, null);
+                if (s0 < 1) {
+                    g.scale(s0, 1);
+                    g.drawString(str, 0, y0);
+                } else g.drawString(str, (w - width) / 2, y0); // 居中绘制
                 g.dispose();
+                this.draw = (gi, xi, yi, time) => gi.drawImage(tex, xi + x - w / 2, yi + y - h / 2, null);
+                this.scroll = () => false;
             } else {
                 let last = start;
                 const ins = h * 2; // 间隔
@@ -236,8 +261,10 @@ const TextManager = {
                     g.setColor(color);
                     g.drawString(str, -tx - ins, y0);
                     g.drawString(str, -tx + width, y0);
+                    g.dispose();
                     gi.drawImage(tex, xi + x - w / 2, yi + y - h / 2, null);
                 }
+                this.scroll = () => true;
             }
             this.dispose = () => {
             }
@@ -253,18 +280,19 @@ const TextManager = {
          * @param {number} y y坐标
          * @param {number} w 最大宽度
          * @param {number} h 最大高度
-         * @param {number} mode 高度算法 0:Height, 1: Ascent 默认为1
+         * @param {number} highMode 高度算法 0:Height, 1: Ascent 默认为1
+         * @param {number} processingMode 处理模式 0: 滚动, 1: 截取, 2: 缩放
          * @param {number} start 开始时间
          * @param {Any | Null} id
          */
-        this.drawMiddle = (str, font, style, color, x, y, w, h, mode, start, id) => {
+        this.drawMiddle = (str, font, style, color, x, y, w, h, highMode, start, processingMode, id) => {
             if (start == null) start = 0;
-            if (mode == undefined) mode = 1;
+            if (highMode == undefined) highMode = 1;
             if (id != undefined) {
                 if (map.has(id)) map.get(id).dispose();
-                map.set(id, new Text(str, font, style, color, fx(x), fy(y), w, h, mode, start));
+                map.set(id, new Text(str, font, style, color, fx(x), fy(y), w, h, highMode, processingMode, start));
             } else {
-                list.push(new Text(str, font, style, color, fx(x), fy(y), w, h, mode, start));
+                list.push(new Text(str, font, style, color, fx(x), fy(y), w, h, highMode, processingMode, start));
             }
         }
 
@@ -302,6 +330,12 @@ const TextManager = {
             for (let [id, text] of map) text.dispose();
             for (let text of list) text.dispose();
         }
+
+        this.scroll = () => {
+            for (let [id, text] of map) if (text.scroll()) return true;
+            for (let text of list) if (text.scroll()) return true;
+            return false;
+        }
     }
 }
 
@@ -312,21 +346,7 @@ TextManager.setComp = (g, value) => {
     g.setComposite(AlphaComposite.SrcOver.derive(value * ov));
 };
 
-TextManager.Clip.layout = layout = (g, x, y, w, h) => {
-    return;
-    const setComp = TextManager.setComp;
-    g = g.create();
-    setComp(g, 0.1);
-    g.setColor(Color.BLUE);
-    g.fillRect(x - w / 2, y - h / 2, w, h);
-    setComp(g, 0.8);
-    g.setStroke(new BasicStroke(2));
-    g.setColor(Color.BLACK);
-    g.drawRect(x - w / 2, y - h / 2, w, h);
-    g.dispose();
-}
-
-TextManager.Buffered.layout = layout = (g, w, h) => {
+TextManager.layout = (g, w, h) => {
     return;
     const setComp = TextManager.setComp;
     g = g.create();
@@ -341,18 +361,15 @@ TextManager.Buffered.layout = layout = (g, w, h) => {
 }
 
 TextManager.modeKey = "text_manager_mode";
-TextManager.defaultMode = "0";
+TextManager.defaultMode = "2";
 
 TextManager.getMode = () => {
-    return ClientConfig.get(TextManager.modeKey);
+    return Number(ClientConfig.get(TextManager.modeKey));
 }
 
 TextManager.processString = (str, font, w, getW) => {
     switch (TextManager.getMode() + "") {
-        case "0": {
-            break;
-        }
-        default: {
+        case "1": {
             if (getW(str, font) <= w) return str;
             str = str + "...";
             while (getW(str, font) > w && str.length > 0) {
@@ -364,6 +381,7 @@ TextManager.processString = (str, font, w, getW) => {
             }
             break;
         }
+        default: break;
     }
     return str;
 }
@@ -374,5 +392,5 @@ TextManager.processString = (str, font, w, getW) => {
 //     return java.util.Optional.of(arr);
 // }, false);
 
-TextManager.configResponder = new ConfigResponder.TextField(TextManager.modeKey, ComponentUtil.translatable("name.aph.text_manager_mode"), "1", str => str, ErrorSupplier.only(["0", "1"]), str => {}, str => java.util.Optional.of(asJavaArray([ComponentUtil.translatable("tip.aph.text_manager_mode"), ComponentUtil.translatable("tip.aph.reload_resourcepack")], Component)), false);
+TextManager.configResponder = new ConfigResponder.TextField(TextManager.modeKey, ComponentUtil.translatable("name.aph.text_manager_mode"), "2", str => str, ErrorSupplier.only(["0", "1", "2"]), str => {}, str => java.util.Optional.of(asJavaArray([ComponentUtil.translatable("tip.aph.text_manager_mode"), ComponentUtil.translatable("tip.aph.reload_resourcepack")], Component)), false);
 ClientConfig.register(TextManager.configResponder);

@@ -50,7 +50,7 @@ var ErrorSupplier = {
         if (isNaN(num)) return Optional.of(ComponentUtil.translatable("error.aph.invalid_value"));
         return Optional.empty();
     },
-    NumberRange: function(min, max, includeMin, includeMax) {
+    numberRange: function(min, max, includeMin, includeMax) {
         return function(str) {
             str = str + "";
             let num = Number(str);

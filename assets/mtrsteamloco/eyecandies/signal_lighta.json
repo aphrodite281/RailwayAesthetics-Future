@@ -1,16 +1,20 @@
 {
-    "signal_lighta_3l": {
-        "name": "obj.raf.signal_lighta_3l",
-        "scriptFiles": ["mtrsteamloco:eyecandies/signal_lighta/main_3.js"],
-        "shape": "4, 0, 4, 12, 16, 12",
-        "hasCollision": true,
-        "lightLevel": 7
-    },
     "signal_lighta_2l": {
         "name": "obj.raf.signal_lighta_2l",
-        "scriptFiles": ["mtrsteamloco:eyecandies/signal_lighta/main_2.js"],
-        "shape": "4, 0, 4, 12, 12, 12",
-        "hasCollision": true,
+        "lights": [["light0", "0xff4040"], ["light1", "0x40ff40"]],
+        "scriptFiles": ["mtrsteamloco:eyecandies/signal_lighta/common.js"],
+        "lightLevel": 7
+    },
+    "signal_lighta_3l": {
+        "name": "obj.raf.signal_lighta_3l",
+        "lights": [["light2", "0xff4040"], ["light1", "0xffff40"], ["light0", "0x40ff40"]],
+        "scriptFiles": ["mtrsteamloco:eyecandies/signal_lighta/common.js"],
+        "lightLevel": 7
+    },
+    "signal_lighta_4l": {
+        "name": "obj.raf.signal_lighta_4l",
+        "lights": [["light3", "0xff4040"], ["light2", "0xffff40"], ["light1", "0xffff40"], ["light0", "0x40ff40"]],
+        "scriptFiles": ["mtrsteamloco:eyecandies/signal_lighta/common.js"],
         "lightLevel": 7
     }
 }

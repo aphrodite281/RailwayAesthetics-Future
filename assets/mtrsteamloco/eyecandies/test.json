@@ -1,7 +1,0 @@
-{
-    "test": {
-        "name": "obj.raf.test",
-        "scriptFiles": ["mtrsteamloco:eyecandies/test/config.js"],
-        "abc": 123
-    }
-}

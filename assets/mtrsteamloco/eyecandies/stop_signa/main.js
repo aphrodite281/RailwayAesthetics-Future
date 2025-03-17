@@ -1,114 +1,106 @@
-include(Resources.id("aphrodite:library/code/model/face.js"));
-include(Resources.id("aphrodite:library/code/base/color_int_base.js"));
+importPackage (java.awt);
+importPackage (java.awt.image);
+
+include(Resources.id("aphrodite:library/code/util/tostring.js"));
 include(Resources.id("aphrodite:library/code/util/text_u.js"));
+include(Resources.id("aphrodite:library/code/util/error_supplier.js"));
 
-//const font0 = Resources.getSystemFont("Noto Serif");
-const font0 = Resources.readFont(Resources.id("aphrodite:library/font/hkh_sxt.ttf"));
-const fontSize = 256;
-const font = font0.deriveFont(Font.PLAIN, fontSize);
+const keyColor = "color";
+const keyScale = "scale";
+const keyFont = "font";
 
-const cp = (str) => {return TextU.CP(str)};
+const res1 = new ConfigResponder.TextField(keyColor, ComponentUtil.translatable("name.raf.color"), "0").setErrorSupplier(ErrorSupplier.Color);
+const res2 = new ConfigResponder.TextField(keyScale, ComponentUtil.translatable("name.raf.scale"), "1").setErrorSupplier(ErrorSupplier.Float);
+const res4 = new ConfigResponder.TextField(keyFont, ComponentUtil.translatable("name.raf.font"), "aphrodite:library/font/zhdh.ttf");
+
+const g0 = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics();
+
+const mat = new Matrix4f();
+mat.translate(0, 0.5, 0);
 
 function create(ctx, state, entity) {
-    let text = "";
-    try {
-        text = cp(MinecraftClient.getStationAt(entity.getWorldPosVector3f()).name + "");
-    }catch(e) {
-        text = "无车站";
-    }
-    state.text = text;
+    entity.registerCustomConfig(res1);
+    entity.registerCustomConfig(res2);
+    entity.registerCustomConfig(res4);
+    entity.sendUpdateC2S();
+    
+    state.dyn = new DynamicModelHolder();
+    state.info = genInfo(entity);
+    state.tex = genTexture(state.info);
+    state.dyn.uploadLater(genModel(state.tex));
 
-    let nu = false;
-
-    pi = (key, mnum) => {
-        let num = parseInt(entity.data.get(key));
-        if (isNaN(num)) {
-            num = mnum;
-            entity.data.put(key, mnum + "");
-            nu = true;
-        }
-        return num;
-    }
-    pf = (key, mnum) => {
-        let num = parseFloat(entity.data.get(key));
-        if (isNaN(num)) {
-            num = mnum;
-            entity.data.put(key, mnum + "");
-            nu = true;
-        }
-        return num;
-    }
-
-    state.scale = pf("scale", 1);
-    state.color = pi("color", 0);
-
-    state.face = neww(ctx, state.text, state.scale, state.color);
-
-    if (nu) entity.sendUpdateC2S();
+    ctx.drawCalls.put(0, new ClusterDrawCall(state.dyn, mat));
 }
 
 function render(ctx, state, entity) {
-   state.face.tick();
-
-   let nu = false;
-
-    pi = (key, mnum) => {
-        let num = parseInt(entity.data.get(key));
-        if (isNaN(num)) {
-            num = mnum;
-            entity.data.put(key, mnum + "");
-            nu = true;
-        }
-        return num;
+    let info = genInfo(entity);
+    if (toString(info) != toString(state.info)) {
+        state.info = info;
+        state.tex.close();
+        state.tex = genTexture(state.info);
+        state.dyn.uploadLater(genModel(state.tex));
     }
-    pf = (key, mnum) => {
-        let num = parseFloat(entity.data.get(key));
-        if (isNaN(num)) {
-            num = mnum;
-            entity.data.put(key, mnum + "");
-            nu = true;
-        }
-        return num;
-    }
-    let scale = pf("scale", 1);
-    let color = pi("color", 0);
-    if (scale != state.scale || color != state.color) {
-        state.scale = scale;
-        state.color = color;
-        state.face.close();
-        state.face = neww(ctx, state.text, state.scale, state.color);
-    }
-    if (nu) entity.sendUpdateC2S();
 }
 
 function dispose(ctx, state, entity) {
-    state.face.close();
+    state.tex.close();
+    state.dyn.close();
 }
 
-function getSize(str, font) {
-    let frc = Resources.getFontRenderContext();
-    bounds = font.getStringBounds(str, frc);
-    return [Math.ceil(bounds.getWidth()), Math.ceil(bounds.getHeight())];
+function genInfo(entity) {
+    let color = parseInt(entity.getCustomConfig(keyColor));
+    let scale = parseFloat(entity.getCustomConfig(keyScale));
+    let station = MinecraftClient.getStationAt(entity.getWorldPosVector3f());
+    let text = "无车站";
+    if (station != null) {
+        text = TextU.CP(station.name);
+    }
+    let font = entity.getCustomConfig(keyFont);
+    return {
+        color: color,
+        scale: scale,
+        text: text,
+        font: font
+    }
 }
 
+const SCALE = 150;
 
-function neww(ctx, str, scale, color){
-    let size = getSize(str, font);
-    let face = new Face({
-        ctx: ctx,
-        isTrain: false,
-        matrices: [new Matrices()],
-        texture: size,
-        model: {
-            size: [size[0]/100 * scale, size[1]/100 * scale],
-            renderType: "exteriortranslucent"
-        }
-    });
-    let tex = face.texture;
-    let g = tex.graphics;
-    g.setColor(new Color(color));
+function genTexture(info) {
+    let font = getFont(info.font);
+    font = font.deriveFont(info.scale * SCALE);
+    let fm = g0.getFontMetrics(font);
+    let w = fm.stringWidth(info.text);
+    let h = fm.getHeight();
+    let gt = GraphicsTexture(w, h);
+    let g = gt.graphics;
+    g.setColor(new Color(info.color));
     g.setFont(font);
-    g.drawString(str, 0, size[1]);
-    tex.upload();
-    return face;
+    g.drawString(info.text, 0, fm.getAscent());
+    gt.upload();
+    return gt;
 }
+
+function genModel(tex) {
+    let w = tex.width / SCALE, h = tex.height / SCALE;
+    let builder = new RawMeshBuilder(4, "exterior", tex.identifier);
+    for(let i = 0; i < 4; i++) {
+        builder.vertex(new Vector3f(w * (i == 0 || i == 1? 0.5 : -0.5), h * (i == 0 || i == 3 ? -0.5 : 0.5), 0)).uv(i == 0 || i ==1 ? 1 : 0, i == 0 || i == 3 ? 1 : 0).normal(0, 0, 0).endVertex();
+    }
+    let rawModel = new RawModel();
+    rawModel.append(builder.getMesh());
+    rawModel.triangulate();
+    return rawModel;
+}
+
+var getFont = (function() {
+    const FONT_CACHE = new Map();
+    return function(src) {
+        if (FONT_CACHE.has(src)) {
+            return FONT_CACHE.get(src);
+        }
+        if (Resources.hasResource(Resources.id(src))) FONT_CACHE.set(src, Resources.readFont(Resources.id(src)));
+        else FONT_CACHE.set(src, new Font(src, Font.PLAIN, 16));
+        return FONT_CACHE.get(src);
+    }
+})();

@@ -3,21 +3,19 @@ include(Resources.id("aphrodite:library/code/util/error_supplier.js"));
 const colorKey = "color";
 const res = new ConfigResponder.TextField(colorKey, ComponentUtil.translatable("name.raf.color"), "0xfafafa").setErrorSupplier(ErrorSupplier.Color);
 
-const getColor = entity => java.awt.Color.getColor(entity.getCustomConfig(colorKey));
+const getColor = entity => Number(entity.getCustomConfig(colorKey));
 
-function c(ctx, state, entity, model) {
+function create(ctx, state, entity) {
     entity.registerCustomConfig(res);
-    let rm = model.copy(); rm.sourceLocation = null;
-    duv(rm);
-    setColor(rm, getColor(entity));
-    let dyn = new DynamicModelHolder();
-    dyn.uploadLater(rm);
-    state.dyn = dyn;
-    ctx.drawCalls.put("barsa", new ClusterDrawCall(dyn, new Matrix4f()));
+    entity.sendUpdateC2S();
+    
+    state.mc = base.copyForMaterialChanges();
+    setColor0(state.mc, getColor(entity));
+    ctx.drawCalls.put("barsa", new ClusterDrawCall(state.mc, new Matrix4f()));
 }
 
-function r(ctx, state, entity) {
-    setColor0(state.dyn, getColor(entity));
+function render(ctx, state, entity) {
+    setColor0(state.mc, getColor(entity));
 }
 
 function setColor(rm, c) {
@@ -27,9 +25,8 @@ function setColor(rm, c) {
     }
 }
 
-function setColor0(dyn, c) {
+function setColor0(mc, c) {
     let color = c << 8 | 0xff;
-    let mc = dyn.getUploadedModel();
     let vs = [mc.uploadedOpaqueParts, mc.uploadedTranslucentParts];
     for (let v of vs) {
         for (let vr of v.meshList) {

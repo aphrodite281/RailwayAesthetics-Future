@@ -8,16 +8,15 @@ importPackage(java.lang);
 include(Resources.id("aphrodite:library/code/util/text_u.js"));
 include(Resources.id("aphrodite:library/code/util/error_supplier.js"));
 include(Resources.id("aphrodite:library/code/graphic/text_manager.js"));
-include(Resources.id("aphrodite:library/code/util/array_tostring.js"));
-include(Resources.id("aphrodite:library/code/util/object_tostring.js"));
+include(Resources.id("aphrodite:library/code/util/tostring.js"));
 
 // TextManager.processString = (str, font, w, getW) => str;
 
-const backgroundColorKey = "colorA";
-const textColorKey = "colorB";
-const stopCheckingColorKey = "colorC";
-const checkingColorKey = "colorD";
-const waitingColorKey = "colorE";
+const backgroundColorKey = "background_color";
+const textColorKey = "text_color";
+const stopCheckingColorKey = "stop_checking_color";
+const checkingColorKey = "checking_color";
+const waitingColorKey = "waiting_color";
 const runKey = "run";
 const sloganKey = "slogan";
 const modeKey = "mode";
@@ -26,17 +25,17 @@ const scaleKey = "scale";
 const fontKey = "pida_font";
 const defaultFont = "Serif";
 
-let newColorRes = (key, nameKey, value) => new ConfigResponder.TextField(key, ComponentUtil.translatable("name.raf." + key), value).setErrorSupplier(ErrorSupplier.Color);
+let newColorRes = (key, value) => new ConfigResponder.TextField(key, ComponentUtil.translatable("name.raf." + key), value).setErrorSupplier(ErrorSupplier.Color);
 
-const res0 = newColorRes(backgroundColorKey, "background_color", "0x3936ff");
-const res1 = newColorRes(textColorKey, "text_color", "0xffffff");
-const res2 = newColorRes(stopCheckingColorKey, "stop_checking_color", "0xff0000");
-const res3 = newColorRes(checkingColorKey, "checking_color", "0x00ff00");
-const res4 = newColorRes(waitingColorKey, "waiting_color", "0xffffff");
+const res0 = newColorRes(backgroundColorKey, "0x3936ff");
+const res1 = newColorRes(textColorKey, "0xffffff");
+const res2 = newColorRes(stopCheckingColorKey, "0xff0000");
+const res3 = newColorRes(checkingColorKey, "0x00ff00");
+const res4 = newColorRes(waitingColorKey, "0xffffff");
 const res5 = new ConfigResponder.TextField(runKey, ComponentUtil.translatable("name.raf.run"), "true").setErrorSupplier(ErrorSupplier.only(["true", "false"]));
 const res6 = new ConfigResponder.TextField(sloganKey, ComponentUtil.translatable("name.raf.slogan"), "开车前5分钟停止检票");
-const res7 = new ConfigResponder.TextField(modeKey, ComponentUtil.translatable("name.raf.mode"), "0").setErrorSupplier(ErrorSupplier.only(["0", "1"])).setTooltipSupplier(str => java.util.Optional.of(asJavaArray([ComponentUtil.translatable("tip.raf.pida_mode")], Component)));
-const res8 = new ConfigResponder.TextField(limitsKey, ComponentUtil.translatable("name.raf.limits"), "5/15").setErrorSupplier(str => {
+const res7 = new ConfigResponder.TextField(modeKey, ComponentUtil.translatable("name.raf.mode"), "0").setErrorSupplier(ErrorSupplier.only(["0", "1"])).setTooltipSupplier(str => java.util.Optional.of(asJavaArray([ComponentUtil.translatable("tip.raf.pida.mode")], Component)));
+const res8 = new ConfigResponder.TextField(limitsKey, ComponentUtil.translatable("name.raf.limit"), "5/15").setErrorSupplier(str => {
     let arr = str.split("/");
     if (arr.length != 2) {
         return java.util.Optional.of(ComponentUtil.translatable("error.aph.invalid_value"));
@@ -69,7 +68,7 @@ const screenModel = ModelManager.uploadVertArrays(screenRaw);
 const dModel = ModelManager.uploadVertArrays(rawModels.get("d"));
 
 const get = (entity, key) => entity.getCustomConfig(key);
-const getColor = (entity, key) => java.awt.Color.decode(get(entity, key));
+const getColor = (entity, key) => new Color(Number(get(entity, key)));
 
 const dateFormatter = new java.text.SimpleDateFormat("HH:mm");
 
@@ -103,7 +102,7 @@ function create(ctx, state, entity) {
     ctx.drawCalls.put(dKey, getCall(d));
 
     let drawCalls = [];
-    if (get(entity, runKey) == "true") {
+    if (get(entity, runKey) + "" == "true") {
         drawCalls.push(new DR(entity, true));
     } else {
         drawCalls.push(new BLACK(entity, true));
@@ -285,7 +284,7 @@ function DR(entity, isFirst, info) {
 
     this.outdated = () => {
         let newInfo = getInfo(entity);
-        if (info.toString() != newInfo.toString()) return newInfo;
+        if (toString(info) != toString(newInfo)) return newInfo;
         else return null;
     }
 

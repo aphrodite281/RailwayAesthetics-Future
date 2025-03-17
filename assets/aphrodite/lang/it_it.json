@@ -1,8 +1,9 @@
 {
     "error.aph.invalid_value": "Valore non valido",
+    "error.aph.number_range": "L'intervallo numerico va da%s a%s",
     "error.aph.invalid_color": "Colore non valido",
     "error.aph.only_be": "Può essere solo %s",
     "name.aph.text_manager_mode": "Modalità di gestione del testo",
-    "tip.aph.text_manager_mode": "0: scorrimento, 1: ripresa",
-    "tip.aph.reload_resourcepack": "Ricarica il pacchetto per applicare le modifiche"
+    "tip.aph.text_manager_mode": "0: Scorrimento, 1: Cattura, 2: Compressa",
+    "tip.aph.reload_resourcepack": "Ricarica il pacchetto risorse per applicare le modifiche"
 }

@@ -11,8 +11,7 @@ importPackage(java.awt.font);
 importPackage(java.util.concurrent);
 
 include(Resources.id("aphrodite:library/code/util/text_u.js"));
-include(Resources.id("aphrodite:library/code/util/map_tostring.js"));
-include(Resources.id("aphrodite:library/code/util/array_tostring.js"));
+include(Resources.id("aphrodite:library/code/util/tostring.js"));
 include(Resources.id("aphrodite:library/code/util/value.js"));
 include(Resources.id("aphrodite:library/code/util/error_supplier.js"));
 include(Resources.id("aphrodite:library/code/graphic/color_u.js"));
@@ -20,7 +19,7 @@ include(Resources.id("aphrodite:library/code/graphic/text_manager.js"));
 include(Resources.id("aphrodite:library/code/graphic/canvas.js"));
 include(Resources.id("aphrodite:library/code/graphic/upload_manager.js"));
 include(Resources.id("aphrodite:library/code/graphic/images_output_manager.js"));
-include(Resources.id("aphrodite:library/code/gui/btn_enter_sub_bar.js"))
+include(Resources.id("aphrodite:library/code/gui/btn_enter_sub_bar.js"));
 
 include(Resources.id("mtr:lcda/icon/hc.js")); //换乘
 include(Resources.id("mtr:lcda/icon/zd.js")); //站点
@@ -181,7 +180,7 @@ function lcdaRecordMode() {
 
 const lcdaPDKey = "lcda_pixel_density"
 const lcdaPDInput = new ConfigResponder.TextField(lcdaPDKey, ComponentUtil.translatable("name.raf.lcda_pixel_density"), "0.5")
-    .setErrorSupplier(ErrorSupplier.NumberRange(0, null, false, false))
+    .setErrorSupplier(ErrorSupplier.numberRange(0, null, false, false))
     .setSaveConsumer((v) => {
         lcdaCheckChanges();
     });
@@ -193,7 +192,7 @@ function lcdaPixelDensity() {
 
 const lcdaFpsKey = "lcda_fps"
 const lcdaFpsInput = new ConfigResponder.TextField(lcdaFpsKey, ComponentUtil.translatable("name.raf.lcda_fps"), "24")
-    .setErrorSupplier(ErrorSupplier.NumberRange(0, null, false, false));
+    .setErrorSupplier(ErrorSupplier.numberRange(0, null, false, false));
 // ClientConfig.register(lcdaFpsInput);
 
 function lcdaFpsGlobal() {
@@ -251,7 +250,7 @@ let lcdaSmooth = (k, value) => {// 平滑变化
 }
 
 function lcdaGenFaceModel() {// lighttranslucent light
-    let builder = new RawMeshBuilder(4, "lighttranslucent", Resources.id("minecraft:textures/misc/white.png"));
+    let builder = new RawMeshBuilder(4, "interiortranslucent", Resources.id("minecraft:textures/misc/white.png"));
     for(let i = 0; i < 4; i++) {
         builder.vertex(new Vector3f(lcdaConfigs.modelSize[0] * (i == 0 || i == 1? 0.5 : -0.5), lcdaConfigs.modelSize[1] * (i == 0 || i == 3 ? -0.5 : 0.5), 0)).uv(i == 0 || i ==1 ? 1 : 0, i == 0 || i == 3 ? 1 : 0).normal(0, 0, 0).endVertex();
     }
@@ -550,7 +549,7 @@ function LCDThread(model, isRight, ctx, state, carIndex, ttf) {
                     if (now) {
                         second = args[i];
                         if (first == undefined || second == undefined) return false;
-                        if (first.toString() != second.toString()) return false;
+                        if (toString(first) != toString(second)) return false;
                     } else {
                         first = args[i];
                     }
@@ -678,7 +677,7 @@ function LCDThread(model, isRight, ctx, state, carIndex, ttf) {
                 let w0 = w * 110 / 500, h0 = h * 0.75;
                 let img = new BufferedImage(w0, h0, BufferedImage.TYPE_INT_ARGB);
                 let g = img.createGraphics();
-                let textManager = new TextManager.Buffered(w0, h0);
+                let textManager = new TextManager.Buffered();
                 let drawMiddle = textManager.drawMiddle;
                 let dx = (ax) => w0 * ax / 440;
                 let dy = (ay) => h0 * ay / 375;
@@ -751,7 +750,7 @@ function LCDThread(model, isRight, ctx, state, carIndex, ttf) {
                 }
                 let tex = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
                 let g = tex.createGraphics();
-                let textManager = new TextManager.Buffered(w, h);
+                let textManager = new TextManager.Buffered();
                 let drawMiddle = textManager.drawMiddle;
                 let p = Font.PLAIN;
                 let [color0, color1, cname, ename, cdest, edest, time0, time1, is, t1, t2, t3, t4, isArrive, open] = info;
@@ -1143,7 +1142,7 @@ function LCDThread(model, isRight, ctx, state, carIndex, ttf) {
                         drawMiddle0(g, "No Information", font0.deriveFont(Font.PLAIN, h * 0.1), dx(220) + dn, h * 0.8);
                         return;
                     }
-                    let textManager = new TextManager.Buffered(w, h);
+                    let textManager = new TextManager.Buffered();
                     let drawMiddle = textManager.drawMiddle;
                     let sizeX = [];
                     for (let i = 0; i < 5; i++) {
@@ -1230,7 +1229,7 @@ function LCDThread(model, isRight, ctx, state, carIndex, ttf) {
                 let et = null;
                 let img = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
                 let g = img.createGraphics();
-                let textManager = new TextManager.Buffered(w, h);
+                let textManager = new TextManager.Buffered();
                 let drawMiddle = textManager.drawMiddle;
                 let p = Font.PLAIN;
                 let b = Font.BOLD;
