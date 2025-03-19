@@ -1,62 +1,55 @@
-function toString(obj, isFirst) {
-    if (isFirst === undefined) isFirst = true;
-    if (obj === null) {
-        return "null";
-    } else if (typeof obj === "undefined") {
-        return "undefined";
-    } else if (typeof obj === "string") {
-        return obj;
-    } else if (typeof obj === "number") {
-        if (isNaN(obj)) {
-            return "NaN";
-        } else if (!isFinite(obj)) {
-            return (obj > 0? "Infinity" : "-Infinity");
-        } else {
-            return obj.toString();
+function tostring (obj) {
+    if (obj === null) return "null";
+    if (obj === undefined) return "undefined";
+    let type = typeof obj;
+    if (type === "string") return obj;
+    if (type === "number" || type === "boolean" || type === "bigint") return obj.toString();
+    if (type === "function") return "function";
+    if (obj instanceof Date) return obj.toISOString();
+    if (obj instanceof Error) return obj.error + "\n" + obj.stack;
+    if (obj instanceof RegExp) return obj.toString();
+    if (obj instanceof Array) {
+        let str = "Array[";
+        for (let i = 0; i < obj.length; i++) {
+            str += tostring(obj[i]) + ",";
         }
-    } else if (typeof obj === "boolean") {
-        return obj.toString();
-    } else if (typeof obj === "function") {
-        return obj.toString();
-    } else {
-        if (obj instanceof Array) {
-            let str = "[";
-            for (var i = 0; i < obj.length; i++) {
-                str += toString(obj[i]);
-                if (i < obj.length - 1) {
-                    str += ", ";
-                }
-            }
-            str += "]";
-            return str;
-        } else if (obj instanceof Map) {
-            let str = "{";
-            for (var [key, value] of obj) {
-                str += key + ": " + toString(value);
-                if (key !== Object.keys(obj)[Object.keys(obj).length - 1]) {
-                    str += ", ";
-                }
-            }
-            str += "}";
-            return str;
-        } else if (obj instanceof java.lang.String) {
-            return obj + "";
-        } else {
-            if (isFirst) {
-                let str = "{";
-                for (var key in obj) {
-                    if (obj.hasOwnProperty(key)) {
-                        str += key + ": " + toString(obj[key], false);
-                        if (key !== Object.keys(obj)[Object.keys(obj).length - 1]) {
-                            str += ", ";
-                        }
-                    }
-                }
-                str += "}";
-                return str;
-            } else {
-                return obj.toString();
-            }
-        }
+        str = str.slice(0, -1) + "]";
+        return str;
     }
+
+    if (obj instanceof Map) {
+        let str = "Map{";
+        for (let [key, value] of obj) {
+            str += tostring(key) + ":" + tostring(value) + ",";
+        }
+        str = str.slice(0, -1) + "}";
+        return str;
+    }
+    if (obj instanceof Set) {
+        let str = "Set[";
+        for (let item of obj) {
+            str += tostring(item) + ",";
+        }
+        str = str.slice(0, -1) + "]";
+        return str;
+    }
+
+
+    let str0 = obj.toString();
+    if (str0 == "[object Object]") {
+        let str = "Object{";
+        for (let key in obj) {
+            if (obj.hasOwnProperty(key)) {
+                str += key + ":" + tostring(obj[key]) + ",";
+            }
+        }
+        str = str.slice(0, -1) + "}";
+        return str;
+    }
+
+    return str0;
+}
+
+function fun() {
+    return "fun";
 }

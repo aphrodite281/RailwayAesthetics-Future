@@ -344,13 +344,10 @@ function getInfo(entity) {
 
     let swp = [];//schesWithPlas
     for (let pla of plas) {
-        for (let [key, value] of data.SCHEDULES_FOR_PLATFORM) {
-            if (key == pla.id) {
-                for (let sche of value) {
-                    swp.push([sche, pla]);
-                }
-                break;
-            }
+        let res = data.SCHEDULES_FOR_PLATFORM.get(java.lang.Long.valueOf(pla.id));
+        if (res == null) continue;
+        for (let sche of res) {
+            swp.push([sche, pla]);
         }
     }
     swp.sort((a, b) => a[0].arrivalMillis - b[0].arrivalMillis);

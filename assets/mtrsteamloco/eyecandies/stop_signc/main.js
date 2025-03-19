@@ -79,12 +79,8 @@ function genInfo(entity) {
                     if (ind < ro.platformIds.length) {
                         let pid = ro.platformIds[ind].platformId;
                         let s = "未知|Unknown";
-                        for (let [id, st] of MTRClientData.DATA_CACHE.platformIdToStation) {
-                            if (id == pid) {
-                                s = st.name;
-                                break;
-                            }
-                        }
+                        let st = MTRClientData.DATA_CACHE.platformIdToStation.get(java.lang.Long.valueOf(pid));
+                        if (st != null) s = st.name;
                         routes.push({ name: s, color: ro.color });
                     } else {
                         routes.push({ name: null, color: ro.color });

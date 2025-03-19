@@ -263,6 +263,7 @@ function lcdaGenFaceModel() {// lighttranslucent light
 
 function LCDThread(model, isRight, ctx, state, carIndex, ttf) {
     let uid = "LCDThread-" + "Car" + carIndex + '-' + (isRight ? "Right " : "Left  ");
+    const TU = TextU;
     let train = () => ctx.getWrapperObject();
     let thread = new Thread(() => {
         
@@ -360,9 +361,9 @@ function LCDThread(model, isRight, ctx, state, carIndex, ttf) {
                     let plas = train().getThisRoutePlatforms();
                     let ind = train().getThisRoutePlatformsNextIndex();
                     iindex = ind;
-                    if (plas.length == 0) break;
+                    if (plas.size() == 0) break;
                     if (plas == null) break;
-                    if (plas.length <= ind) break;
+                    if (plas.size() <= ind) break;
                     if (ind < 0) break;
                     let pla = plas[ind];
                     let station = pla.destinationStation;
@@ -421,7 +422,7 @@ function LCDThread(model, isRight, ctx, state, carIndex, ttf) {
                         isArrive = true;
                         open = getOpen(rail.getOpeningDirection());
                     }
-                    
+
                     name = station.name;
                     t3 = TU.CP(name), t4 = TU.NP(name);
                     is = false;
@@ -432,42 +433,10 @@ function LCDThread(model, isRight, ctx, state, carIndex, ttf) {
                     for (let i = 1; i <= paths.length; i++) {
                         dsub[i] = dsub[i - 1] + paths[i - 1].rail.getLength();
                     }
-            
-                    /* let d = pla.distance;
-                    let s = train().spacing();
-                    let rv1 = d - s * carIndex;
-                    let rv2 = d - s * (carIndex - 1);
-                    let po1 = train().getRailIndex(rv1, true);
-                    let po2 = train().getRailIndex(rv2, true);
-                    let r1 = paths[po1].rail;
-                    let r2 = paths[po2].rail;
-                    let v1 = rv1 - dsub[po1];
-                    let v2 = rv2 - dsub[po2];
-                    let pp1 = r1.getPosition(v1);
-                    let pp2 = r2.getPosition(v2);
-                    let p01 = new Vector3f(pp1), p02 = new Vector3f(pp2);
-                    let bos = MinecraftClient.canOpenDoorsAt(p02, p01);
-                    let o1 = bos[0];
-                    let o2 = bos[1];
-                    if (isRight && o1) open = 0;
-                    if (!isRight && o2) open = 0;
-                    if (isRight && o2) open = 1;
-                    if (!isRight && o1) open = 1;
-                    if (o1 && o2) open = 2;*/
-                    /* let k = acc / 1000 % 100;
-                    for (let i = 0; i < k; i++) {
-                        huancheng.set(route0[i][0] + "|" + route0[i][1], [route0[i][0], route0[i][1], route0[i][2], route0[i][3]]);
-                    }
-                    throw new Error(); */
+
                     let dataCache = MTRClientData.DATA_CACHE;
-                    let plass = dataCache.requestStationIdToPlatforms(station.id);
+                    let plass = dataCache.requestStationIdToPlatforms(java.lang.Long.valueOf(station.id));
                     for (let [id, platform] of plass) {
-                        /* let platformRouteDetails = dataCache.requestPlatformIdToRoutes(id);
-                        for (let platformRouteDetail of platformRouteDetails) {
-                            let name = platformRouteDetail.routeName;
-                            let color = platformRouteDetail.routeColor;
-                            huancheng.set(TU.CP(name) + "|" + TU.NP(name), [TU.CP(name), TU.NP(name), color, getColor(color)]);
-                        } */
                         for (let route of MTRClientData.ROUTES) {
                             if (route.isHidden) continue;
                             if (route.containsPlatformId(id)) {
@@ -549,7 +518,7 @@ function LCDThread(model, isRight, ctx, state, carIndex, ttf) {
                     if (now) {
                         second = args[i];
                         if (first == undefined || second == undefined) return false;
-                        if (toString(first) != toString(second)) return false;
+                        if (tostring(first) != tostring(second)) return false;
                     } else {
                         first = args[i];
                     }
@@ -861,7 +830,7 @@ function LCDThread(model, isRight, ctx, state, carIndex, ttf) {
                     if (w2 <= wk) {
                         let img = new BufferedImage(wk, hk, BufferedImage.TYPE_INT_ARGB);
                         let gk = img.createGraphics();
-                        TextManager.Buffered.layout(gk, wk, hk);
+                        TextManager.layout(gk, wk, hk);
                         gk.setColor(new Color(0));
                         let x = (wk - w2) / 2;
                         let y = hk * 0.85;
@@ -931,7 +900,7 @@ function LCDThread(model, isRight, ctx, state, carIndex, ttf) {
                         let img = new BufferedImage(wk, hk, BufferedImage.TYPE_INT_ARGB);
                         let gk = img.createGraphics();
                         gk.setColor(new Color(0));
-                        TextManager.Buffered.layout(gk, wk, hk);
+                        TextManager.layout(gk, wk, hk);
                         let ins = hk * 2;
                         let xs = -1 * (now() / 1000 * 2 * hk) % (w2 + ins);
                         let x = xs;
@@ -1405,6 +1374,7 @@ function LCDThread(model, isRight, ctx, state, carIndex, ttf) {
                     refreshS();
                     refreshD();
     
+
                     ctrlUsed = now() - start;
                 } catch (e) {
                     ctx.setDebugInfo("Error", e.message, e.stack);
@@ -1413,14 +1383,9 @@ function LCDThread(model, isRight, ctx, state, carIndex, ttf) {
             ctrl.run();
             ctrlPool.scheduleAtFixedRate(ctrl, 0, 100, TimeUnit.MILLISECONDS);
 
-            let submitPool = Executors.newScheduledThreadPool(10);
+            let submitPool = Executors.newScheduledThreadPool(2);
             disposeList.push(() => submitPool.shutdown());
-            // let uoloadPool = Executors.newScheduledThreadPool(4);
-            // let executor = Executors.newFixedThreadPool(10);
-            // disposeList.push(() => uoloadPool.shutdown());
-            // disposeList.push(() => executor.shutdown());
             let lastStart;
-            // let timeoutTimes = 0;
             
             let iom = new ImagesOutputManager.ASync("lcda_output/" + ctx.hashCode().toString(16) + "-" + carIndex + "-" + (isRight ? "Right" : "Left"));
             disposeList.push(() => iom.close());
@@ -1431,6 +1396,7 @@ function LCDThread(model, isRight, ctx, state, carIndex, ttf) {
             let lastAlpha = -114514;
             let draw = new Runnable({run: () => {
                 try {
+
                     let fps = -100;
                     if (lastStart != undefined) fps = 1000 / (now() - lastStart);
                     lastStart = now();
