@@ -1,0 +1,18 @@
+{
+    "custom_trains": {
+      "lcda_my_deploying_1": {
+        "name": "LCDA Deploying 1",
+        "base_train_type": "s_train",
+        "color": "2AF0AD",
+        "script_files": ["mtr:deploying/lcda/config1.js"]
+      },
+      "lcda_my_deploying_2": {
+        "name":"LCDA Deploying 2",
+        "model": "mtr:path/to/your/model.obj",
+        "texture_id": "mtr:path/to/your/texture.png",
+        "model_properties": "mtr:path/to/your/model_properties.json",
+        "color": "2AF0AD",
+        "script_files": ["mtr:deploying/lcda/config2.js"]
+      }
+    }
+}

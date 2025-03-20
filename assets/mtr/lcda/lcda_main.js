@@ -31,11 +31,11 @@ include(Resources.id("mtr:lcda/icon/hcjt.js")); //换成箭头
 include(Resources.id("mtr:lcda/icon/xjjt.js")); //行进箭头
 include(Resources.id("mtr:lcda/icon/logo.js")); //图标
 
-const lcdaConfigs = {
+const lcdaDefultConfigs = {
     textureSize: [1600, 350],
     modelSize: [1600 / 2000, 350 / 2000],
     doorZPositions: [0, 5, -5, 10, -10],
-    doorPosition: [1.3, 1.9],
+    doorXYPosition: [1.3, 1.9],
     rotateX: 15 / 180 * Math.PI,
     finalTranslate: [0, 0, 0],
     filletPixel: 30,
@@ -113,7 +113,7 @@ function lcdaGetMatrices(isRight) {
     let result = [];
     let matrices = new Matrices();
     let k = isRight? -1 : 1;
-    matrices.translate(- k * lcdaConfigs.doorPosition[0], lcdaConfigs.doorPosition[1], 0);
+    matrices.translate(- k * lcdaConfigs.doorXYPosition[0], lcdaConfigs.doorXYPosition[1], 0);
     let execute = (translateZ) => {
         matrices.translate(0, 0, translateZ);
         matrices.rotateY(k * Math.PI / 2);

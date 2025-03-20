@@ -9,9 +9,9 @@ with (lcdaConfigs) {
     modelSize = [1.45, 0.175];
     textureSize = [modelSize[0] * 2000, modelSize[1] * 2000];
     filletPixel = 30;
-    companyNameCJK = "北武工艺";
-    companyNameENG = "HOKUBUCRAFT";
-    // companyLogoPng = Resources.readBufferedImage(Resources.id("your:path/to/your/company_logo.png"));
+    companyNameCJK = "北京地铁";
+    companyNameENG = "Beijing Subway";
+    companyLogoPng = Resources.readBufferedImage(Resources.id("your:path/to/your/company_logo.png"));
 }
 
 lcdaApply();
