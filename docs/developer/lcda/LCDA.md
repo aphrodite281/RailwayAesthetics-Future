@@ -7,7 +7,7 @@
 ## 移植
 
 您需要编写一些代码并将此资源包与RailwayAesthetics-Future一起加载。
-您可以下载[示例资源包](./example.zip)
+您可以下载[示例资源包](./developer/lcda/example.zip)
 
 ### 基本信息
 
