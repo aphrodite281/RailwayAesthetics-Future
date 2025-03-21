@@ -31,7 +31,7 @@ include(Resources.id("mtr:lcda/icon/hcjt.js")); //换成箭头
 include(Resources.id("mtr:lcda/icon/xjjt.js")); //行进箭头
 include(Resources.id("mtr:lcda/icon/logo.js")); //图标
 
-const lcdaDefultConfigs = {
+const lcdaConfigs = {
     textureSize: [1600, 350],
     modelSize: [1600 / 2000, 350 / 2000],
     doorZPositions: [0, 5, -5, 10, -10],

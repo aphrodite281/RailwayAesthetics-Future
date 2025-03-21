@@ -1,4 +1,4 @@
 - 简介
-  - [首页](README.md)
+  - [首页](README)
 - 开发者
-  - [LCDA移植](developer/lcda/LCDA.md)
+  - [LCDA移植](developer/lcda/LCDA)
