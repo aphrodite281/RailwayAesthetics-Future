@@ -1,5 +1,5 @@
 - 简介
-  - [首页](index.md)
+  - [首页](README.md)
 - 使用
   - [下载](usage/download.md)
 - 开发者
