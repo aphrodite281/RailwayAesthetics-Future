@@ -177,4 +177,4 @@ lcdaApply();
 
 ![a5](a5.png)
 至此 您完成了对 `LGRS Shenzhen Metro MOVIA456 Train Pack Version1.1` 的 `szmc_01a2206_2011fisu` 的 `LCDA` 移植。
-您可以下载[此移植包](./sz_pack.zip) 进行调整。
+您可以下载 [移植包](./sz_pack.zip) 参考。

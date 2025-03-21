@@ -1,0 +1,18 @@
+{
+    "custom_trains": {
+      "szmc_01a2206_2011fisu_lcda": {
+        "name":"深圳地铁 01A2206庞型车 2011大运会涂装(LCDA)",
+        "color":"#01B055",
+        "gangway_connection_id": "mtr:movia456/szmc_01a2206_2011fisu/movia456",
+        "door_animation_type":"PLUG_SLOW",
+        "render_door_overlay":false,
+        "rider_offset":0.0,
+        "texture_id":"mtr:movia456/szmc_01a2206_2011fisu/m1-textures/m1waike.png",
+        "model":"mtr:movia456/szmc_01a2206_2011fisu/movia456.obj",
+        "model_properties":"mtr:movia456/szmc_01a2206_2011fisu/szmc_01a2206_2011fisu.json",
+        "bve_sound_base_id": "4eba_4040",
+        "description":"深圳地铁 庞巴迪MOVIA456型电动列车\n涂装：深圳地铁1号线2011年深圳大运会涂装\n服务线路：深圳地铁1号线&深圳地铁4号线\n最高运营时速：80km/h\n牵引电动机：庞巴迪运输制三相异步交流电动机\n©LGRS 懒鸽铁道工作室 & 只会睡觉的懒鸽子  All Right Served\nContact us! Email:1436300182@qq.com",			
+        "script_files": ["mtr:deploying/lcda/szmc_01a2206_2011fisu.js"]
+      }
+    }
+}
