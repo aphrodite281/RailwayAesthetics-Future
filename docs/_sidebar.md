@@ -1,2 +1,6 @@
-- 入门
-  - [首页](first.md)
+- 简介
+  - [首页](index.md)
+- 使用
+  - [下载](usage/download.md)
+- 开发者
+  - [LCDA移植](developer/lcda/LCDA.md)
