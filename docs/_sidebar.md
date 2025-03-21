@@ -1,5 +1,6 @@
 - 简介
-  - [首页](README.md)
-
+  - [首页](index.md)
+- 使用
+  - [下载](usage/download.md)
 - 开发者
   - [LCDA移植](developer/lcda/LCDA.md)
