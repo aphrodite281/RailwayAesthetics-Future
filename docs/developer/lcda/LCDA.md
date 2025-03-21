@@ -123,20 +123,20 @@ lcdaApply();
 比如现在应该是 `rotateX = (90 - (180 - 136.906)) / 180 * Math.PI`
 
 
-> 最后的最后
+### 最后的最后
 
 如果位置不准确，您可以调整 `finalTranslate` 进行微调。
 您可以根据需求设置 模型大小、纹理大小、圆角像素、公司名称、公司Logo等。
 
 至此 您便完成了移植。
-使用时请添加 `RailwayAesthetics-Future` (和您移植的列车资源包) 到启用资源包列表中。
+使用时请添加 `RailwayAesthetics-Future 的最新版本` (和您移植的列车资源包) 到启用资源包列表中。
 
 
 ### 示例
 
 以为 `LGRS Shenzhen Metro MOVIA456 Train Pack Version1.1` 的 `szmc_01a2206_2011fisu` 添加 `LCDA` 为例：
 
-下载`LGRS Shenzhen Metro MOVIA456 Train Pack Version1.1` 并解压(我解压到 `sz pack` 文件夹)。
+下载`LGRS Shenzhen Metro MOVIA456 Train Pack Version1.1` 并解压(我解压到 `sz pack` 文件夹)。  
 下载[示例资源包](https://aphrodite281.github.io/RailwayAesthetics-Future/developer/lcda/example.zip) 并解压(我解压到 `sz del`文件夹)。
 
 ![a1](a1.png)
@@ -151,9 +151,10 @@ lcdaApply();
 添加或调整以上内容
 
 
-在 `./sz del/assets/mtr/deploying/lcda/szmc_01a2206_2011fisu.js` 新建 `szmc_01a2206_2011fisu.js`
-使用在 [确定参数-OBJ](#obj) 获得的参数填写内容。
+在 `./sz del/assets/mtr/deploying/lcda/szmc_01a2206_2011fisu.js` 新建 `szmc_01a2206_2011fisu.js`  
+使用在 [确定参数-OBJ](#obj) 获得的参数填写内容。 
 例如现在应该是以下参数：
+
 ```javascript
 include(Resources.id("mtr:lcda/lcda_main.js"));
 
@@ -176,8 +177,8 @@ lcdaApply();
 
 ![a4](a4.png)
 启动游戏，加载这几个资源包。  
-进入世界，测试LCD效果，适当调整参数。
+进入世界，测试LCD效果，适当调整参数。 
 
 ![a5](a5.png)
-至此 您完成了对 `LGRS Shenzhen Metro MOVIA456 Train Pack Version1.1` 的 `szmc_01a2206_2011fisu` 的 `LCDA` 移植。
-您可以下载 [移植包](./sz_pack.zip) 参考。
+至此 您完成了对 `LGRS Shenzhen Metro MOVIA456 Train Pack Version1.1` 的 `szmc_01a2206_2011fisu` 的 `LCDA` 移植。  
+您可以下载 [sz del](./sz_del.zip) 参考。 
