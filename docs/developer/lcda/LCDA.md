@@ -120,7 +120,7 @@ lcdaApply();
 
 ![p11](p11.png)
 拖动面至LCD屏幕位置，会自动被吸附，查看此时的 `旋转(Y)` ，复制下来作为 `rotateX`
-比如现在应该是 `rotateX = (180 - 136.906) / 180 * Math.PI`
+比如现在应该是 `rotateX = (90 - (180 - 136.906)) / 180 * Math.PI`
 
 
 > 最后的最后
@@ -142,16 +142,18 @@ lcdaApply();
 ![a1](a1.png)
 找到位于 `./sz pack/assets/mtr/mtr_custom_resources.json` 的json文件，找到您要移植的列车，复制所有内容。
 
+
 ![a2](a2.png)
 到 `./sz del/assets/mtr/mtr_custom_resources.json` 中替换。
+
 
 ![a3](a3.png)
 添加或调整以上内容
 
+
 在 `./sz del/assets/mtr/deploying/lcda/szmc_01a2206_2011fisu.js` 新建 `szmc_01a2206_2011fisu.js`
-
 使用在 [确定参数-OBJ](#obj) 获得的参数填写内容。
-
+例如现在应该是以下参数：
 ```javascript
 include(Resources.id("mtr:lcda/lcda_main.js"));
 
@@ -171,6 +173,7 @@ with (lcdaConfigs) {
 
 lcdaApply();
 ```
+
 ![a4](a4.png)
 启动游戏，加载这几个资源包。  
 进入世界，测试LCD效果，适当调整参数。
