@@ -27,7 +27,6 @@ jobs:
             LICENSE
             readme.md
   release:
-    needs: pack
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
