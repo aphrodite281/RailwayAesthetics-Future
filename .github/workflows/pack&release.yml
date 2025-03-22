@@ -39,12 +39,14 @@ jobs:
           echo "DESCRIPTION=$DESCRIPTION" >> $GITHUB_ENV
       - name: Create Zip
         run: zip -r "RailwayAesthetics-Future ${{ env.DESCRIPTION }}.zip" assets/ pack.mcmeta pack.png LICENSE readme.md
+      - name: Set current date
+        run: echo "CUR_DATE=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
           files: RailwayAesthetics-Future ${{ env.DESCRIPTION }}.zip
           body: |
-            更新日期: ${{ formatDateTime(now(), 'yyyy-MM-dd') }}
+            更新日期: ${{ env.CUR_DATE }}
             工作流: [${{ github.sha }}](${GITHUB_SERVER_URL}/${{ github.repository }}/actions/runs/${{ github.run_id }})
           draft: false
           prerelease: false
