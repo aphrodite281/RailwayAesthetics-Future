@@ -36,6 +36,7 @@ jobs:
           name: RailwayAesthetics-Future ${{ needs.pack.outputs.DESCRIPTION }}
           path: download/
       - name: Release
+        uses: softprops/action-gh-release@v2
         with:
           files: download/RailwayAesthetics-Future ${{ needs.pack.outputs.DESCRIPTION }}.zip
           body: 一些更新
