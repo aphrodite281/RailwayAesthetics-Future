@@ -19,15 +19,13 @@ jobs:
           DESCRIPTION=$(jq -r '.pack.description' pack.mcmeta)
           echo "DESCRIPTION=$DESCRIPTION" >> $GITHUB_ENV
 
+      - name: Create ZIP file
+        run: |
+          zip -r RailwayAesthetics-Future-${{ env.DESCRIPTION }}.zip assets/ pack.mcmeta pack.png LICENSE readme.md
+
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
-          files: |
-            assets/
-            pack.mcmeta
-            pack.png
-            LICENSE
-            readme.md
+          files: RailwayAesthetics-Future-${{ env.DESCRIPTION }}.zip
           name: RailwayAesthetics-Future ${{ env.DESCRIPTION }}
-          body: |
-            RailwayAesthetics-Future ${{ env.DESCRIPTION }}
+          body: 一些更新
