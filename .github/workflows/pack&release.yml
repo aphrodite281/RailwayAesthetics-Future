@@ -1,4 +1,4 @@
-name: Pack & Release
+name: Pack&Release
 
 on: [push, pull_request]
 
