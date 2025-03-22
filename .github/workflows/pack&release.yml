@@ -41,7 +41,7 @@ jobs:
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
-          files: RailwayAesthetics-Future ${{ needs.pack.outputs.DESCRIPTION }}.zip
+          files: RailwayAesthetics-Future ${{ env.DESCRIPTION }}.zip
           body: 一些更新
           draft: false
           prerelease: false
