@@ -46,3 +46,8 @@ jobs:
           draft: false
           prerelease: false
           tag_name: ${{ env.DESCRIPTION }}
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: _RailwayAesthetics-Future ${{ env.DESCRIPTION }}
+          path: RailwayAesthetics-Future-${{ env.DESCRIPTION }}.zip
