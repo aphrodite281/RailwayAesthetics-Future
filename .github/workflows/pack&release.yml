@@ -43,7 +43,9 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: RailwayAesthetics-Future ${{ env.DESCRIPTION }}.zip
-          body: 一些更新
+          body: |
+            更新日期: $(date +"%Y-%m-%d")
+            当前版本: [${{ github.sha }}]("https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}")
           draft: false
           prerelease: false
           tag_name: ${{ env.DESCRIPTION }}
