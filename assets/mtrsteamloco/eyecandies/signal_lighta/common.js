@@ -1,4 +1,5 @@
 include(Resources.id("aphrodite:library/code/util/error_supplier.js"));
+include(Resources.id("aphrodite:library/code/gui/orderly_responder.js"));
 
 const lights = CONFIG_INFO.lights;
 
@@ -30,19 +31,22 @@ const modeRes = new ConfigResponder.TextField(modeKey, ComponentUtil.translatabl
         let wr = Optional.of(ComponentUtil.translatable("error.aph.invalid_value"));
         str = str + '';
         if (str.length != lights.length + 1) return wr;
-        for (let i = 0; i < str.length; i++) {
+        if (str[0] != '0' && str[0] != '1') return wr;
+        for (let i = 1; i < str.length; i++) {
             if (str[i] != '0' && str[i] != '1' && str[i] != '2') return wr;
         }
         return Optional.empty();
-    });
+    })
+    .setTooltipSupplier(str => Optional.of(asJavaArray([ComponentUtil.translatable("tip.raf.signal_lighta.mode")], Component)));
 
 const RESS = (function() {
     let result = [modeRes];
-    for (let [key, color0] of lights) {
+    for (let i = lights.length - 1; i >= 0; i--) {
+        let [key, color0] = lights[i];
         result.push(new ConfigResponder.TextField(key, ComponentUtil.translatable("name.raf." + key), color0).setErrorSupplier(ErrorSupplier.Color));
     }
     result.push(new ConfigResponder.TextField("color_m", ComponentUtil.translatable("name.raf." + "color_m"), "0x808080").setErrorSupplier(ErrorSupplier.Color));
-    return result;
+    return orderlyResponder("ARAF", "made by Aphrodite281", result);
 })()
 
 function getColor(entity, key) {
@@ -50,7 +54,7 @@ function getColor(entity, key) {
 }
 
 function create(ctx, state, entity) {
-    for (let res of RESS) entity.registerCustomConfig(res);
+    entity.registerCustomConfig(RESS);
     entity.sendUpdateC2S();
 
     for (let [key, color0] of lights) {
@@ -99,7 +103,7 @@ function render(ctx, state, entity) {
             if (i != ls.length) ctx.drawModel((i == oa ? ls[i - 1] : state.m), mat);
             else ctx.drawModel(((i == oa || oa == 0) ? ls[ls.length - 1] : state.m), mat);
         }else {
-            let char = mode[i];
+            let char = mode[1 + lights.length - i];
             if (char == '0') {
                 ctx.drawModel(state.m, mat);
             } else if (char == '1') {

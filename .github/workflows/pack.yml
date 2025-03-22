@@ -1,0 +1,25 @@
+name: Pack
+
+on: [push, pull_request]
+
+jobs:
+  pack:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Read pack.mcmeta
+        id: read_pack
+        run: |
+          DESCRIPTION=$(jq -r '.pack.description' pack.mcmeta)
+          echo "DESCRIPTION=$DESCRIPTION" >> $GITHUB_ENV
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: RailwayAesthetics-Future ${{ env.DESCRIPTION }}
+          path: |
+            assets/
+            pack.mcmeta
+            pack.png
+            LICENSE
+            readme.md

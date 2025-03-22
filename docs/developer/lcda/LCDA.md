@@ -64,7 +64,7 @@ lcdaApply();
 | doorXYPosition | 门的 XY 位置 | [1.3, 1.9] |
 | rotateX | 门的向内偏转角度（弧度制） | 15 / 180 * Math.PI |
 | finalTranslate | 最终的偏移，用于精细调整 | [0, 0, 0] |
-| modelSize | 模型大小，单位米（块） | [1600 / 2000, 350 / 2000] | [1600 / 2000, 350 / 2000] |
+| modelSize | 模型大小，单位米（块） | [1600 / 2000, 350 / 2000] |
 | textureSize | 默认的纹理大小，实际纹理大小会乘以像素密度。 | [1600, 350] |
 | filletPixel | 圆角像素 | 30 | 
 | companyNameCJK | 公司名称，中文 | "北武工艺" |
