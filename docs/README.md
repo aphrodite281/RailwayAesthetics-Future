@@ -14,5 +14,11 @@ Previous version: V1.0.1 `ANTE 1.0.2` compatible
 [ANTE 文档](https://aphrodite281.github.io/mtr-ante/#/)
 [ANTE Documentation](https://aphrodite281.github.io/mtr-ante/#/)
 
+[Railway Aesthetics - Future 发行版](https://github.com/aphrodite281/RailwayAesthetics-Future/releases)
+[Railway Aesthetics - Future Releases](https://github.com/aphrodite281/RailwayAesthetics-Future/releases)
+
+[ANTE 发行版](https://github.com/aphrodite281/mtr-ante/releases)
+[ANTE Releases](https://github.com/aphrodite281/mtr-ante/releases)
+
 欢迎加入我们的 QQ 群: 836291719
 Welcome to join our QQ group: 836291719
