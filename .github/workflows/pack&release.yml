@@ -45,3 +45,4 @@ jobs:
           body: 一些更新
           draft: false
           prerelease: false
+          tag_name: ${{ env.DESCRIPTION }}
