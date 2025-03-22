@@ -8,6 +8,8 @@ permissions:
 jobs:
   pack:
     runs-on: ubuntu-latest
+    outputs:
+      DESCRIPTION: ${{ steps.read_pack.outputs.DESCRIPTION }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
