@@ -50,6 +50,14 @@ jobs:
           body: |
             更新日期: ${{ env.CUR_DATE }}
             当前工作流: [${{ env.SHA_SHORT }}](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+
+            更新内容:
+
+            相关链接:
+            - [RailwayAesthetics-Future文档](https://aphrodite281.github.io/RailwayAesthetics-Future/#/)
+            - [ANTE文档](https://aphrodite281.github.io/mtr-ante/#/)
+            - [RailwayAesthetics-Future发行版](https://github.com/aphrodite281/RailwayAesthetics-Future/releases)
+            - [ANTE发行版](https://github.com/aphrodite281/mtr-ante/releases)
           draft: false
           prerelease: false
           tag_name: ${{ env.DESCRIPTION }}
