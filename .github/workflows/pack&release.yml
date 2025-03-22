@@ -45,7 +45,7 @@ jobs:
           files: RailwayAesthetics-Future ${{ env.DESCRIPTION }}.zip
           body: |
             更新日期: $(date +"%Y-%m-%d")
-            当前版本: [${{ github.sha }}]("https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}")
+            工作流: [${{ github.sha }}]("https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}")
           draft: false
           prerelease: false
           tag_name: ${{ env.DESCRIPTION }}
