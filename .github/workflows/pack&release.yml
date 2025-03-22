@@ -8,8 +8,6 @@ permissions:
 jobs:
   pack:
     runs-on: ubuntu-latest
-    outputs:
-      DESCRIPTION: ${{ steps.read_pack.outputs.DESCRIPTION }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -32,15 +30,19 @@ jobs:
     needs: pack
     runs-on: ubuntu-latest
     steps:
-      - name: Download
-        uses: actions/download-artifact@v4
-        with:
-          name: RailwayAesthetics-Future ${{ needs.pack.outputs.DESCRIPTION }}
-          path: download/
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Read pack.mcmeta
+        id: read_pack
+        run: |
+          DESCRIPTION=$(jq -r '.pack.description' pack.mcmeta)
+          echo "DESCRIPTION=$DESCRIPTION" >> $GITHUB_ENV
+      - name: Create Zip
+        run: zip -r RailwayAesthetics-Future-${{ env.DESCRIPTION }}.zip assets/ pack.mcmeta pack.png LICENSE readme.md
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
-          files: download/RailwayAesthetics-Future ${{ needs.pack.outputs.DESCRIPTION }}.zip
+          files: RailwayAesthetics-Future ${{ needs.pack.outputs.DESCRIPTION }}.zip
           body: 一些更新
           draft: false
           prerelease: false
