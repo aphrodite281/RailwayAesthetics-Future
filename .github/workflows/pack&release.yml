@@ -35,7 +35,7 @@ jobs:
       - name: Read pack.mcmeta
         id: read_pack
         run: |
-          DESCRIPTION=$(jq -r '.pack.description' pack.mcmeta)
+          DESCRIPTION=$(git describe --tags --abbrev=0)
           echo "DESCRIPTION=$DESCRIPTION" >> $GITHUB_ENV
       - name: Create Zip
         run: zip -r "RailwayAesthetics-Future ${{ env.DESCRIPTION }}.zip" assets/ pack.mcmeta pack.png LICENSE readme.md
