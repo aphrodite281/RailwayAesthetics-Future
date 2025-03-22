@@ -27,6 +27,7 @@ jobs:
             LICENSE
             readme.md
   release:
+    if: startsWith(github.event.head_commit.message, 'rel')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -46,8 +47,3 @@ jobs:
           draft: false
           prerelease: false
           tag_name: ${{ env.DESCRIPTION }}
-      - name: Upload
-        uses: actions/upload-artifact@v4
-        with:
-          name: _RailwayAesthetics-Future ${{ env.DESCRIPTION }}
-          path: RailwayAesthetics-Future ${{ env.DESCRIPTION }}.zip
