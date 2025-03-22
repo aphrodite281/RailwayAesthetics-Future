@@ -55,7 +55,7 @@ var ErrorSupplier = {
             str = str + "";
             let num = Number(str);
             if ((min != null && (includeMin? num < min : num <= min)) || (max != null && (includeMax? num > max : num >= max))) {
-                return Optional.of(ComponentUtil.translatable("error.aph.number_range", min, max));
+                return Optional.of(ComponentUtil.translatable("error.aph.number_range", min == null? "-Infinity" : min, max == null? "Infinity" : max));
             }
             return Optional.empty();
         }
