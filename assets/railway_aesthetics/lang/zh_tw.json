@@ -16,6 +16,7 @@
     "obj.raf.signal_lighta_4l": "信號燈A 4燈",
     "obj.raf.signal_lighta_3l": "信號燈A 3燈",
     "obj.raf.signal_lighta_2l": "信號燈A 2燈",
+    "obj.raf.displayscreena": "顯示幕A",
     "error.raf.invalid_value": "無效的值",
     "error.raf.invalid_color": "無效的顏色",
     "error.raf.invalid_scale": "無效的縮放",
@@ -62,5 +63,11 @@
     "name.raf.font_size": "字體尺寸",
     "name.raf.offset_y": "Y偏移量",
     "name.raf.has_grid": "顯示網格",
-    "name.raf.font": "字體"
+    "name.raf.font": "字體",
+    "name.raf.image": "影像",
+    "name.raf.flip_u": "U翻轉",
+    "name.raf.flip_v": "V翻轉",
+    "name.raf.gif_speed": "播放速度",
+    "name.raf.overlay_color": "疊加顏色",
+    "name.raf.render_type": "渲染類型"
 }

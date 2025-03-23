@@ -16,6 +16,7 @@
     "obj.raf.signal_lighta_4l": "Lampe de signalisation a 4 lampes",
     "obj.raf.signal_lighta_3l": "Lampe de signalisation a 3 lampes",
     "obj.raf.signal_lighta_2l": "Lampe de signalisation a 2 lampes",
+    "obj.raf.displayscreena": "Écran d'affichage a",
     "error.raf.invalid_value": "Valeur invalide",
     "error.raf.invalid_color": "Couleur invalide",
     "error.raf.invalid_scale": "Zoom invalide",
@@ -62,5 +63,11 @@
     "name.raf.font_size": "Taille de la police",
     "name.raf.offset_y": "Y offset",
     "name.raf.has_grid": "Afficher la grille",
-    "name.raf.font": "Les polices"
+    "name.raf.font": "Les polices",
+    "name.raf.image": "Images",
+    "name.raf.flip_u": "U Flip",
+    "name.raf.flip_v": "V Flip",
+    "name.raf.gif_speed": "Vitesse de jeu",
+    "name.raf.overlay_color": "Couleur superposée",
+    "name.raf.render_type": "Type de rendu"
 }

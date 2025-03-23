@@ -16,6 +16,7 @@
     "obj.raf.signal_lighta_4l": "Светильник А 4",
     "obj.raf.signal_lighta_3l": "Светильник А 3",
     "obj.raf.signal_lighta_2l": "Светильник А 2",
+    "obj.raf.displayscreena": "Дисплей А",
     "error.raf.invalid_value": "Неверное значение",
     "error.raf.invalid_color": "Неверный цвет",
     "error.raf.invalid_scale": "Неверный масштаб",
@@ -62,5 +63,11 @@
     "name.raf.font_size": "Размер шрифта",
     "name.raf.offset_y": "Смещение Y",
     "name.raf.has_grid": "Показать сетку",
-    "name.raf.font": "Шрифт"
+    "name.raf.font": "Шрифт",
+    "name.raf.image": "Изображения",
+    "name.raf.flip_u": "У - поворот",
+    "name.raf.flip_v": "V Перевернутый",
+    "name.raf.gif_speed": "Скорость воспроизведения",
+    "name.raf.overlay_color": "Цвет суперпозиции",
+    "name.raf.render_type": "Тип рендеринга"
 }

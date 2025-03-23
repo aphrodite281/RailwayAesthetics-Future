@@ -14,7 +14,7 @@ var ErrorSupplier = {
     Color:function(str) {
         str = str + "";
         let num = parseInt(str);
-        if (isNaN(num) || num < 0 || num > 0xffffff) return Optional.of(ComponentUtil.translatable("error.aph.invalid_color"));
+        if (isNaN(num) || num < 0 || num > 0xffffffff) return Optional.of(ComponentUtil.translatable("error.aph.invalid_color"));
         else return Optional.empty();
     },
     endWith: function(args) {
@@ -49,7 +49,7 @@ var ErrorSupplier = {
         let num = Number(str);
         if (isNaN(num)) return Optional.of(ComponentUtil.translatable("error.aph.invalid_value"));
         return Optional.empty();
-    },
+    }, 
     numberRange: function(min, max, includeMin, includeMax) {
         return function(str) {
             str = str + "";
@@ -61,3 +61,5 @@ var ErrorSupplier = {
         }
     }
 };
+
+ErrorSupplier.RenderType = ErrorSupplier.only(["exterior", "exteriortranslucent", "interior", "interiortranslucent", "light", "lighttranslucent"]);

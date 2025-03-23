@@ -16,6 +16,7 @@
     "obj.raf.signal_lighta_4l": "信号灯 A 4灯",
     "obj.raf.signal_lighta_3l": "信号灯 A 3灯",
     "obj.raf.signal_lighta_2l": "信号灯 A 2灯",
+    "obj.raf.displayscreena": "显示屏 A",
     "error.raf.invalid_value": "无效的值",
     "error.raf.invalid_color": "无效的颜色",
     "error.raf.invalid_scale": "无效的缩放",
@@ -62,5 +63,11 @@
     "name.raf.font_size": "字体尺寸",
     "name.raf.offset_y": "Y 偏移量",
     "name.raf.has_grid": "显示网格",
-    "name.raf.font": "字体"
+    "name.raf.font": "字体",
+    "name.raf.image": "图像",
+    "name.raf.flip_u": "U 翻转",
+    "name.raf.flip_v": "V 翻转",
+    "name.raf.gif_speed": "播放速度",
+    "name.raf.overlay_color": "叠加颜色",
+    "name.raf.render_type": "渲染类型"
 }

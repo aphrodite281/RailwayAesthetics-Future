@@ -16,6 +16,7 @@
     "obj.raf.signal_lighta_4l": "신호등 A 4등",
     "obj.raf.signal_lighta_3l": "신호등 A 3등",
     "obj.raf.signal_lighta_2l": "신호등 A 2등",
+    "obj.raf.displayscreena": "디스플레이 A",
     "error.raf.invalid_value": "잘못된 값",
     "error.raf.invalid_color": "잘못된 색상",
     "error.raf.invalid_scale": "잘못된 배율 조정",
@@ -62,5 +63,11 @@
     "name.raf.font_size": "글꼴 크기",
     "name.raf.offset_y": "Y 오프셋",
     "name.raf.has_grid": "메쉬 표시",
-    "name.raf.font": "글꼴"
+    "name.raf.font": "글꼴",
+    "name.raf.image": "이미지",
+    "name.raf.flip_u": "U 뒤집기",
+    "name.raf.flip_v": "V 뒤집기",
+    "name.raf.gif_speed": "재생 속도",
+    "name.raf.overlay_color": "색상 중첩",
+    "name.raf.render_type": "렌더 유형"
 }

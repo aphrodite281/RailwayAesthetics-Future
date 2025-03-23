@@ -16,6 +16,7 @@
     "obj.raf.signal_lighta_4l": "Signal light A 4 lights",
     "obj.raf.signal_lighta_3l": "Signal light A 3 lights",
     "obj.raf.signal_lighta_2l": "Signal light A 2 lights",
+    "obj.raf.displayscreena": "Display screen A",
     "error.raf.invalid_value": "invalid value",
     "error.raf.invalid_color": "Invalid color",
     "error.raf.invalid_scale": "Invalid scaling",
@@ -62,5 +63,11 @@
     "name.raf.font_size": "font-size",
     "name.raf.offset_y": "Y offset",
     "name.raf.has_grid": "show grid",
-    "name.raf.font": "font"
+    "name.raf.font": "font",
+    "name.raf.image": "image",
+    "name.raf.flip_u": "U Flip",
+    "name.raf.flip_v": "V Flip",
+    "name.raf.gif_speed": "Play speed",
+    "name.raf.overlay_color": "Overlay colors",
+    "name.raf.render_type": "Render Type"
 }

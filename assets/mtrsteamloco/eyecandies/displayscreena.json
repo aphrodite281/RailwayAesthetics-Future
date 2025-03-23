@@ -1,0 +1,6 @@
+{
+    "displayscreena": {
+        "name": "obj.raf.displayscreena",
+        "scriptFiles": ["mtrsteamloco:eyecandies/displayscreena/main.js"]
+    }
+}

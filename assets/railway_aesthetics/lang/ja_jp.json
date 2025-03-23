@@ -16,6 +16,7 @@
     "obj.raf.signal_lighta_4l": "信号A 4ランプ",
     "obj.raf.signal_lighta_3l": "信号A 3ランプ",
     "obj.raf.signal_lighta_2l": "信号A 2ランプ",
+    "obj.raf.displayscreena": "ディスプレイA",
     "error.raf.invalid_value": "無効な値",
     "error.raf.invalid_color": "無効な色",
     "error.raf.invalid_scale": "無効なスケール",
@@ -62,5 +63,11 @@
     "name.raf.font_size": "フォントサイズ",
     "name.raf.offset_y": "Yオフセット量",
     "name.raf.has_grid": "グリッドの表示",
-    "name.raf.font": "フォント"
+    "name.raf.font": "フォント",
+    "name.raf.image": "画像",
+    "name.raf.flip_u": "U反転",
+    "name.raf.flip_v": "V反転",
+    "name.raf.gif_speed": "再生速度",
+    "name.raf.overlay_color": "重ね合わせカラー",
+    "name.raf.render_type": "レンダリングタイプ"
 }

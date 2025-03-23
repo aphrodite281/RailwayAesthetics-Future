@@ -16,6 +16,7 @@
     "obj.raf.signal_lighta_4l": "Semáforo a 4 luces",
     "obj.raf.signal_lighta_3l": "Semáforo a 3 luces",
     "obj.raf.signal_lighta_2l": "Semáforo a 2 luces",
+    "obj.raf.displayscreena": "Pantalla a",
     "error.raf.invalid_value": "Valor no válido",
     "error.raf.invalid_color": "Color no válido",
     "error.raf.invalid_scale": "Zoom no válido",
@@ -62,5 +63,11 @@
     "name.raf.font_size": "Tamaño de la fuente",
     "name.raf.offset_y": "Desplazamiento y",
     "name.raf.has_grid": "Mostrar cuadrícula",
-    "name.raf.font": "Fuente"
+    "name.raf.font": "Fuente",
+    "name.raf.image": "Imagen",
+    "name.raf.flip_u": "U volteado",
+    "name.raf.flip_v": "V volteado",
+    "name.raf.gif_speed": "Velocidad de reproducción",
+    "name.raf.overlay_color": "Color superpuesto",
+    "name.raf.render_type": "Tipo de representación"
 }
