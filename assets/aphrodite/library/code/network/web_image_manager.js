@@ -18,6 +18,7 @@ var WebImageManager = (function () {
 
         const PATH_CACHE = "_aph-cache/";
         const FILE_CACHE = new java.io.File(PATH_CACHE);
+        const CACHE_CANONICAL_PATH = FILE_CACHE.getCanonicalPath() + "";
 
         function Gif(file) {
             function Frame(image, delay, endTime) {
@@ -62,8 +63,6 @@ var WebImageManager = (function () {
                     }
                     imgs.push(image);
                     delays.push(delay);
-                    // long += delay;
-                    // this.frames.push(new Frame(image, delay, long));
                 }
 
                 let base = new java.awt.image.BufferedImage(reader.getWidth(0), reader.getHeight(0), java.awt.image.BufferedImage.TYPE_INT_ARGB);
@@ -174,13 +173,25 @@ var WebImageManager = (function () {
             }
         }
 
-        function _loadImage(uri, reDownload) {
+        function _loadImage1(file) {
+            try {
+                if ((file.getName() + "").endsWith(".gif")) {
+                    return new Gif(file);
+                } else {
+                    return new Bitmap(file);
+                }
+            } catch (e) {
+                print("Error loading image: " + file);
+            }
+        }
+
+        function _loadImage0(uri, reDownload) {
             try {
                 const url = new java.net.URL(uri);
                 const conn = url.openConnection(); 
                 const responseCode = conn.getResponseCode();
                 if (responseCode == java.net.HttpURLConnection.HTTP_OK) {
-                    let fileName = PATH_CACHE + uri.substring(uri.lastIndexOf('/') + 1);
+                    let fileName = PATH_CACHE + uri.replace("://", "/").replace("\\", "/");
                     let disposition = conn.getHeaderField("Content-Disposition");
                     let contentType = conn.getContentType();
 
@@ -188,7 +199,7 @@ var WebImageManager = (function () {
 
                     const file = new java.io.File(fileName);
                     function download() {
-                        FILE_CACHE.mkdirs();
+                        file.getParentFile().mkdirs();
                         file.createNewFile();
                         let ip = null;
                         let op = null;
@@ -230,7 +241,7 @@ var WebImageManager = (function () {
                             return res;
                         } catch (e) {
                             print("Re-download image: " + " from " + uri + " to" + fileName + "\n" + "Cause of error: " + e.message + "\n" + e.stackTrace);
-                            return _loadImage(uri, true);
+                            return _loadImage0(uri, true);
                         }
                     }
                 } else throw new Error("Failed to load image: " + uri + " with response code: " + responseCode);
@@ -241,35 +252,41 @@ var WebImageManager = (function () {
             }
         }
 
-        this.loadImage = function(url, callback, reDownload) {
+        function _loadImage(fileOrUrl, fromDisk, reDownload) {
+            if (fromDisk) return _loadImage1(fileOrUrl);
+            else return _loadImage0(fileOrUrl, reDownload);
+        }
+
+        function loadImage(url, callback, reDownload) {
             url = url + "";
+            let uri = url.replace("://", "/").replace("\\", "/");
             if (callback == undefined) callback = function() {};
             if (reDownload == undefined) reDownload = false;
-            if (CACHE.has(url) && !reDownload) {
-                callback(CACHE.get(url));
+            if (CACHE.has(uri) && !reDownload) {
+                callback(CACHE.get(uri));
                 MinecraftClient.displayMessage("§eLoaded image:" + url + " from cache", true);
                 return;
             } else {
-                if (IN_PROGRESS.has(url)) return;
-                IN_PROGRESS.add(url);
+                if (IN_PROGRESS.has(uri)) return;
+                IN_PROGRESS.add(uri);
                 EXECUTOR.submit(new java.lang.Runnable({run: function() {
                     try {
                         let startTime = Date.now();
-                        let img = _loadImage(url, reDownload);
-                        IN_PROGRESS.delete(url);
+                        let img = _loadImage(url, false, reDownload);
+                        IN_PROGRESS.delete(uri);
                         if (img instanceof Gif || img instanceof Bitmap) {
-                            if (CACHE.has(url)) {
-                                let ele = CACHE.get(url);
+                            if (CACHE.has(uri)) {
+                                let ele = CACHE.get(uri);
                                 if (ele instanceof Gif || ele instanceof Bitmap) ele.dispose();
                             }
-                            CACHE.set(url, img);
+                            CACHE.set(uri, img);
                         }
                         callback(img);
                         print("Done loading image:" + url + " in " + (Date.now() - startTime) + "ms");
                         MinecraftClient.displayMessage("§eDone loading image:" + url + " in " + (Date.now() - startTime) + "ms", true);
                     } catch (e) {
                         print("Failed to load image: " + url + " with error: " + e.message + "\n" + e.stackTrace);
-                        IN_PROGRESS.delete(url);
+                        IN_PROGRESS.delete(uri);
                         callback(null);
                         MinecraftClient.displayMessage("§cFailed to load image: " + url + " with error: " + e.message, false);
                     }
@@ -277,19 +294,31 @@ var WebImageManager = (function () {
             }
         }
 
-        this.toString = function() {
-            return NAME;
-        }
+        this.loadImage = loadImage;
 
-        this._cleanCache = function() {
-            let copy = new Map(CACHE);
-            CACHE.clear();
-            for (let [url, img] of copy) {
-                if (img instanceof Gif || img instanceof Bitmap) img.dispose();
+        function load(file) {
+            if (file.isDirectory()) {
+                for (let f of file.listFiles()) {
+                    load(f);
+                }
+            } else {
+                let p = file.getCanonicalPath() + "";
+                let index = p.indexOf(CACHE_CANONICAL_PATH);
+                let uri = p.substring(index + CACHE_CANONICAL_PATH.length + 1).replace(/\\/g, "/");
+                let res = _loadImage(file, true);
+                if (res != null) CACHE.set(uri, res);
             }
         }
 
-        this._deepClean = function() {
+        this.reBuildCache = function() {
+            CACHE.clear();
+
+            if (!FILE_CACHE.exists()) return;
+
+            load(FILE_CACHE);
+        }
+
+        this.deepClean = function() {
             let copy = new Map(CACHE);
             CACHE.clear();
             for (let [url, img] of copy) {
@@ -301,9 +330,21 @@ var WebImageManager = (function () {
         this.getCacheSize = function() {
             return CACHE.size;
         }
+
+        this.getCache = function() {
+            return CACHE;
+        }
+
+        this.toString = function() {
+            return NAME;
+        }
     }
 
-    GlobalRegister.put(NAME, new WebImageManager());
+    const INSTANCE = new WebImageManager();
+
+    INSTANCE.reBuildCache();
+
+    GlobalRegister.put(NAME, INSTANCE);
     
     return ENTRANCE;
 })();

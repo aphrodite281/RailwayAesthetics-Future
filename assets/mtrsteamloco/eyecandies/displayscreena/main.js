@@ -49,6 +49,12 @@ function create(ctx, state, entity) {
 
 function render(ctx, state, entity) {
     update(ctx, state, entity);
+    let keys = WebImageManager.getInstance().getCache().keys();
+    let str = "";
+    for (let key of keys) {
+        str += key + " ";
+    }
+    ctx.setDebugInfo("size", str);
 }
 
 function dispose(ctx, state, entity) {
