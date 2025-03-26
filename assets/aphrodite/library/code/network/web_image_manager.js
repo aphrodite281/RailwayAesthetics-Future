@@ -9,7 +9,7 @@ var WebImageManager = (function () {
         }
     };
 
-    if (GlobalRegister.containsKey(NAME)) return ENTRANCE;
+    // if (GlobalRegister.containsKey(NAME)) return ENTRANCE;
 
     function WebImageManager() {
         const CACHE = new Map();
@@ -36,46 +36,118 @@ var WebImageManager = (function () {
                 }
             }
 
+            function decode(io) {
+                // Header
+                let name = io.readBytes(3);
+                let version = io.readByte(3);
+
+                // Logical Screen Descriptor
+                let logicalScreenWidth = io.readUnsignedShort();
+                let logicalScreenHeight = io.readUnsignedShort();
+                let globalColorTableFlag = io.readBit();
+                let colorResolution = io.readBits(3) + 1;
+                let sortFlag = io.readBit();
+                let sizeOfGlobalColorTable = io.readBits(3);
+                let backgroundColorIndex = io.readByte();
+                let pixelAspectRatio = io.readByte();
+                
+                // Global Color Table
+                let golbalColorTable = [];
+                if (globalColorTableFlag) {
+                    let size = Math.pow(2, sizeOfGlobalColorTable + 1);
+                    for (let i = 0; i < size; i++) {
+                        let r = io.readByte();
+                        let g = io.readByte();
+                        let b = io.readByte();
+                        golbalColorTable.push({r: r, g: g, b: b});
+                    }
+                }
+
+                // 
+            }
+
             this.frames = [];
             
+            let io0 = null;
             let io = null;
             try {
-                io = Packages.javax.imageio.ImageIO.createImageInputStream(file);
+                io0 = Packages.javax.imageio.ImageIO.createImageInputStream(file);
                 // let reader = Packages.javax.imageio.ImageIO.getImageReadersByFormatName("gif").next();
-                let reader = Packages.javax.imageio.ImageIO.getImageReaders(io).next();
-                reader.setInput(io);
+                let reader = Packages.javax.imageio.ImageIO.getImageReaders(io0).next();
+                reader.setInput(io0);
                 let n = reader.getNumImages(true);
+
+                let streamMetadata = reader.getStreamMetadata();
+                let tree = streamMetadata.getAsTree("javax_imageio_gif_stream_1.0");
+                let children = tree.getChildNodes();
+                let w = null, h = null;
+                for (let i = 0; i < children.getLength(); i++) {
+                    let node = children.item(i);
+                    let name = node.getNodeName() + "";
+                    if (name.equals("LogicalScreenDescriptor")) {
+                        w = parseInt(node.getAttributes().getNamedItem("logicalScreenWidth").getNodeValue());
+                        h = parseInt(node.getAttributes().getNamedItem("logicalScreenHeight").getNodeValue());
+                    }
+                }
+
+                let io = Packages.javax.imageio.ImageIO.createImageOutputStream(file);
 
                 let imgs = [];
                 let delays = [];
+                let locations = [];
+                let methods = [];
                 for (let i = 0; i < n; i++) {
                     let image = reader.read(i);
 
                     let metadata = reader.getImageMetadata(i);
                     let tree = metadata.getAsTree("javax_imageio_gif_image_1.0");
-                    children = tree.getChildNodes();
+                    let children = tree.getChildNodes();
                     let delay = 100;
+                    let location = [0, 0];
+                    let method = "doNotDispose";
                     for (let j = 0; j < children.getLength(); j++) {
                         let node = children.item(j);
-                        if (node.getNodeName().equals("GraphicControlExtension")) {
+                        let name = node.getNodeName();
+                        if (name.equals("GraphicControlExtension")) {
                             delay = parseInt(node.getAttributes().getNamedItem("delayTime").getNodeValue()) * 10;
+                            method = node.getAttributes().getNamedItem("disposalMethod").getNodeValue();
+                        } else if (name.equals("ImageDescriptor")) {
+                            location = [
+                                parseInt(node.getAttributes().getNamedItem("imageLeftPosition").getNodeValue()), 
+                                parseInt(node.getAttributes().getNamedItem("imageTopPosition").getNodeValue())
+                            ];
                         }
                     }
                     imgs.push(image);
                     delays.push(delay);
+                    locations.push(location);
+                    methods.push(method);
                 }
 
-                let base = new java.awt.image.BufferedImage(reader.getWidth(0), reader.getHeight(0), java.awt.image.BufferedImage.TYPE_INT_ARGB);
+                let base = new java.awt.image.BufferedImage(w, h, java.awt.image.BufferedImage.TYPE_INT_ARGB);
                 let g = base.createGraphics();
                 g.setComposite(java.awt.AlphaComposite.SrcOver);
-                for (let img of imgs) {
-                    g.drawImage(img, 0, 0, null);
+                for (let i = 0; i < n; i++) {
+                    g.drawImage(imgs[i], locations[i][0], locations[i][1], null);
                 }
 
                 let long = 0;
                 for (let i = 0; i < n; i++) {
+                    switch(methods[i] + "") {
+                        case "restoreToBackgroundColor":
+                            g.setComposite(java.awt.AlphaComposite.Clear);
+                            g.fillRect(0, 0, w, h);
+                            g.setComposite(java.awt.AlphaComposite.SrcOver);
+                            break;
+                        case "doNotDispose":
+                            break;
+                        default: 
+                            throw new Error("Unknown disposal method: " + methods[i]);
+                    }
                     let img = imgs[i];
-                    g.drawImage(img, 0, 0, null);
+                    g.drawImage(img, locations[i][0], locations[i][1], null);
+                    // g.setColor(java.awt.Color.WHITE);
+                    // g.fillRect(0, 0, base.getWidth() * i / n, base.getHeight() * 0.1);
                     let delay = delays[i];
                     long += delay;
                     this.frames.push(new Frame(base, delay, long));
@@ -83,9 +155,13 @@ var WebImageManager = (function () {
 
                 this.duration = long;
                 success = true;
+                if (io0 != null) io0.close();
+                io0 = null;
                 if (io != null) io.close();
                 io = null;
             } catch (e) {
+                if (io0 != null) io0.close();
+                io0 = null;
                 if (io != null) io.close();
                 io = null;
                 throw e;
@@ -310,7 +386,7 @@ var WebImageManager = (function () {
             }
         }
 
-        this.reBuildCache = function() {
+        this.rebuildCache = function() {
             CACHE.clear();
 
             if (!FILE_CACHE.exists()) return;
@@ -342,7 +418,7 @@ var WebImageManager = (function () {
 
     const INSTANCE = new WebImageManager();
 
-    INSTANCE.reBuildCache();
+    INSTANCE.rebuildCache();
 
     GlobalRegister.put(NAME, INSTANCE);
     

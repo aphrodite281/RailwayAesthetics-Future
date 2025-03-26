@@ -45,16 +45,15 @@ function create(ctx, state, entity) {
     state.dyn = new DynamicModelHolder();
     update(ctx, state, entity);
     ctx.drawCalls.put(0, new ClusterDrawCall(state.dyn, MATRIX));
+
+    state.last = Date.now();
 }
 
 function render(ctx, state, entity) {
+    let start = Date.now();
     update(ctx, state, entity);
-    let keys = WebImageManager.getInstance().getCache().keys();
-    let str = "";
-    for (let key of keys) {
-        str += key + " ";
-    }
-    ctx.setDebugInfo("size", str);
+    ctx.setDebugInfo("used", (Date.now() - start) + "ms", "internal", (start - state.last) + "ms");
+    state.last = start;
 }
 
 function dispose(ctx, state, entity) {
