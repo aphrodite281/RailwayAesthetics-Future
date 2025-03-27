@@ -9,7 +9,7 @@ var WebImageManager = (function () {
         }
     };
 
-    // if (GlobalRegister.containsKey(NAME)) return ENTRANCE;
+    if (GlobalRegister.containsKey(NAME)) return ENTRANCE;
 
     function WebImageManager() {
         const CACHE = new Map();
@@ -36,45 +36,14 @@ var WebImageManager = (function () {
                 }
             }
 
-            function decode(io) {
-                // Header
-                let name = io.readBytes(3);
-                let version = io.readByte(3);
-
-                // Logical Screen Descriptor
-                let logicalScreenWidth = io.readUnsignedShort();
-                let logicalScreenHeight = io.readUnsignedShort();
-                let globalColorTableFlag = io.readBit();
-                let colorResolution = io.readBits(3) + 1;
-                let sortFlag = io.readBit();
-                let sizeOfGlobalColorTable = io.readBits(3);
-                let backgroundColorIndex = io.readByte();
-                let pixelAspectRatio = io.readByte();
-                
-                // Global Color Table
-                let golbalColorTable = [];
-                if (globalColorTableFlag) {
-                    let size = Math.pow(2, sizeOfGlobalColorTable + 1);
-                    for (let i = 0; i < size; i++) {
-                        let r = io.readByte();
-                        let g = io.readByte();
-                        let b = io.readByte();
-                        golbalColorTable.push({r: r, g: g, b: b});
-                    }
-                }
-
-                // 
-            }
-
             this.frames = [];
             
-            let io0 = null;
             let io = null;
             try {
-                io0 = Packages.javax.imageio.ImageIO.createImageInputStream(file);
+                io = Packages.javax.imageio.ImageIO.createImageInputStream(file);
                 // let reader = Packages.javax.imageio.ImageIO.getImageReadersByFormatName("gif").next();
-                let reader = Packages.javax.imageio.ImageIO.getImageReaders(io0).next();
-                reader.setInput(io0);
+                let reader = Packages.javax.imageio.ImageIO.getImageReaders(io).next();
+                reader.setInput(io);
                 let n = reader.getNumImages(true);
 
                 let streamMetadata = reader.getStreamMetadata();
@@ -89,8 +58,6 @@ var WebImageManager = (function () {
                         h = parseInt(node.getAttributes().getNamedItem("logicalScreenHeight").getNodeValue());
                     }
                 }
-
-                let io = Packages.javax.imageio.ImageIO.createImageOutputStream(file);
 
                 let imgs = [];
                 let delays = [];
@@ -146,8 +113,6 @@ var WebImageManager = (function () {
                     }
                     let img = imgs[i];
                     g.drawImage(img, locations[i][0], locations[i][1], null);
-                    // g.setColor(java.awt.Color.WHITE);
-                    // g.fillRect(0, 0, base.getWidth() * i / n, base.getHeight() * 0.1);
                     let delay = delays[i];
                     long += delay;
                     this.frames.push(new Frame(base, delay, long));
@@ -155,13 +120,9 @@ var WebImageManager = (function () {
 
                 this.duration = long;
                 success = true;
-                if (io0 != null) io0.close();
-                io0 = null;
                 if (io != null) io.close();
                 io = null;
             } catch (e) {
-                if (io0 != null) io0.close();
-                io0 = null;
                 if (io != null) io.close();
                 io = null;
                 throw e;
