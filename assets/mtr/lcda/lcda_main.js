@@ -249,7 +249,7 @@ let lcdaSmooth = (k, value) => {// 平滑变化
 }
 
 function lcdaGenFaceModel() {// lighttranslucent light interiortranslucent
-    let builder = new RawMeshBuilder(4, "lighttranslucent", Resources.id("minecraft:textures/misc/white.png"));
+    let builder = new RawMeshBuilder(4, "light", Resources.id("minecraft:textures/misc/white.png"));
     for(let i = 0; i < 4; i++) {
         builder.vertex(new Vector3f(lcdaConfigs.modelSize[0] * (i == 0 || i == 1? 0.5 : -0.5), lcdaConfigs.modelSize[1] * (i == 0 || i == 3 ? -0.5 : 0.5), 0)).uv(i == 0 || i ==1 ? 1 : 0, i == 0 || i == 3 ? 1 : 0).normal(0, 0, 0).endVertex();
     }
