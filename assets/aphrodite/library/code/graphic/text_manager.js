@@ -392,5 +392,8 @@ TextManager.processString = (str, font, w, getW) => {
 //     return java.util.Optional.of(arr);
 // }, false);
 
-TextManager.configResponder = new ConfigResponder.TextField(TextManager.modeKey, ComponentUtil.translatable("name.aph.text_manager_mode"), "2", str => str, ErrorSupplier.only(["0", "1", "2"]), str => {}, str => java.util.Optional.of(asJavaArray([ComponentUtil.translatable("tip.aph.text_manager_mode"), ComponentUtil.translatable("tip.aph.reload_resourcepack")], Component)), false);
+// TextManager.configResponder = new ConfigResponder.TextField(TextManager.modeKey, ComponentUtil.translatable("name.aph.text_manager_mode"), "2", str => str, ErrorSupplier.only(["0", "1", "2"]), str => {}, str => java.util.Optional.of(asJavaArray([ComponentUtil.translatable("tip.aph.text_manager_mode"), ComponentUtil.translatable("tip.aph.reload_resourcepack")], Component)), false);
+
+TextManager.configResponder = new ConfigResponder.CycleToggle(TextManager.modeKey, ComponentUtil.translatable("name.aph.text_manager_mode"), 2, ["0", "1", "2"])
+    .setTooltipSupplier(str => java.util.Optional.of(asJavaArray([ComponentUtil.translatable("tip.aph.text_manager_mode"), ComponentUtil.translatable("tip.aph.reload_resourcepack")], Component)));
 ClientConfig.register(TextManager.configResponder);

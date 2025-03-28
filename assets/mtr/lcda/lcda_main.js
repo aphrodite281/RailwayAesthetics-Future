@@ -170,12 +170,11 @@ function lcdaGenFilletOverlay() {
 }
 
 const lcdaRecordModeKey = "lcda_record_mode"
-const lcdaRecordModeInput = new ConfigResponder.TextField(lcdaRecordModeKey, ComponentUtil.translatable("name.raf.lcda_record_mode"), "0")
-    .setErrorSupplier(ErrorSupplier.only(['0', '1']));
+const lcdaRecordModeInput = new ConfigResponder.BooleanToggle(lcdaRecordModeKey, ComponentUtil.translatable("name.raf.lcda_record_mode"), false)
 // ClientConfig.register(lcdaRecordModeInput);
 
 function lcdaRecordMode() {
-    return Number(ClientConfig.get(lcdaRecordModeKey));
+    return (ClientConfig.get(lcdaRecordModeKey) + "") == "true";
 }
 
 const lcdaPDKey = "lcda_pixel_density"
@@ -1411,7 +1410,7 @@ function LCDThread(model, isRight, ctx, state, carIndex, ttf) {
                     else if (mainAlpha.get() == 0 && isOnRoute()) mainAlpha.turn(1);
                     mainAlpha.update();
                     ti("Update");
-                    if ((mainAlpha.get() == 0 && mainAlpha.get() == lastAlpha) || (lcdaRecordMode() == 1 && !lcdaNeedRecord(train(), carIndex, isRight))) {
+                    if ((mainAlpha.get() == 0 && mainAlpha.get() == lastAlpha) || (lcdaRecordMode() && !lcdaNeedRecord(train(), carIndex, isRight))) {
                         ti("Skip Draw");
                     } else {
                         // let done = false;
