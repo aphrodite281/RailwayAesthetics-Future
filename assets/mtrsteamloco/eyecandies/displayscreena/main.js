@@ -12,7 +12,7 @@ const KEY_OVERLAY_COLOR = "overlay_color";
 const KEY_RENDER_TYPE = "render_type";
 
 const IMAGE_RESPONDER = new ConfigResponder.TextField(KEY_IMAGE, ComponentUtil.translatable("name.raf.image"), "https://image.hokubu.cn/i/2025/03/23/67df5dee55f02.png");
-const MODEL_SIZE_RESPONDER = new ConfigResponder.TextField(KEY_MODEL_SIZE, ComponentUtil.translatable("name.raf.model_size"), "5/5")
+const MODEL_SIZE_RESPONDER = new ConfigResponder.TextField(KEY_MODEL_SIZE, ComponentUtil.translatable("name.raf.model_size.2x"), "5/5")
     .setErrorSupplier(function(str) {
         let wr = Optional.of(ComponentUtil.translatable("error.aph.invalid_value"));
         let tokens = str.split("/");

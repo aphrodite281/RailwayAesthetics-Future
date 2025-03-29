@@ -19,8 +19,8 @@ const keyHasGrid = "has_grid";
 
 const res = (function() {
 
-    function gen(key, dv) {
-        return new ConfigResponder.TextField(key, ComponentUtil.translatable("name.raf." + key), dv);
+    function gen(key, dv, p) {
+        return new ConfigResponder.TextField(key, ComponentUtil.translatable("name.raf." + (p == null ? key : p)), dv);
     }
 
     let r = Optional.of(ComponentUtil.translatable("error.aph.invalid_value"));
@@ -40,9 +40,9 @@ const res = (function() {
     let bc = gen(keyBackgroundColor, "0x3d3d3d").setErrorSupplier(ErrorSupplier.Color);
     let tc = gen(keyTextColor, "0xffffff").setErrorSupplier(ErrorSupplier.Color);
     let gc = gen(keyGridColor, "0x000000").setErrorSupplier(ErrorSupplier.Color);
-    let sp = gen(keySpeed, "-10/0").setErrorSupplier(mul(false));
-    let uv = gen(keyTEXSize, "200/20").setErrorSupplier(mul(true));
-    let ms = gen(keyModelSize, "10/1").setErrorSupplier(mul(true));
+    let sp = gen(keySpeed, "-10/0", "speed.2x").setErrorSupplier(mul(false));
+    let uv = gen(keyTEXSize, "200/20", "tex_size.2x").setErrorSupplier(mul(true));
+    let ms = gen(keyModelSize, "10/1", "model_size.2x").setErrorSupplier(mul(true));
     let fs = gen(keyFontSize, "18").setErrorSupplier(ErrorSupplier.numberRange(0, null, true, true));
     let sy = gen(keyOffsetY, "-1").setErrorSupplier(ErrorSupplier.Number);
     let tx = gen(keyText, "Hello, World!    ");
