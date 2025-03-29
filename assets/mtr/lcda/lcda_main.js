@@ -292,8 +292,8 @@ function LCDThread(model, isRight, ctx, state, carIndex, ttf) {
 
             let now = () => Date.now();
             let nano = () => System.nanoTime();
-            let SDrawCalls = [];// [旧图, [新渐变的, 新alpha]] 渐变绘制
-            let DDrawCalls = [];// [对象1, 对象2] 动态绘制
+            let SDrawCalls = [];
+            let DDrawCalls = [];
             let mainAlpha = new Value(isOnRoute() ? 1 : 0, 1, 0, 1.2, 0, 0);// 主渐变alpha
             let info = [-1];// 信息
             // let fps = 24;// 帧率
@@ -1469,7 +1469,7 @@ function LCDThread(model, isRight, ctx, state, carIndex, ttf) {
                         ctx.setDebugInfo(uid, ts, "Ctrl: " + ctrlUsed, "FPS:" + fps.toFixed(2).toString().padStart(5, '0'), "\n", 
                         "Pools: " + ["ctrl: " + ctrlPool.getActiveCount() + "/" + ctrlPool.getPoolSize(), "submit: " + submitPool.getActiveCount() + "/" + submitPool.getPoolSize()].toString(), "D-Calls:" + DDrawCalls.toString(), "S-Calls:" + SDrawCalls.toString(), "\n", 
                         "Used: " + used.toString(), "DStyle: " + DStyle, "\n", 
-                        "Arrive: " + iisArrive, "OnRoute: " + isOnRoute(), "Alpha: " + mainAlpha.dir() + " " +  mainAlpha.speed()+ " " + mainAlpha.get().toFixed(2).toString().padStart(5, '0')); // , "upload: " + uoloadPool.getActiveCount() + "/" + uoloadPool.getPoolSize(), "executor: " + executor.getActiveCount() + "/" + executor.getPoolSize() , "Timeout: " + timeoutTimes
+                        "Arrive: " + iisArrive, "OnRoute: " + isOnRoute(), "Alpha: " + mainAlpha.toString()); // , "upload: " + uoloadPool.getActiveCount() + "/" + uoloadPool.getPoolSize(), "executor: " + executor.getActiveCount() + "/" + executor.getPoolSize() , "Timeout: " + timeoutTimes
                     }
                 } catch (e) {
                     ctx.setDebugInfo(uid + " Error At: ", now().toString(), e.message, e.stack);

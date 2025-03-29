@@ -101,4 +101,8 @@ function Value(min, max, now, speed, direction, loop) {
         if (newSpeed != null) speed = newSpeed;
         return speed;
     }
+
+    this.toString = function() {
+        return "Value{" + "min=" + min + ", max=" + max + ", now=" + now.toFixed(2) + ", speed=" + speed + ", direction=" + dir + ", loop=" + loop + ", last=" + last + "}";
+    }
 }
