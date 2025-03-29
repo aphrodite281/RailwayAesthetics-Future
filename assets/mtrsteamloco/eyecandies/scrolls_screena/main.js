@@ -104,7 +104,7 @@ function create(ctx, state, entity) {
 
                 state.dyn.uploadLater(rm);
 
-                ctx.setDebugInfo("change", Date.now());
+                // ctx.setDebugInfo("change", Date.now());
             }
 
             let g = texture.graphics;
@@ -132,10 +132,11 @@ function create(ctx, state, entity) {
             texture.upload();
             let end = Date.now();
             let el = end - start;
-            ctx.setDebugInfo("used", el);
+            // ctx.setDebugInfo("used", el);
             model.replaceAllTexture(texture.identifier);
         }catch (e) {
             ctx.setDebugInfo("error", e.message, e.stack);
+            print(e.message + "\n" + e.stack);
         }
     };
 
@@ -145,8 +146,8 @@ function create(ctx, state, entity) {
 function render(ctx, state, entity) {
     state.lastRenderTime = Date.now();
     state.tack();
-    ctx.setDebugInfo("tex", state.getTexture());
-    ctx.setDebugInfo("info", tostring(state.getInfo()));
+    // ctx.setDebugInfo("tex", state.getTexture());
+    // ctx.setDebugInfo("info", tostring(state.getInfo()));
 }
 
 function dispose(ctx, state, entity) {
