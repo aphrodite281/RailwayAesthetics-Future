@@ -284,7 +284,7 @@ function DR(entity, isFirst, info) {
 
     this.outdated = () => {
         let newInfo = getInfo(entity);
-        if (toString(info) != toString(newInfo)) return newInfo;
+        if (tostring(info) != tostring(newInfo)) return newInfo;
         else return null;
     }
 

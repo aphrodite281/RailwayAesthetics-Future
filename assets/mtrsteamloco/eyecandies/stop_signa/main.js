@@ -34,7 +34,7 @@ function create(ctx, state, entity) {
 
 function render(ctx, state, entity) {
     let info = genInfo(entity);
-    if (toString(info) != toString(state.info)) {
+    if (tostring(info) != tostring(state.info)) {
         state.info = info;
         state.tex.close();
         state.tex = genTexture(state.info);
