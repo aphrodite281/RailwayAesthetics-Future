@@ -106,61 +106,37 @@ function create(ctx, state, entity) {
     state.running = true;
     state.lastRenderTime = Date.now();
     
+    let gt = new GraphicsTexture(texSize[0], texSize[1]);
+    state.gt = gt;
+    imcsc.replaceAllTexture(gt.identifier);
+    let array = [];
 
-    state.task = function() {
-        print("start");
-        let array = [];
-
-        let gt = new GraphicsTexture(texSize[0], texSize[1]);
-        imcsc.replaceAllTexture(gt.identifier);
-
-        try {
-
-        function draw() {
-            if (array.length == 0) {
-                array.push(new Element(genElementInfo(entity)));
-            } else {
-                let info = genElementInfo(entity);
-                if (!array[array.length - 1].equals(info)) {
-                    array.push(new Element(info));
-                }
-
-                if (array[array.length - 1].alpha() >= 1 && array.length > 1) {
-                    let latest = array[array.length - 1];
-                    array = [latest];
-                }
+    state.draw = function() {
+        if (array.length == 0) {
+            array.push(new Element(genElementInfo(entity)));
+        } else {
+            let info = genElementInfo(entity);
+            if (!array[array.length - 1].equals(info)) {
+                array.push(new Element(info));
             }
-            
-            for (let e of array) e.draw(gt.graphics);
-            gt.upload();
-        }
 
-        while (state.running && (state.lastRenderTime + 10000) > Date.now()) {
-            let start = Date.now();
-            draw();
-            let end = Date.now();
-            ctx.setDebugInfo("used", end - start);
-            java.lang.Thread.sleep(Math.max(0, 24 / 1000 - (end - start)));
+            if (array[array.length - 1].alpha() >= 1 && array.length > 1) {
+                let latest = array[array.length - 1];
+                array = [latest];
+            }
         }
-        } catch(e) {
-            ctx.setDebugInfo("error", e.message, e.stack);
-            print(e);
-        }
-        gt.close();
-        print("exit");
-        ctx.setDebugInfo("exit", true);
-    };
-    state.thread = new java.lang.Thread(state.task, "PSDA Thread" + ctx.hashCode().toString(16));
-    state.thread.start();
+        
+        for (let e of array) e.draw(gt.graphics);
+        gt.upload();
+    }
+    // state.thread = new java.lang.Thread(state.task, "PSDA Thread" + ctx.hashCode().toString(16));
+    // state.thread.start();
     state.soundTime = -114514;
 }
 
 onRender = function(ctx, state, entity, v) {
+    state.draw();
     state.lastRenderTime = Date.now();
-    if (!state.thread.isAlive()) {
-        state.thread = new java.lang.Thread(state.task, "PSDA Thread" + ctx.hashCode().toString(16));
-        state.thread.start();
-    }
     let mat = new Matrices();
     mat.translate(0, v, 0);
     ctx.drawModel(mcm, mat);
@@ -177,6 +153,7 @@ onRender = function(ctx, state, entity, v) {
 
 function dispose(ctx, state, entity) {
     state.running = false;
+    state.gt.close();
 }
 
 function Element(info) {
@@ -220,7 +197,7 @@ function Element(info) {
     }
 
     this.equals = function(oinfo) {
-        if (toString(info) == toString(oinfo)) return true;
+        if (tostring(info) == tostring(oinfo)) return true;
         return false;
     }
 

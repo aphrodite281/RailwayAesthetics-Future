@@ -1,22 +1,16 @@
+include(Resources.id("aphrodite:library/code/graphic/gif_encoder.js"));
+
 var WebImageManager = (function () {
     const NAME = "WebImageManager";
-    const ENTRANCE = {
-        getInstance: function() {
-            return GlobalRegister.get(NAME); 
-        },
-        toString: function() {
-            return NAME;
-        }
-    };
 
-    if (GlobalRegister.containsKey(NAME)) return ENTRANCE;
+    if (GlobalRegister.containsKey(NAME)) return GlobalRegister.get(NAME);
 
     function WebImageManager() {
         const CACHE = new Map();
         const IN_PROGRESS = new Set();
         const EXECUTOR = java.util.concurrent.Executors.newCachedThreadPool();
 
-        const PATH_CACHE = "_aph-cache/";
+        const PATH_CACHE = "aph/_web_image_cache/";
         const FILE_CACHE = new java.io.File(PATH_CACHE);
         const CACHE_CANONICAL_PATH = FILE_CACHE.getCanonicalPath() + "";
 
@@ -38,93 +32,23 @@ var WebImageManager = (function () {
 
             this.frames = [];
             
-            let io = null;
             try {
-                io = Packages.javax.imageio.ImageIO.createImageInputStream(file);
-                // let reader = Packages.javax.imageio.ImageIO.getImageReadersByFormatName("gif").next();
-                let reader = Packages.javax.imageio.ImageIO.getImageReaders(io).next();
-                reader.setInput(io);
-                let n = reader.getNumImages(true);
+                let io = new java.io.BufferedInputStream(new java.io.FileInputStream(file));
+                let encoder = newGifEncoder();
+                encoder.read(io);
 
-                let streamMetadata = reader.getStreamMetadata();
-                let tree = streamMetadata.getAsTree("javax_imageio_gif_stream_1.0");
-                let children = tree.getChildNodes();
-                let w = null, h = null;
-                for (let i = 0; i < children.getLength(); i++) {
-                    let node = children.item(i);
-                    let name = node.getNodeName() + "";
-                    if (name.equals("LogicalScreenDescriptor")) {
-                        w = parseInt(node.getAttributes().getNamedItem("logicalScreenWidth").getNodeValue());
-                        h = parseInt(node.getAttributes().getNamedItem("logicalScreenHeight").getNodeValue());
-                    }
+                let len = encoder.getFrameCount();
+                let time = 0;
+                for (let i = 0; i < len; i++) {
+                    let frame = encoder.getFrame(i);
+                    let delay = encoder.getDelay(i);
+                    time += delay;
+                    this.frames.push(new Frame(frame, delay, time));
                 }
 
-                let imgs = [];
-                let delays = [];
-                let locations = [];
-                let methods = [];
-                for (let i = 0; i < n; i++) {
-                    let image = reader.read(i);
-
-                    let metadata = reader.getImageMetadata(i);
-                    let tree = metadata.getAsTree("javax_imageio_gif_image_1.0");
-                    let children = tree.getChildNodes();
-                    let delay = 100;
-                    let location = [0, 0];
-                    let method = "doNotDispose";
-                    for (let j = 0; j < children.getLength(); j++) {
-                        let node = children.item(j);
-                        let name = node.getNodeName();
-                        if (name.equals("GraphicControlExtension")) {
-                            delay = parseInt(node.getAttributes().getNamedItem("delayTime").getNodeValue()) * 10;
-                            method = node.getAttributes().getNamedItem("disposalMethod").getNodeValue();
-                        } else if (name.equals("ImageDescriptor")) {
-                            location = [
-                                parseInt(node.getAttributes().getNamedItem("imageLeftPosition").getNodeValue()), 
-                                parseInt(node.getAttributes().getNamedItem("imageTopPosition").getNodeValue())
-                            ];
-                        }
-                    }
-                    imgs.push(image);
-                    delays.push(delay);
-                    locations.push(location);
-                    methods.push(method);
-                }
-
-                let base = new java.awt.image.BufferedImage(w, h, java.awt.image.BufferedImage.TYPE_INT_ARGB);
-                let g = base.createGraphics();
-                g.setComposite(java.awt.AlphaComposite.SrcOver);
-                for (let i = 0; i < n; i++) {
-                    g.drawImage(imgs[i], locations[i][0], locations[i][1], null);
-                }
-
-                let long = 0;
-                for (let i = 0; i < n; i++) {
-                    switch(methods[i] + "") {
-                        case "restoreToBackgroundColor":
-                            g.setComposite(java.awt.AlphaComposite.Clear);
-                            g.fillRect(0, 0, w, h);
-                            g.setComposite(java.awt.AlphaComposite.SrcOver);
-                            break;
-                        case "doNotDispose":
-                            break;
-                        default: 
-                            throw new Error("Unknown disposal method: " + methods[i]);
-                    }
-                    let img = imgs[i];
-                    g.drawImage(img, locations[i][0], locations[i][1], null);
-                    let delay = delays[i];
-                    long += delay;
-                    this.frames.push(new Frame(base, delay, long));
-                }
-
-                this.duration = long;
+                this.duration = time;
                 success = true;
-                if (io != null) io.close();
-                io = null;
             } catch (e) {
-                if (io != null) io.close();
-                io = null;
                 throw e;
             }
 
@@ -383,5 +307,5 @@ var WebImageManager = (function () {
 
     GlobalRegister.put(NAME, INSTANCE);
     
-    return ENTRANCE;
+    return INSTANCE;
 })();

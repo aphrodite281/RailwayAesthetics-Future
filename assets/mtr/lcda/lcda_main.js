@@ -1386,9 +1386,9 @@ function LCDThread(model, isRight, ctx, state, carIndex, ttf) {
             disposeList.push(() => submitPool.shutdown());
             let lastStart;
             
-            let iom = new ImagesOutputManager.ASync("lcda_output/" + ctx.hashCode().toString(16) + "-" + carIndex + "-" + (isRight ? "Right" : "Left"));
+            let iom = new ImagesOutputManager.ASync("aph/lcda_output/" + ctx.hashCode().toString(16) + "-" + carIndex + "-" + (isRight ? "Right" : "Left"));
             disposeList.push(() => iom.close());
-            ImagesOutputManager.saveVideoConverterTo("lcda_output");
+            ImagesOutputManager.saveVideoConverterTo("aph/lcda_output/");
 
             let f = lcdaGlobalBuffer.filletOverlay;
 

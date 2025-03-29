@@ -3,6 +3,8 @@ importPackage(java.awt);
 importPackage(javax.imageio);
 importPackage(java.util.concurrent);
 
+include(Resources.id("aphrodite:library/code/file/decompress.js"));
+
 var ImagesOutputManager = {
     Sync: function(path) {
         this.preserve = function (img, time) {
@@ -48,21 +50,6 @@ var ImagesOutputManager = {
         }
     },
     saveVideoConverterTo: function (path) {
-        let file = new File(path + "/video_converter.py");
-        if (file.exists()) return;
-        file.getParentFile().mkdirs();
-        let os = new FileOutputStream(file);
-        let is = Resources.readStream(Resources.id("aphrodite:library/code/graphic/video_converter.py"));
-        try {
-            let buffer = java.lang.reflect.Array.newInstance(java.lang.Byte.TYPE, 1024);
-            let len = 0;
-            while ((len = is.read(buffer)) > 0) {
-                os.write(buffer, 0, len);
-            }
-            os.close();
-        } catch (e) {
-            os.close();
-            throw e;
-        }
+        decompress("aphrodite:library/code/graphic/video_converter.py", path + "/video_converter.py");
     }
 }

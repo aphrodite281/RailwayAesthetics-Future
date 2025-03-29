@@ -35,10 +35,6 @@ const COM_RESPONDER = orderlyResponder("ARAF", "made by Aphrodite281", [IMAGE_RE
 const MATRIX = new Matrix4f();
 MATRIX.translate(0, 0.5, 0);
 
-function load(url, callback) {
-    WebImageManager.getInstance().loadImage(url, callback);
-}
-
 function create(ctx, state, entity) {
     entity.registerCustomConfig(COM_RESPONDER);
     entity.sendUpdateC2S();
@@ -52,7 +48,7 @@ function create(ctx, state, entity) {
 function render(ctx, state, entity) {
     let start = Date.now();
     update(ctx, state, entity);
-    ctx.setDebugInfo("used", (Date.now() - start) + "ms", "internal", (start - state.last) + "ms");
+    // ctx.setDebugInfo("used", (Date.now() - start) + "ms", "internal", (start - state.last) + "ms");
     state.last = start;
 }
 
@@ -106,7 +102,7 @@ function Gif(face, gif, info) {
 }
 
 function genHolder(info, ctx, dyn, face, callback) {
-    WebImageManager.getInstance().loadImage(info.url, function(img) {
+    WebImageManager.loadImage(info.url, function(img) {
         if (img == null) {
             ctx.setDebugInfo("Failed to load image");
             return;
