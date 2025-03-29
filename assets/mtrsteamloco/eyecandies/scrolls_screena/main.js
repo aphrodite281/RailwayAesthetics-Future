@@ -63,28 +63,28 @@ function create(ctx, state, entity) {
 
     state.dyn = new DynamicModelHolder();
 
+    let info = null;
+    let texture = null;
+    let model = null;
+    let grid = null;
+
+    state.getTexture = function() {
+        return texture;
+    }
+
+    state.getInfo = function() {
+        return info;
+    }
+
     state.tack = function() {
-        let info = null;
-        let texture = null;
-        let model = null;
-        let grid = null;
-
         try {
-
-        while (state.running && (state.lastRenderTime + 10000) > Date.now()) {
             let start = Date.now();
             let ne = genInfo(entity);
             
             let changed = false;
-            function k(key) {
-                changed = changed || toString(info[key]) != toString(ne[key].toString);
-            }
 
             if (info != null) {
-                k("modelSize");
-                k("texSize");
-                k("hasGrid"); 
-                k("gridColor");
+                changed = tostring(info)!= tostring(ne);
             } else changed = true;
 
 
@@ -103,6 +103,8 @@ function create(ctx, state, entity) {
                 }
 
                 state.dyn.uploadLater(rm);
+
+                ctx.setDebugInfo("change", Date.now());
             }
 
             let g = texture.graphics;
@@ -110,10 +112,11 @@ function create(ctx, state, entity) {
             g.setColor(info.backgroundColor);
             g.fillRect(0, 0, texture.width, texture.height);
             let fm = g.getFontMetrics(dfont.deriveFont(info.fontSize));
-            let w = fm.stringWidth(info.text);
+            let w = Math.max(fm.stringWidth(info.text), texture.width);
+            let h = Math.max(fm.getHeight() * 1.2, texture.height);
             let d = fm.getDescent();
             let tx = Date.now() / 1000 * info.speed[0] % w;
-            let ty = Date.now() / 1000 * info.speed[1] % (fm.getHeight() * 1.2);
+            let ty = Date.now() / 1000 * info.speed[1] % h;
             if (info.speed[0] == 0) tx = 0;
             if (info.speed[1] == 0) ty = 0;
             ty += (info.texSize[1] - d);
@@ -122,7 +125,7 @@ function create(ctx, state, entity) {
             g.setFont(dfont.deriveFont(info.fontSize));
             for (let i = -2; i < 3; i++) {
                 for (let j = -2; j < 3; j++) {
-                    g.drawString(info.text, tx + w * i, ty + fm.getHeight() * j * 1.2);
+                    g.drawString(info.text, tx + w * i, ty + h * j);
                 }
             }
             // g.drawString(info.text, 0, info.texSize[1]);
@@ -130,34 +133,26 @@ function create(ctx, state, entity) {
             let end = Date.now();
             let el = end - start;
             ctx.setDebugInfo("used", el);
-            java.lang.Thread.sleep(Math.max(0, 1000 / 24 - el));
             model.replaceAllTexture(texture.identifier);
-        }
-
         }catch (e) {
             ctx.setDebugInfo("error", e.message, e.stack);
         }
-        if (texture != null) texture.close();
-        
-        print("exit");
-        ctx.setDebugInfo("exit", true);
     };
 
-    state.thread = new java.lang.Thread(state.tack, "Scrolls ScreenA Thread" + ctx.hashCode().toString(16));
-    state.thread.start();
     ctx.drawCalls.put(0, new ClusterDrawCall(state.dyn, mat));
 }
 
 function render(ctx, state, entity) {
     state.lastRenderTime = Date.now();
-    if (!state.thread.isAlive()) {
-        state.thread = new java.lang.Thread(state.tack, "Scrolls ScreenA Thread" + ctx.hashCode().toString(16));
-        state.thread.start();
-    }
+    state.tack();
+    ctx.setDebugInfo("tex", state.getTexture());
+    ctx.setDebugInfo("info", tostring(state.getInfo()));
 }
 
 function dispose(ctx, state, entity) {
     state.running = false;
+    let tex = state.getTexture();
+    if (tex != null) tex.close();
 }
 
 function genModel(info, tex) {// Resources.id("minecraft:textures/misc/white.png")

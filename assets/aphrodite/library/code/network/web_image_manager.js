@@ -1,4 +1,4 @@
-include(Resources.id("aphrodite:library/code/graphic/gif_encoder.js"));
+include(Resources.id("aphrodite:library/code/jar/gif_encoder.js"));
 
 var WebImageManager = (function () {
     const NAME = "WebImageManager";

@@ -20,6 +20,7 @@ include(Resources.id("aphrodite:library/code/graphic/canvas.js"));
 include(Resources.id("aphrodite:library/code/graphic/upload_manager.js"));
 include(Resources.id("aphrodite:library/code/graphic/images_output_manager.js"));
 include(Resources.id("aphrodite:library/code/gui/btn_enter_sub_bar.js"));
+// include(Resources.id("aphrodite:library/code/jar/batik.js"));
 
 include(Resources.id("mtr:lcda/icon/hc.js")); //换乘
 include(Resources.id("mtr:lcda/icon/zd.js")); //站点
@@ -30,6 +31,11 @@ include(Resources.id("mtr:lcda/icon/jt.js")); //箭头
 include(Resources.id("mtr:lcda/icon/hcjt.js")); //换成箭头
 include(Resources.id("mtr:lcda/icon/xjjt.js")); //行进箭头
 include(Resources.id("mtr:lcda/icon/logo.js")); //图标
+
+// let start = java.lang.Long.valueOf(java.lang.System.nanoTime());
+// const IMG = Batik.transformSVG2BufferedImage(Resources.readStream(Resources.id("mtr:lcda/icon/hc.svg")), 100, 100);
+// let end = java.lang.Long.valueOf(java.lang.System.nanoTime());
+// print("加载SVG耗时: " + (java.lang.Math.subtractExact(end, start) / 1e6) + "ms");
 
 const lcdaConfigs = {
     textureSize: [1600, 350],
@@ -1446,8 +1452,12 @@ function LCDThread(model, isRight, ctx, state, carIndex, ttf) {
                             g.fillRect(0, 0, w, h);
                         }
 
+                        // setComp(g, 1);
+                        // g.drawImage(IMG, 0, 0, null);
+                        
                         g.setComposite(AlphaComposite.DstOut);
                         g.drawImage(f, 0, 0, null);
+
                         g.dispose();
                         ti("Draw");
 

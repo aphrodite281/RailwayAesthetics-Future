@@ -1,10 +1,14 @@
-function decompress(from, to) {
+function decompress(from, to, reload) {
+    if (reload == undefined) reload = false;
     let is, os;
 
     try {
-        is = Resources.readStream(Resources.id(from));
         let file = new java.io.File(to);
+        if (file.exists() && !reload) return file;
+
         file.getParentFile().mkdirs();
+        file.createNewFile();
+        is = Resources.readStream(Resources.id(from));
         os = new java.io.FileOutputStream(file);
         let buffer = java.lang.reflect.Array.newInstance(java.lang.Byte.TYPE, 4096);
         let bytesRead = -1;
