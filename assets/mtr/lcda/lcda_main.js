@@ -98,7 +98,6 @@ function create(ctx, state, train) {
     train.registerCustomConfig(lcdaRecordInput(train));
     train.registerCustomConfig(lcdaBtnEnterSubBar);
     train.sendCustomConfigsUpdateC2S();
-    ctx.setDebugInfo("railtype", Packages.mtr.data.RailType.valueOf("ABC/1145"));
 }
 
 
