@@ -10,8 +10,12 @@ jobs:
         uses: actions/checkout@v2
       - name: Set current date
         run: echo "CUR_DATE=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
+      - name: Set sanitized name
+        run: |
+          SAN_NAME=$(echo "${{ github.repository }}" | tr '/' '-')
+          echo "SAN_NAME=$SAN_NAME" >> $GITHUB_ENV
       - name: Upload
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ github.repository | replace('/', '-') }}-docs+${{ env.CUR_DATE }}
+          name: ${{ SAN_NAME }}-docs+${{ env.CUR_DATE }}
           path: ./docs/*
