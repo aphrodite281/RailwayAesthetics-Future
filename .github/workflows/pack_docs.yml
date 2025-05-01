@@ -17,5 +17,5 @@ jobs:
       - name: Upload
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ SAN_NAME }}-docs+${{ env.CUR_DATE }}
+          name: ${{ env.SAN_NAME }}-docs+${{ env.CUR_DATE }}
           path: ./docs/*
