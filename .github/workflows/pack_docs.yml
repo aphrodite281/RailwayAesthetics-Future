@@ -13,5 +13,5 @@ jobs:
       - name: Upload
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ replace(github.repository, '/', '-') }}-docs+${{ env.CUR_DATE }}
+          name: ${{ github.repository | replace('/', '-') }}-docs+${{ env.CUR_DATE }}
           path: ./docs/*
