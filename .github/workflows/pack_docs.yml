@@ -13,5 +13,5 @@ jobs:
       - name: Upload
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ github.repository_name }}-docs-${{ env.CUR_DATE }}
+          name: ${{ github.repository.name }}-docs-${{ env.CUR_DATE }}
           path: ./docs/*
