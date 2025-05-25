@@ -365,6 +365,7 @@ function getInfo(entity) {
     for (let [sche, pla] of swp) {
         if (list.length >= 19) break;
         let rn = ud, sf = ud, zd = ud, kd = ud, jpk = ud, zt = ud, color = tc;//车次 始发站 终到站 开点 检票口 状态 颜色
+        const currentStationName = getName(station.name);//定义车站名称为"currentStationName"
         for (let rot of data.ROUTES) {
             if (rot.id == sche.routeId) {
                 let pids = rot.platformIds;
@@ -386,14 +387,15 @@ function getInfo(entity) {
                 break;
             }
         }
+        if (zd === currentStationName) continue;//如果终到站是本站，跳过这个车次
         kd = getTime(sche.arrivalMillis);
         let num = parseInt(pla.name);
         if (mode) {
             if (!isNaN(num)) {
                 if (num % 2 == 0) {
-                    jpk = sche.trainCars > 8 ? ((num - 1) + "A·" + (num - 1) + "B·" + num + "A·" + num + "B") : ((num - 1 ) + "A·" + num + "B");
+                    jpk = sche.trainCars > 8 ? ((num - 1) + "A·" + (num - 1) + "B·" + num + "A·" + num + "B") : ((num - 1 ) + "A·" + num + "A");
                 }else {
-                    jpk = sche.trainCars > 8 ? (num + "A·" + num + "B·" + (num + 1) + "A·" + (num + 1) + "B") : (num + "A·" + (num + 1) + "B");
+                    jpk = sche.trainCars > 8 ? (num + "A·" + num + "B·" + (num + 1) + "A·" + (num + 1) + "B") : (num + "A·" + (num + 1) + "A");
                 }
             }else {
                 jpk = pla.name;
